@@ -15,7 +15,7 @@ const homeMilestoneTitleEl = document.getElementById("homeMilestoneTitle");
 const homeMilestoneLevelEl = document.getElementById("homeMilestoneLevel");
 const homeMilestoneProgressEl = document.getElementById("homeMilestoneProgress");
 const homeMilestoneRemainingEl = document.getElementById("homeMilestoneRemaining");
-const homeMilestoneDotsEl = document.getElementById("homeMilestoneDots");
+const homeMilestoneBarFillEl = document.getElementById("homeMilestoneBarFill");
 const brandTaglineEl = document.getElementById("brandTagline");
 
 // 👤 Temporary user (replace later with auth)
@@ -122,6 +122,34 @@ function getTodayIsoDate() {
   return `${year}-${month}-${day}`;
 }
 
+function getRelativeIsoDate(offsetDays) {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + offsetDays);
+  return getTodayIsoDateForDate(date);
+}
+
+function getTodayIsoDateForDate(date) {
+  const now = new Date(date);
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getTargetUnlockIsoDate(practiceDates) {
+  const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
+  const state = getCurrentMilestoneState(userId, milestoneProgressCount);
+
+  if (!state?.milestone || state.index >= APP_MILESTONES.length - 1 || state.remainingDays <= 0) {
+    return null;
+  }
+
+  const isMarkedToday = practiceDates.includes(getTodayIsoDate());
+  const daysOffset = Math.max(0, state.remainingDays - (isMarkedToday ? 0 : 1));
+  return getRelativeIsoDate(daysOffset);
+}
+
 // 🧠 State
 let isMarked = false;
 
@@ -180,11 +208,9 @@ function renderHomeMilestoneProgress() {
     homeMilestoneRemainingEl.textContent = remaining === 0 ? "Completed" : `${remaining} days to go`;
   }
 
-  if (homeMilestoneDotsEl) {
-    const dots = homeMilestoneDotsEl.querySelectorAll("span");
-    dots.forEach((dot, index) => {
-      dot.classList.toggle("active", index < completed);
-    });
+  if (homeMilestoneBarFillEl) {
+    const progressPercent = total === 0 ? 0 : Math.max(0, Math.min(100, (completed / total) * 100));
+    homeMilestoneBarFillEl.style.width = `${progressPercent}%`;
   }
 }
 
@@ -244,6 +270,7 @@ function renderWeek(practiceDates) {
   }
 
   const today = getTodayIsoDate();
+  const targetUnlockDate = getTargetUnlockIsoDate(practiceDates);
   const todayDate = new Date();
   todayDate.setHours(0, 0, 0, 0);
 
@@ -264,11 +291,12 @@ function renderWeek(practiceDates) {
 
     const isToday = formattedDate === today;
     const isDone = practicedSet.has(formattedDate);
+    const isTargetUnlockDay = formattedDate === targetUnlockDate;
 
     const dayLabel = date.toLocaleDateString("en-US", { weekday: "short" }).slice(0, 1);
 
     weekStripEl.innerHTML += `
-      <div class="week-day ${isDone ? "done" : ""} ${isToday ? "today" : ""}">
+      <div class="week-day ${isDone ? "done" : ""} ${isToday ? "today" : ""} ${isTargetUnlockDay ? "target-unlock" : ""}">
         <span class="week-day-label">${dayLabel}</span>
         <span class="week-day-date">${date.getDate()}</span>
       </div>

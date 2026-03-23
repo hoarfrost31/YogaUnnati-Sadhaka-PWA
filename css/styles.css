@@ -257,7 +257,7 @@ input {
 
 .program-card-with-promo .program-left,
 .program-card-with-promo .program-progress,
-.program-card-with-promo .dots,
+.program-card-with-promo .home-milestone-bar,
 .program-card-with-promo .program-btn {
   position: relative;
   z-index: 1;
@@ -424,22 +424,22 @@ input {
   text-align: right;
 }
 
-.dots {
-  display: flex;
-  gap: 9px;
+.home-milestone-bar {
+  width: 100%;
+  height: 8px;
   margin: 12px 0 14px;
-}
-
-.dots span {
-  width: 10px;
-  height: 10px;
+  overflow: hidden;
   border-radius: 999px;
-  background: rgba(127, 151, 128, 0.16);
+  background: rgba(127, 151, 128, 0.14);
 }
 
-.dots .active {
-  background: var(--accent);
-  box-shadow: 0 0 0 4px rgba(209, 134, 74, 0.12);
+.home-milestone-bar-fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent-deep) 0%, #dea16b 100%);
+  box-shadow: 0 0 0 1px rgba(209, 134, 74, 0.05), 0 6px 12px rgba(209, 134, 74, 0.14);
+  transition: width 320ms ease;
 }
 
 .program-btn,
@@ -613,6 +613,40 @@ input {
     0 8px 14px rgba(209, 134, 74, 0.18);
 }
 
+.week-day.target-unlock .week-day-date {
+  position: relative;
+  color: #9a6b16;
+  background: linear-gradient(180deg, rgba(245, 223, 164, 0.55) 0%, rgba(233, 191, 93, 0.18) 100%);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(214, 167, 55, 0.35),
+    0 8px 16px rgba(214, 167, 55, 0.12);
+}
+
+.week-day.target-unlock .week-day-date::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, #fff4cf 0%, #f0c86a 55%, #d5a033 100%);
+  box-shadow: 0 0 0 3px rgba(245, 223, 164, 0.22);
+}
+
+.week-day.done.target-unlock .week-day-date {
+  color: white;
+  background: linear-gradient(180deg, #d0923d 0%, #e0a86d 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 240, 203, 0.4),
+    0 10px 16px rgba(209, 134, 74, 0.2);
+}
+
+.week-day.done.target-unlock .week-day-date::after {
+  background: radial-gradient(circle at 30% 30%, #fff8df 0%, #ffe29f 60%, #f3c44e 100%);
+  box-shadow: 0 0 0 3px rgba(255, 236, 189, 0.18);
+}
+
 .stat-card {
   border-radius: 24px;
   padding: 22px 18px;
@@ -733,6 +767,9 @@ input {
 .community-card .community-item {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .community-art {
@@ -770,6 +807,19 @@ input {
   font-weight: 500;
   font-size: 0.96rem;
   color: var(--text);
+}
+
+.community-profile-copy {
+  min-width: 0;
+}
+
+.community-card-arrow {
+  width: 19px;
+  height: 19px;
+  color: var(--text-soft);
+  opacity: 0.88;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .days {
@@ -925,6 +975,39 @@ input {
   box-shadow:
     inset 0 0 0 2px rgba(255, 255, 255, 0.35),
     0 8px 14px rgba(209, 134, 74, 0.18);
+}
+
+.day.target-unlock {
+  color: #9a6b16;
+  background: linear-gradient(180deg, rgba(245, 223, 164, 0.55) 0%, rgba(233, 191, 93, 0.18) 100%);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(214, 167, 55, 0.35),
+    0 8px 16px rgba(214, 167, 55, 0.12);
+}
+
+.day.target-unlock::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, #fff4cf 0%, #f0c86a 55%, #d5a033 100%);
+  box-shadow: 0 0 0 3px rgba(245, 223, 164, 0.22);
+}
+
+.day.active.target-unlock {
+  color: #fff;
+  background: linear-gradient(180deg, #d0923d 0%, #e0a86d 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 240, 203, 0.4),
+    0 10px 16px rgba(209, 134, 74, 0.2);
+}
+
+.day.active.target-unlock::after {
+  background: radial-gradient(circle at 30% 30%, #fff8df 0%, #ffe29f 60%, #f3c44e 100%);
+  box-shadow: 0 0 0 3px rgba(255, 236, 189, 0.18);
 }
 
 .day.streak::before {

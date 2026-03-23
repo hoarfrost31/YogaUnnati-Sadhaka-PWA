@@ -49,6 +49,19 @@ function canMarkPracticeForDate(dateString) {
   return selectedDate <= today && selectedDate >= oldestAllowed;
 }
 
+function getTargetUnlockIsoDate(practiceDates) {
+  const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
+  const state = getCurrentMilestoneState(userId, milestoneProgressCount);
+
+  if (!state?.milestone || state.index >= APP_MILESTONES.length - 1 || state.remainingDays <= 0) {
+    return null;
+  }
+
+  const isMarkedToday = practiceDates.includes(getTodayIsoDate());
+  const daysOffset = Math.max(0, state.remainingDays - (isMarkedToday ? 0 : 1));
+  return getRelativeIsoDate(daysOffset);
+}
+
 async function initUser() {
   const { data: sessionData } = await supabaseClient.auth.getSession();
   if (sessionData?.session?.user) {
@@ -183,6 +196,7 @@ function loadStats() {
 function renderCalendar(practicedDates) {
   const grid = document.getElementById("calendarGrid");
   const label = document.getElementById("monthLabel");
+  const targetUnlockDate = getTargetUnlockIsoDate(practicedDates);
 
   grid.innerHTML = "";
 
@@ -211,13 +225,14 @@ function renderCalendar(practicedDates) {
       d === today.getDate() &&
       month === today.getMonth() &&
       year === today.getFullYear();
+    const isTargetUnlockDay = fullDate === targetUnlockDate;
 
     const isWeekStart = (firstDay + d - 1) % 7 === 0;
     const streakClass = isActive && isPrevActive ? "streak" : "";
     const streakStartClass = isActive && isPrevActive && isWeekStart ? "streak-start" : "";
 
     grid.innerHTML += `
-      <div class="day ${isActive ? "active" : ""} ${isToday ? "today" : ""} ${streakClass} ${streakStartClass}" data-date="${fullDate}">
+      <div class="day ${isActive ? "active" : ""} ${isToday ? "today" : ""} ${isTargetUnlockDay ? "target-unlock" : ""} ${streakClass} ${streakStartClass}" data-date="${fullDate}">
         ${d}
       </div>
     `;
