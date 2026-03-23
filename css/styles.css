@@ -560,6 +560,25 @@ input {
   gap: 12px;
 }
 
+.target-date-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.target-date-note-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  background: radial-gradient(circle at 30% 30%, #fff4cf 0%, #f0c86a 55%, #d5a033 100%);
+  box-shadow: 0 0 0 3px rgba(245, 223, 164, 0.18);
+}
+
 .week-card-arrow {
   width: 19px;
   height: 19px;
@@ -939,6 +958,10 @@ input {
   grid-template-columns: repeat(7, 1fr);
   gap: 9px;
   margin-top: 12px;
+}
+
+.progress-target-date-note {
+  margin-top: 14px;
 }
 
 .day {
