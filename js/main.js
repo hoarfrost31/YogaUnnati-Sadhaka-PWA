@@ -17,6 +17,7 @@ const homeMilestoneProgressEl = document.getElementById("homeMilestoneProgress")
 const homeMilestoneRemainingEl = document.getElementById("homeMilestoneRemaining");
 const homeMilestoneBarFillEl = document.getElementById("homeMilestoneBarFill");
 const brandTaglineEl = document.getElementById("brandTagline");
+const HOME_MILESTONE_BAR_ANIMATED_KEY = "home_milestone_bar_animated_v1";
 
 // 👤 Temporary user (replace later with auth)
 // const userId = "user_1";
@@ -24,6 +25,7 @@ let userId;
 let practiceDates = [];
 let taglineIndex = 0;
 let taglineTimer = null;
+let hasHydratedHomeMilestoneBar = false;
 
 const BRAND_TAGLINES = [
   "Hatha Yoga in its purest form",
@@ -173,6 +175,47 @@ function syncHomeUI() {
   renderHomeMilestoneProgress();
 }
 
+function setHomeMilestoneBarWidth(progressPercent) {
+  if (!homeMilestoneBarFillEl) {
+    return;
+  }
+
+  const widthValue = `${progressPercent}%`;
+
+  if (!hasHydratedHomeMilestoneBar) {
+    let shouldAnimate = false;
+
+    try {
+      shouldAnimate = !sessionStorage.getItem(HOME_MILESTONE_BAR_ANIMATED_KEY);
+      if (shouldAnimate) {
+        sessionStorage.setItem(HOME_MILESTONE_BAR_ANIMATED_KEY, "1");
+      }
+    } catch (error) {
+      shouldAnimate = false;
+    }
+
+    if (shouldAnimate) {
+      homeMilestoneBarFillEl.style.width = "0%";
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          homeMilestoneBarFillEl.style.width = widthValue;
+        });
+      });
+    } else {
+      homeMilestoneBarFillEl.classList.add("no-animate");
+      homeMilestoneBarFillEl.style.width = widthValue;
+      window.requestAnimationFrame(() => {
+        homeMilestoneBarFillEl.classList.remove("no-animate");
+      });
+    }
+
+    hasHydratedHomeMilestoneBar = true;
+    return;
+  }
+
+  homeMilestoneBarFillEl.style.width = widthValue;
+}
+
 function renderHomeMilestoneProgress() {
   const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
   const state = getCurrentMilestoneState(userId, milestoneProgressCount);
@@ -210,7 +253,7 @@ function renderHomeMilestoneProgress() {
 
   if (homeMilestoneBarFillEl) {
     const progressPercent = total === 0 ? 0 : Math.max(0, Math.min(100, (completed / total) * 100));
-    homeMilestoneBarFillEl.style.width = `${progressPercent}%`;
+    setHomeMilestoneBarWidth(progressPercent);
   }
 }
 

@@ -442,6 +442,10 @@ input {
   transition: width 320ms ease;
 }
 
+.home-milestone-bar-fill.no-animate {
+  transition: none;
+}
+
 .program-btn,
 .primary-btn {
   width: 100%;
