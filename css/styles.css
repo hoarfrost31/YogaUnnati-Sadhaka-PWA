@@ -1306,43 +1306,86 @@ input {
   100% { transform: scale(1); }
 }
 
-.streak-badge,
-.warning {
-  margin-top: 14px;
-  border-radius: 18px;
-  padding: 14px 16px;
-  text-align: center;
-  font-size: 0.87rem;
-  font-weight: 700;
-  animation: fadeIn 0.4s ease;
-}
-
 .progress-message-stack {
-  display: grid;
-  gap: 10px;
   margin-top: 16px;
 }
 
-.progress-message-stack .streak-badge,
-.progress-message-stack .warning {
-  margin-top: 0;
+.progress-status-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 13px 16px;
+  border-radius: 18px;
+  font-size: 0.87rem;
+  font-weight: 700;
+  animation: fadeIn 0.4s ease;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.22s ease, opacity 0.22s ease;
 }
 
-.streak-badge {
+.progress-status-card.is-switching {
+  opacity: 0.78;
+  transform: translateY(2px);
+}
+
+.progress-status-icon {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.progress-status-text {
+  position: relative;
+  z-index: 1;
+  line-height: 1.35;
+}
+
+.progress-status-card.is-encouragement {
   background: var(--accent-soft);
   color: var(--accent-deep);
   border: 1px solid rgba(209, 134, 74, 0.12);
 }
 
-.warning {
+.progress-status-card.is-encouragement::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.36) 42%, transparent 72%);
+  transform: translateX(-135%);
+  animation: progressStatusShimmer 3s ease-in-out infinite;
+}
+
+.progress-status-card.is-warning {
   background: var(--danger-soft);
   color: var(--danger-text);
   border: 1px solid rgba(138, 90, 86, 0.12);
 }
 
+@keyframes progressStatusShimmer {
+  0%,
+  20% {
+    transform: translateX(-135%);
+  }
+  55%,
+  100% {
+    transform: translateX(135%);
+  }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-status-card,
+  .progress-status-card::after {
+    animation: none;
+    transition: none;
+  }
 }
 
 .milestone-journey {

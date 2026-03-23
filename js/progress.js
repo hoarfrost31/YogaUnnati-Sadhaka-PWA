@@ -9,6 +9,10 @@ const progressMilestoneValueEl = document.getElementById("progressMilestoneValue
 const progressMilestoneRadialEl = document.getElementById("progressMilestoneRadial");
 const progressMilestoneIconEl = document.getElementById("progressMilestoneIcon");
 const progressTodayBtn = document.getElementById("progressTodayBtn");
+const progressStatusCardEl = document.getElementById("progressStatusCard");
+const progressStatusIconEl = document.getElementById("progressStatusIcon");
+const progressStatusTextEl = document.getElementById("progressStatusText");
+let progressStatusTimer = null;
 
 function getTodayIsoDate() {
   const now = new Date();
@@ -39,15 +43,37 @@ async function initUser() {
   userId = data.user.id;
 }
 
-function ensureWarningAboveStreak() {
-  const warningBox = document.getElementById("warningBox");
-  const streakBadge = document.getElementById("streakBadge");
-
-  if (!warningBox || !streakBadge || !streakBadge.parentNode) {
+function renderProgressStatus(messages) {
+  if (!progressStatusCardEl || !progressStatusIconEl || !progressStatusTextEl || !messages.length) {
     return;
   }
 
-  streakBadge.parentNode.insertBefore(warningBox, streakBadge);
+  if (progressStatusTimer) {
+    window.clearInterval(progressStatusTimer);
+    progressStatusTimer = null;
+  }
+
+  let currentIndex = 0;
+
+  const applyMessage = (message) => {
+    progressStatusCardEl.classList.remove("is-warning", "is-encouragement", "is-switching");
+    progressStatusCardEl.classList.add(message.tone === "warning" ? "is-warning" : "is-encouragement");
+    progressStatusIconEl.textContent = message.icon;
+    progressStatusTextEl.textContent = message.text;
+  };
+
+  applyMessage(messages[currentIndex]);
+
+  if (messages.length > 1) {
+    progressStatusTimer = window.setInterval(() => {
+      progressStatusCardEl.classList.add("is-switching");
+
+      window.setTimeout(() => {
+        currentIndex = (currentIndex + 1) % messages.length;
+        applyMessage(messages[currentIndex]);
+      }, 220);
+    }, 3400);
+  }
 }
 
 function loadCalendar() {
@@ -77,20 +103,19 @@ function loadStats() {
 
   document.getElementById("streak").textContent = streak;
 
-  const streakText = document.getElementById("streakText");
+  const statusMessages = [];
   if (streak === 0) {
-    streakText.textContent = "Start your streak today 💪";
+    statusMessages.push({ tone: "encouragement", icon: "💪", text: "Start your streak today" });
   } else if (streak === 1) {
-    streakText.textContent = "🔥 1 day streak — good start!";
+    statusMessages.push({ tone: "encouragement", icon: "🔥", text: "1 day streak — good start!" });
   } else if (streak < 5) {
-    streakText.textContent = `🔥 ${streak} day streak — keep going!`;
+    statusMessages.push({ tone: "encouragement", icon: "🔥", text: `${streak} day streak — keep going!` });
   } else if (streak < 10) {
-    streakText.textContent = `🔥 ${streak} day streak — strong discipline!`;
+    statusMessages.push({ tone: "encouragement", icon: "🔥", text: `${streak} day streak — strong discipline!` });
   } else {
-    streakText.textContent = `🔥 ${streak} day streak — unstoppable!`;
+    statusMessages.push({ tone: "encouragement", icon: "🔥", text: `${streak} day streak — unstoppable!` });
   }
 
-  const warningBox = document.getElementById("warningBox");
   const latestDate = dates.length > 0 ? parseLocalDate(dates[0]) : null;
   const todayDate = new Date();
   todayDate.setHours(0, 0, 0, 0);
@@ -101,14 +126,12 @@ function loadStats() {
   }
 
   if (streak > 0 && diffDays === 1) {
-    warningBox.textContent = "⚠️ You haven't practiced today — your streak is at risk!";
-    warningBox.classList.remove("hidden");
+    statusMessages.push({ tone: "warning", icon: "⚠️", text: "You haven't practiced today — your streak is at risk!" });
   } else if (streak > 0 && diffDays > 1) {
-    warningBox.textContent = "💔 You missed your streak — start again today!";
-    warningBox.classList.remove("hidden");
-  } else {
-    warningBox.classList.add("hidden");
+    statusMessages.push({ tone: "warning", icon: "💔", text: "You missed your streak — start again today!" });
   }
+
+  renderProgressStatus(statusMessages);
 }
 
 function renderCalendar(practicedDates) {
@@ -128,7 +151,7 @@ function renderCalendar(practicedDates) {
   });
 
   for (let i = 0; i < firstDay; i++) {
-    grid.innerHTML += `<div></div>`;
+    grid.innerHTML += "<div></div>";
   }
 
   const today = new Date();
@@ -297,11 +320,11 @@ function openSheet(date, isActive) {
   dateEl.textContent = date;
 
   if (isActive) {
-    statusEl.textContent = "✅ You practiced on this day";
+    statusEl.textContent = "You practiced on this day";
     btn.textContent = "Unmark Practice";
     btn.className = "sheet-btn unmark";
   } else {
-    statusEl.textContent = "❌ No practice recorded";
+    statusEl.textContent = "No practice recorded";
     btn.textContent = "Mark Practice";
     btn.className = "sheet-btn mark";
   }
@@ -329,7 +352,7 @@ function openSheet(date, isActive) {
         }
         addPracticeDateToCache(userId, selectedDate);
         selectedIsActive = true;
-        showToast("Practice marked ✅");
+        showToast("Practice marked");
       }
 
       closeSheet();
@@ -381,7 +404,6 @@ if (progressTodayBtn) {
 
 async function initApp() {
   await initUser();
-  ensureWarningAboveStreak();
   practiceDates = readPracticeCache(userId);
   syncProgressUI(false);
   refreshPracticeDates();
