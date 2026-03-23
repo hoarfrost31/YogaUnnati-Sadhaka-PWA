@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#f7f3ed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="YogaUnnati" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+
+  <title>YogaUnnati</title>
+
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body class="index-page page-shell">
+
+<div class="app-container">
+  <div class="page-content">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <img src="images/logo.png" class="logo-img" />
+      <div class="logo-text">
+        <h1>YogaUnnati</h1>
+        <p class="tagline" id="brandTagline">Mastering body and mind</p>
+      </div>
+    </div>
+    <a href="profile.html" class="avatar-link" aria-label="Edit profile">
+      <img src="images/profile.jpg" class="avatar" id="homeAvatar" alt="Profile photo"/>
+    </a>
+  </header>
+
+  <!-- Program Card -->
+  <section class="program-card program-card-with-promo">
+
+    <div class="program-promo milestone-image-stiffness" id="homeMilestonePromo" aria-hidden="true">
+      <img src="images/stiffness.jpg" alt="" class="program-promo-img" id="homeMilestoneImage" />
+    </div>
+
+    <div class="program-left">
+      <div class="program-icon program-icon-outline" aria-hidden="true" id="homeMilestoneIcon"></div>
+      <div class="program-copy">
+        <p class="eyebrow-label">Current Milestone</p>
+        <h2 id="homeMilestoneTitle">Stiffness Relief</h2>
+        <p class="level" id="homeMilestoneLevel">Level 1</p>
+      </div>
+    </div>
+
+    <div class="program-progress">
+      <span id="homeMilestoneProgress">Day 0 / 7</span>
+      <span class="muted program-progress-note" id="homeMilestoneRemaining">7 days to go</span>
+    </div>
+
+    <div class="dots" id="homeMilestoneDots">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <button class="program-btn">
+      Mark Today
+    </button>
+
+  </section>
+
+  <!-- Weekly Calendar -->
+  <section class="week-card week-card-link" id="weekCardLink" role="link" tabindex="0" aria-label="Open progress page">
+    <div class="week-card-header">
+      <div>
+        <p class="week-label">This Week</p>
+        <h3>Practice Rhythm</h3>
+      </div>
+      <i data-lucide="chevron-right" class="week-card-arrow"></i>
+    </div>
+
+    <div class="week-strip" id="weekStrip"></div>
+  </section>
+
+  <section class="quote-card index-quote-card">
+    <div class="quote-photo-wrap" aria-hidden="true">
+      <img src="images/Sadhguru-1.jfif" alt="" class="quote-photo" />
+    </div>
+    <div class="quote-copy">
+      <p class="quote-text">
+        "Yoga is a technology where without external input, you create a chemistry of blissfulness within."
+      </p>
+      <span class="quote-author">Sadhguru</span>
+    </div>
+  </section>
+
+  <!-- Community -->
+  <section class="section">
+    <div class="section-header">
+      <h3>Community</h3>
+      <a href="community.html" class="link">See All</a>
+    </div>
+
+    <a href="community.html" class="section-card-link">
+    <div class="community-card">
+      <div class="community-art" aria-hidden="true">
+        <svg viewBox="0 0 120 120" class="community-art-svg" fill="none">
+          <defs>
+            <linearGradient id="communityGradient" x1="20" y1="24" x2="96" y2="100" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#7f9780"/>
+              <stop offset="100%" stop-color="#d99258"/>
+            </linearGradient>
+          </defs>
+          <circle cx="82" cy="34" r="18" fill="rgba(127,151,128,0.12)"/>
+          <circle cx="54" cy="44" r="24" fill="rgba(217,146,88,0.08)"/>
+          <path d="M36 72c5-8 13-12 24-12s19 4 24 12" stroke="url(#communityGradient)" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="48" cy="52" r="10" stroke="url(#communityGradient)" stroke-width="3"/>
+          <circle cx="74" cy="52" r="10" stroke="url(#communityGradient)" stroke-width="3"/>
+        </svg>
+      </div>
+
+      <div class="community-item">
+        <div class="avatar-circle community-profile-avatar">
+          <img src="images/profile.jpg" alt="" class="community-avatar-img hidden" id="communityAvatarImg" />
+          <span id="communityAvatarInitial">Y</span>
+        </div>
+        <div class="community-profile-copy">
+          <div class="name" id="communityProfileName">Your Profile</div>
+          <div class="community-profile-note">See what’s new in the community</div>
+        </div>
+      </div>
+    </div>
+    </a>
+  </section>
+
+  <!-- Milestones -->
+  <section class="section">
+    <div class="section-header">
+      <h3>Milestones</h3>
+      <a href="milestones.html" class="link">View All</a>
+    </div>
+
+    <a href="milestones.html" class="section-card-link">
+    <div class="milestone">
+      <div class="milestone-left">
+        <i data-lucide="trophy"></i>
+        <span>Track your journey through 4 milestones</span>
+      </div>
+      <i data-lucide="chevron-right"></i>
+    </div>
+    </a>
+  </section>
+  </div>
+
+  <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+
+    <a href="index.html" class="nav-item active" id="homeTab">
+        <i data-lucide="home"></i>
+        <span>Home</span>
+    </a>
+
+    <a href="progress.html" class="nav-item" id="progressTab">
+        <i data-lucide="calendar"></i>
+        <span>Progress</span>
+    </a>
+
+    <a href="milestones.html" class="nav-item" id="milestonesTab">
+    <i data-lucide="trophy"></i>
+    <span>Milestones</span>
+  </a>
+
+    <a href="community.html" class="nav-item" id="communityTab">
+        <i data-lucide="users"></i>
+        <span>Community</span>
+    </a>
+
+    </nav>
+
+</div>
+
+<!-- ✅ Scripts at bottom -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="js/supabaseClient.js"></script>
+<script src="js/practiceData.js"></script>
+<script src="js/profileData.js"></script>
+<script src="js/pwa.js"></script>
+<script src="js/pageTransition.js"></script>
+    <script>
+    async function checkAuth() {
+    const { data: sessionData } = await window.supabaseClient.auth.getSession();
+
+    if (sessionData?.session?.user) {
+        return;
+    }
+
+    const { data } = await window.supabaseClient.auth.getUser();
+
+    if (!data.user) {
+        window.location.href = "auth.html";
+    }
+    }
+
+    checkAuth();
+    </script>
+
+
+<script src="js/main.js"></script>
+
+<script>
+  lucide.createIcons();
+</script>
+
+</body>
+</html>

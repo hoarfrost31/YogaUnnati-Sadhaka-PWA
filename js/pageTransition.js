@@ -1,0 +1,154 @@
+const TAB_HISTORY_KEY = "yogaunnati_tab_history";
+const TAB_PAGES = new Set(["index.html", "progress.html", "milestones.html", "community.html", "profile.html"]);
+
+function isInternalPageLink(anchor) {
+  if (!anchor) {
+    return false;
+  }
+
+  const href = anchor.getAttribute("href");
+
+  if (!href || href.startsWith("#") || href.startsWith("javascript:")) {
+    return false;
+  }
+
+  if (anchor.target && anchor.target !== "_self") {
+    return false;
+  }
+
+  if (anchor.hasAttribute("download")) {
+    return false;
+  }
+
+  const url = new URL(anchor.href, window.location.href);
+  return url.origin === window.location.origin;
+}
+
+function getCurrentPageName() {
+  const pathname = window.location.pathname.split("/").pop();
+  return pathname || "index.html";
+}
+
+function readTabHistory() {
+  try {
+    const raw = sessionStorage.getItem(TAB_HISTORY_KEY);
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function writeTabHistory(history) {
+  sessionStorage.setItem(TAB_HISTORY_KEY, JSON.stringify(history.slice(-12)));
+}
+
+function getPreviousTrackedPage(currentPage) {
+  const stack = readTabHistory();
+
+  if (stack[stack.length - 1] === currentPage) {
+    stack.pop();
+  }
+
+  const previousPage = stack[stack.length - 1] || "";
+  return {
+    previousPage,
+    nextHistory: stack,
+  };
+}
+
+function enableTabHistoryNavigation() {
+  const currentPage = getCurrentPageName();
+
+  if (!TAB_PAGES.has(currentPage)) {
+    return;
+  }
+
+  const history = readTabHistory();
+  const lastPage = history[history.length - 1];
+
+  if (lastPage !== currentPage) {
+    history.push(currentPage);
+    writeTabHistory(history);
+  }
+
+  window.history.pushState({ tabBackGuard: true, page: currentPage }, "", window.location.href);
+
+  window.addEventListener("popstate", () => {
+    const { previousPage, nextHistory } = getPreviousTrackedPage(currentPage);
+
+    if (previousPage && previousPage !== currentPage) {
+      writeTabHistory(nextHistory);
+      window.location.href = previousPage;
+      return;
+    }
+
+    writeTabHistory([currentPage]);
+    window.history.pushState({ tabBackGuard: true, page: currentPage }, "", window.location.href);
+  });
+}
+
+function enableNativeBackNavigation() {
+  const currentPage = getCurrentPageName();
+
+  if (!TAB_PAGES.has(currentPage)) {
+    return;
+  }
+
+  const appPlugin = window.Capacitor?.Plugins?.App;
+
+  if (!appPlugin?.addListener) {
+    return;
+  }
+
+  appPlugin.addListener("backButton", () => {
+    const { previousPage, nextHistory } = getPreviousTrackedPage(currentPage);
+
+    if (previousPage && previousPage !== currentPage) {
+      writeTabHistory(nextHistory);
+      window.location.href = previousPage;
+      return;
+    }
+
+    if (currentPage !== "index.html") {
+      writeTabHistory(["index.html"]);
+      window.location.href = "index.html";
+      return;
+    }
+
+    if (typeof appPlugin.exitApp === "function") {
+      appPlugin.exitApp();
+    }
+  });
+}
+
+window.addEventListener("pageshow", () => {
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      document.body.classList.add("page-ready");
+    });
+  });
+});
+
+enableTabHistoryNavigation();
+enableNativeBackNavigation();
+
+document.addEventListener("click", (event) => {
+  if (event.defaultPrevented || event.button !== 0) {
+    return;
+  }
+
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return;
+  }
+
+  const anchor = event.target.closest("a[href]");
+
+  if (!isInternalPageLink(anchor)) {
+    return;
+  }
+});

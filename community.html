@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#f7f3ed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="YogaUnnati" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+  <title>Community Board</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body class="community-board-page page-shell">
+
+<div class="app-container">
+  <div class="page-content">
+  <h1 class="page-title">Community Board</h1>
+  <p class="subtitle">Practice together, grow together</p>
+
+  <section class="community-board-note">
+    <i data-lucide="heart"></i>
+    <p>Every journey is unique. Celebrate progress, not competition.</p>
+  </section>
+
+  <section class="community-board-list">
+    <div id="communityBoardList"></div>
+  </section>
+  </div>
+
+</div>
+
+<div class="community-board-fixed-footer">
+  <p class="community-board-footer"><i data-lucide="infinity"></i><span>Keep showing up, one day at a time</span></p>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item" id="homeTab">
+    <i data-lucide="home"></i>
+    <span>Home</span>
+  </a>
+
+  <a href="progress.html" class="nav-item" id="progressTab">
+    <i data-lucide="calendar"></i>
+    <span>Progress</span>
+  </a>
+
+  <a href="milestones.html" class="nav-item" id="milestonesTab">
+    <i data-lucide="trophy"></i>
+    <span>Milestones</span>
+  </a>
+
+  <a href="community.html" class="nav-item active" id="communityTab">
+    <i data-lucide="users"></i>
+    <span>Community</span>
+  </a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/practiceData.js"></script>
+<script src="js/profileData.js"></script>
+<script src="js/pwa.js"></script>
+<script src="js/pageTransition.js"></script>
+<script src="js/communityBoard.js"></script>
+
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

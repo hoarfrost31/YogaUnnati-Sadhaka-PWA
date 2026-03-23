@@ -1,0 +1,21 @@
+{
+  "name": "yogaunnati-app---copy-(2)",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "prepare:web": "node scripts/prepare-web.cjs",
+    "cap:copy": "npm run prepare:web && npx cap copy",
+    "cap:sync": "npm run prepare:web && npx cap sync",
+    "cap:open:android": "npx cap open android"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/app": "^8.0.1",
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0"
+  }
+}

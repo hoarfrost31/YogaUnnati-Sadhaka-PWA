@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#f7f3ed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="YogaUnnati" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+  <title>Profile</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body class="community-page page-shell">
+
+<div id="toast" class="toast hidden"></div>
+
+<div class="app-container">
+  <div class="page-content">
+  <a href="index.html" class="back-link">
+    <i data-lucide="arrow-left"></i>
+    <span>Back to Home</span>
+  </a>
+
+  <div class="profile-page-header">
+    <h1 class="page-title">Profile</h1>
+    <button id="logoutBtn" class="logout-btn" type="button">Logout</button>
+  </div>
+  <p class="subtitle">Set the name and photo people will recognize</p>
+
+  <section class="profile-card">
+    <div class="profile-card-top">
+      <div class="profile-avatar-shell">
+        <img src="images/profile.jpg" alt="Profile preview" class="profile-avatar-preview hidden" id="profileAvatarPreview" />
+        <span class="profile-avatar-initial" id="profileAvatarInitial">Y</span>
+      </div>
+
+      <div class="profile-card-copy">
+        <p class="eyebrow-label">Your Profile</p>
+        <h2 id="profileNameHeading">Your Profile</h2>
+        <p class="level" id="profileEmailText"></p>
+      </div>
+    </div>
+
+    <div class="profile-form">
+      <label class="field-label" for="profileNameInput">Display Name</label>
+      <input id="profileNameInput" class="input" placeholder="Enter your name" maxlength="40">
+
+      <label class="field-label" for="profileImageInput">Profile Photo</label>
+      <input id="profileImageInput" class="input file-input" type="file" accept="image/*">
+
+      <div class="profile-form-actions">
+        <button id="removePhotoBtn" class="secondary-btn" type="button">Remove Photo</button>
+        <button id="saveProfileBtn" class="primary-btn" type="button">Save Profile</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="community-note-card">
+    <p class="eyebrow-label">Profile Settings</p>
+    <p class="community-note-text">Your app already supports email and password sign-in. This page lets each person set their visible name and profile photo.</p>
+  </section>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item" id="homeTab">
+    <i data-lucide="home"></i>
+    <span>Home</span>
+  </a>
+
+  <a href="progress.html" class="nav-item" id="progressTab">
+    <i data-lucide="calendar"></i>
+    <span>Progress</span>
+  </a>
+
+  <a href="milestones.html" class="nav-item" id="milestonesTab">
+    <i data-lucide="trophy"></i>
+    <span>Milestones</span>
+  </a>
+
+  <a href="community.html" class="nav-item" id="communityTab">
+    <i data-lucide="users"></i>
+    <span>Community</span>
+  </a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/profileData.js"></script>
+<script src="js/pwa.js"></script>
+<script src="js/pageTransition.js"></script>
+<script src="js/community.js"></script>
+
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

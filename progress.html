@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#f7f3ed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="YogaUnnati" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+
+  <title>Progress</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body class="progress-page page-shell">
+
+<div id="toast" class="toast hidden"></div>
+
+<div class="app-container">
+  <div class="page-content">
+
+  <!-- Title -->
+  <h1 class="page-title">Progress</h1>
+  <p class="subtitle">Track your yoga journey</p>
+
+  <!-- Calendar -->
+<section class="calendar-card">
+
+  <div class="calendar-header">
+    <button id="prevMonth">‹</button>
+    <h3 id="monthLabel"></h3>
+    <button id="nextMonth">›</button>
+  </div>
+
+  <!-- Weekdays row -->
+  <div class="calendar-weekdays">
+    <div>Sun</div>
+    <div>Mon</div>
+    <div>Tue</div>
+    <div>Wed</div>
+    <div>Thu</div>
+    <div>Fri</div>
+    <div>Sat</div>
+  </div>
+
+  <!-- Dates grid -->
+  <div id="calendarGrid" class="calendar-grid"></div>
+
+</section>
+
+  <!-- Program -->
+  <section class="program-card small">
+    <div class="progress-program-main">
+      <div class="program-left">
+        <div class="program-icon program-icon-outline" aria-hidden="true" id="progressMilestoneIcon"></div>
+        <div>
+          <h2 id="progressMilestoneTitle">Stiffness Relief</h2>
+          <p class="level" id="progressMilestoneLevel">Level 1</p>
+        </div>
+      </div>
+      <button class="program-btn progress-program-btn" id="progressTodayBtn" type="button">Mark Today</button>
+    </div>
+
+    <div class="radial-progress radial-progress-modern" id="progressMilestoneRadial" aria-label="0 / 7 days completed">
+      <svg viewBox="0 0 44 44" class="radial-progress-ring" aria-hidden="true">
+        <defs>
+          <linearGradient id="radialProgressGradient" x1="6" y1="6" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#be6c2c"></stop>
+            <stop offset="100%" stop-color="#dea16b"></stop>
+          </linearGradient>
+        </defs>
+        <circle class="radial-progress-track" cx="22" cy="22" r="16"></circle>
+        <circle class="radial-progress-value" cx="22" cy="22" r="16"></circle>
+      </svg>
+      <div class="radial-progress-copy">
+        <strong id="progressMilestoneValue">0 / 7</strong>
+        <span>days</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="stats">
+    <div class="stat-card">
+      <i data-lucide="calendar"></i>
+      <h2 id="totalDays">0</h2>
+      <p>Total Days</p>
+    </div>
+
+    <div class="stat-card">
+      <i data-lucide="flame"></i>
+      <h2 id="streak">0</h2>
+      <p>Day Streak</p>
+    </div>
+  </section>
+
+  <div class="streak-badge" id="streakBadge">
+  🔥 <span id="streakText">0 day streak</span>
+</div>
+
+<div id="warningBox" class="warning hidden"></div>
+
+  <!-- Quote -->
+  <section class="quote-card">
+    <div class="quote-icon" aria-hidden="true">
+      <i data-lucide="leaf"></i>
+    </div>
+    <div class="quote-copy">
+      <p class="quote-text">
+        "Yoga is a technology where without external input, you create a chemistry of blissfulness within."
+      </p>
+      <span class="quote-author">Sadhguru</span>
+    </div>
+  </section>
+  </div>
+
+<nav class="bottom-nav">
+
+  <a href="index.html" class="nav-item" id="homeTab">
+    <i data-lucide="home"></i>
+    <span>Home</span>
+  </a>
+
+  <a href="progress.html" class="nav-item active" id="progressTab">
+    <i data-lucide="calendar"></i>
+    <span>Progress</span>
+  </a>
+
+    <a href="milestones.html" class="nav-item" id="milestonesTab">
+    <i data-lucide="trophy"></i>
+    <span>Milestones</span>
+  </a>
+
+  <a href="community.html" class="nav-item" id="communityTab">
+    <i data-lucide="users"></i>
+    <span>Community</span>
+  </a>
+
+</nav>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/practiceData.js"></script>
+<script src="js/profileData.js"></script>
+<script src="js/pwa.js"></script>
+<script src="js/pageTransition.js"></script>
+<script>
+async function checkAuth() {
+  const { data: sessionData } = await window.supabaseClient.auth.getSession();
+
+  if (sessionData?.session?.user) {
+    return;
+  }
+
+  const { data } = await window.supabaseClient.auth.getUser();
+
+  if (!data.user) {
+    window.location.href = "auth.html";
+  }
+}
+
+checkAuth();
+</script>
+
+
+<script src="js/progress.js"></script>
+
+<script>
+  lucide.createIcons();
+</script>
+
+<div id="daySheet" class="sheet hidden">
+  <div class="sheet-overlay" onclick="closeSheet()"></div>
+
+  <div class="sheet-content">
+
+    <div class="sheet-handle"></div>
+
+    <div class="sheet-header">
+      <div class="sheet-icon-wrap" aria-hidden="true">
+        <i data-lucide="calendar-heart"></i>
+      </div>
+      <div class="sheet-header-copy">
+        <p class="sheet-eyebrow">Practice Day</p>
+        <h3 id="sheetDate"></h3>
+      </div>
+    </div>
+
+    <div class="sheet-status" id="sheetStatus"></div>
+
+    <button id="sheetActionBtn" class="sheet-btn"></button>
+
+  </div>
+</div>
+
+</body>
+</html>
