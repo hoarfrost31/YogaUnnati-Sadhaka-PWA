@@ -1307,7 +1307,7 @@ input {
 }
 
 .progress-message-stack {
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 .progress-status-card {
@@ -1317,8 +1317,8 @@ input {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 54px;
-  padding: 13px 16px;
+  min-height: 48px;
+  padding: 11px 15px;
   border-radius: 18px;
   font-size: 0.87rem;
   font-weight: 700;
