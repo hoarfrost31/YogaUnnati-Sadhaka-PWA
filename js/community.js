@@ -260,7 +260,11 @@ if (enableNotificationsBtn) {
 
       if (permission === "granted") {
         writeClassReminderPreference(userId, true);
-        await saveReminderPreference(userId, true);
+        try {
+          await saveReminderPreference(userId, true);
+        } catch (error) {
+          console.error("Could not persist reminder preference to account:", error);
+        }
         showToast("Notifications enabled");
       } else if (permission === "denied") {
         writeClassReminderPreference(userId, false);
@@ -293,7 +297,7 @@ if (classReminderToggle) {
     try {
       await saveReminderPreference(userId, classReminderToggle.checked);
     } catch (error) {
-      console.error(error);
+      console.error("Could not persist reminder preference to account:", error);
     }
     showToast(classReminderToggle.checked ? "9 PM reminder saved" : "Reminder turned off");
     renderReminderSettings();
