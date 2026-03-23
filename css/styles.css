@@ -161,6 +161,15 @@ input {
   text-decoration: none;
 }
 
+.index-page .avatar-link {
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  border-radius: 20px;
+  background: rgba(86, 112, 86, 0.14);
+  box-shadow: 0 10px 22px rgba(36, 28, 19, 0.06);
+}
+
 .avatar-initial-badge {
   display: grid;
   place-items: center;
