@@ -331,9 +331,17 @@ if (enableNotificationsBtn) {
       } catch (error) {
         console.error("Could not persist reminder preference to account:", error);
       }
+
+      try {
+        await window.pushSubscriptions?.ensureSubscribed?.(userId);
+      } catch (error) {
+        console.error("Could not register push subscription:", error);
+      }
+
       showToast("Notifications enabled");
     } else if (permission === "denied") {
       writeClassReminderPreference(userId, false);
+      await window.pushSubscriptions?.disable?.(userId);
       showToast("Notifications blocked");
     } else {
       showToast("Notification permission not granted");

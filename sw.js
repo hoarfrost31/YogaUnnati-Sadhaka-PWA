@@ -1,4 +1,4 @@
-const CACHE_NAME = "yogaunnati-pwa-v9";
+const CACHE_NAME = "yogaunnati-pwa-v11";
 const APP_SHELL_PATHS = [
   "",
   "index.html",
@@ -10,8 +10,10 @@ const APP_SHELL_PATHS = [
   "manifest.webmanifest",
   "css/styles.css",
   "js/supabaseClient.js",
+  "js/pwaConfig.js",
   "js/practiceData.js",
   "js/profileData.js",
+  "js/pushSubscriptionData.js",
   "js/pageTransition.js",
   "js/pwa.js",
   "js/main.js",
@@ -59,6 +61,50 @@ self.addEventListener("message", (event) => {
   if (event.data?.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
+});
+
+self.addEventListener("push", (event) => {
+  const fallbackPayload = {
+    title: "YogaUnnati",
+    body: "Stay on track. See you tomorrow morning.",
+  };
+
+  let payload = fallbackPayload;
+
+  try {
+    payload = event.data?.json() || fallbackPayload;
+  } catch (error) {
+    console.error("Push payload parse failed:", error);
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title || "YogaUnnati", {
+      body: payload.body || fallbackPayload.body,
+      data: payload.data || { url: "./index.html" },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const targetUrl = new URL(event.notification.data?.url || "./index.html", self.registration.scope).toString();
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url === targetUrl && "focus" in client) {
+          return client.focus();
+        }
+      }
+
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+
+      return null;
+    })
+  );
 });
 
 self.addEventListener("fetch", (event) => {
