@@ -3,13 +3,16 @@ const supabaseClient = window.supabaseClient;
 let userId;
 let currentDate = new Date();
 let practiceDates = [];
-const today = new Date().toISOString().split("T")[0];
 const progressMilestoneTitleEl = document.getElementById("progressMilestoneTitle");
 const progressMilestoneLevelEl = document.getElementById("progressMilestoneLevel");
 const progressMilestoneValueEl = document.getElementById("progressMilestoneValue");
 const progressMilestoneRadialEl = document.getElementById("progressMilestoneRadial");
 const progressMilestoneIconEl = document.getElementById("progressMilestoneIcon");
 const progressTodayBtn = document.getElementById("progressTodayBtn");
+
+function getTodayIsoDate() {
+  return new Date().toISOString().split("T")[0];
+}
 
 async function initUser() {
   const { data: sessionData } = await supabaseClient.auth.getSession();
@@ -190,6 +193,7 @@ function updateProgressTodayButton() {
     return;
   }
 
+  const today = getTodayIsoDate();
   const isMarkedToday = practiceDates.includes(today);
   progressTodayBtn.classList.toggle("is-done", isMarkedToday);
 
@@ -207,6 +211,7 @@ async function toggleTodayPractice() {
     return;
   }
 
+  const today = getTodayIsoDate();
   const isMarkedToday = practiceDates.includes(today);
 
   try {

@@ -114,8 +114,9 @@ async function initUser() {
   userId = data.user.id;
 }
 
-// 📅 Today's date (YYYY-MM-DD)
-const today = new Date().toISOString().split("T")[0];
+function getTodayIsoDate() {
+  return new Date().toISOString().split("T")[0];
+}
 
 // 🧠 State
 let isMarked = false;
@@ -133,6 +134,7 @@ function updateProgramButtonState() {
 }
 
 function syncHomeUI() {
+  const today = getTodayIsoDate();
   isMarked = practiceDates.includes(today);
   updateProgramButtonState();
   renderWeek(practiceDates);
@@ -184,6 +186,7 @@ function renderHomeMilestoneProgress() {
 
 // ➕ Insert today's practice
 async function markToday() {
+  const today = getTodayIsoDate();
 
     if (!userId) {
     console.error("User not loaded");
@@ -214,6 +217,7 @@ async function markToday() {
 
 // ❌ Remove today's practice
 async function unmarkToday() {
+  const today = getTodayIsoDate();
   const { error } = await supabaseClient
     .from("practice_logs")
     .delete()
@@ -235,6 +239,7 @@ function renderWeek(practiceDates) {
     return;
   }
 
+  const today = getTodayIsoDate();
   const todayDate = new Date();
   todayDate.setHours(0, 0, 0, 0);
 
