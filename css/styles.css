@@ -1907,11 +1907,11 @@ input {
 
 .community-board-fixed-footer {
   position: fixed;
-  left: 50%;
+  left: 0;
+  right: 0;
   bottom: calc(114px + var(--safe-bottom));
-  transform: translateX(-50%);
-  width: min(calc(100% - 24px), 430px);
-  padding: 18px 0 6px;
+  width: 100%;
+  padding: 18px 24px 8px;
   z-index: 850;
   pointer-events: none;
 }
@@ -1920,8 +1920,7 @@ input {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(247, 243, 237, 0) 0%, rgba(247, 243, 237, 0.9) 28%, #f7f3ed 100%);
+  background: linear-gradient(180deg, rgba(247, 243, 237, 0) 0%, rgba(247, 243, 237, 0.88) 24%, #f7f3ed 58%);
 }
 
 .community-board-footer {
@@ -1935,6 +1934,8 @@ input {
   color: #99a481;
   font-style: italic;
   font-size: 0.95rem;
+  width: min(calc(100% - 24px), 430px);
+  margin-inline: auto;
 }
 
 .community-board-footer svg {
