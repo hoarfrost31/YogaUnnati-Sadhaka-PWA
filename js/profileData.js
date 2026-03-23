@@ -10,8 +10,17 @@ function getProfileCacheKey(userId) {
   return `${PROFILE_CACHE_PREFIX}${userId}`;
 }
 
+function normalizeFallbackName(name = "") {
+  return (name || "")
+    .trim()
+    .replace(/^[^A-Za-z0-9]+/, "")
+    .replace(/[._-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function getInitials(name) {
-  const safeName = (name || "").trim();
+  const safeName = normalizeFallbackName(name);
   if (!safeName) {
     return "Y";
   }
@@ -84,10 +93,11 @@ function writeProfileCache(userId, profile) {
 
 function getProfileFromUser(user) {
   const metadata = user?.user_metadata || {};
-  const emailPrefix = user?.email ? user.email.split("@")[0] : "";
+  const emailPrefix = normalizeFallbackName(user?.email ? user.email.split("@")[0] : "");
+  const displayName = (metadata.display_name || "").trim();
 
   return normalizeProfileData({
-    displayName: metadata.display_name || emailPrefix || DEFAULT_PROFILE_NAME,
+    displayName: displayName || emailPrefix || DEFAULT_PROFILE_NAME,
     avatarUrl: metadata.avatar_data_url || metadata.avatar_url || "",
   });
 }
