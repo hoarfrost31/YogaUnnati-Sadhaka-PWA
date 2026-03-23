@@ -32,9 +32,9 @@
 <section class="calendar-card">
 
   <div class="calendar-header">
-    <button id="prevMonth">â€¹</button>
+    <button id="prevMonth" aria-label="Previous month">&#8249;</button>
     <h3 id="monthLabel"></h3>
-    <button id="nextMonth">â€º</button>
+    <button id="nextMonth" aria-label="Next month">&#8250;</button>
   </div>
 
   <!-- Weekdays row -->
@@ -90,7 +90,7 @@
 
   <section class="progress-message-stack" aria-live="polite">
     <div class="progress-status-card is-encouragement" id="progressStatusCard">
-      <span class="progress-status-icon" id="progressStatusIcon">ðŸ”¥</span>
+      <span class="progress-status-icon" id="progressStatusIcon">🔥</span>
       <span class="progress-status-text" id="progressStatusText">Start your streak today</span>
     </div>
   </section>
@@ -136,7 +136,7 @@
     <span>Progress</span>
   </a>
 
-    <a href="milestones.html" class="nav-item" id="milestonesTab">
+  <a href="milestones.html" class="nav-item" id="milestonesTab">
     <i data-lucide="trophy"></i>
     <span>Milestones</span>
   </a>
@@ -173,7 +173,6 @@ async function checkAuth() {
 
 checkAuth();
 </script>
-
 
 <script src="js/progress.js"></script>
 
