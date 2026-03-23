@@ -5,6 +5,10 @@ const communityBoardListEl = document.getElementById("communityBoardList");
 
 let userId;
 
+function getTodayIsoDate() {
+  return new Date().toISOString().split("T")[0];
+}
+
 function getCommunityBoardCacheKey(userId) {
   return `${COMMUNITY_BOARD_CACHE_PREFIX}${userId}`;
 }
@@ -87,6 +91,9 @@ function getMemberMarkup(member, index, isCurrentUser) {
   const avatarMarkup = member.avatarUrl
     ? `<img src="${member.avatarUrl}" alt="${member.displayName}" class="community-board-avatar-img" />`
     : `<span>${getInitials(member.displayName)}</span>`;
+  const todayBadge = member.practicedToday
+    ? `<p class="community-board-today"><i data-lucide="check"></i><span>Practiced today</span></p>`
+    : "";
 
   return `
     <article class="community-board-entry">
@@ -105,6 +112,7 @@ function getMemberMarkup(member, index, isCurrentUser) {
         </div>
         <p class="community-board-level">${member.level}</p>
         <p class="community-board-streak"><i data-lucide="flame"></i> <span>${member.streak} day streak</span></p>
+        ${todayBadge}
       </div>
 
       <div class="community-board-days">
@@ -144,6 +152,7 @@ function renderBoard(members) {
 }
 
 async function buildCommunityMembers() {
+  const today = getTodayIsoDate();
   const [profiles, practiceLogsResult] = await Promise.all([
     fetchAllProfiles(),
     window.supabaseClient.from("practice_logs").select("user_id, date"),
@@ -193,6 +202,7 @@ async function buildCommunityMembers() {
       streak,
       totalDays,
       level: milestoneState.milestone.level,
+      practicedToday: practiceDates.includes(today),
     });
   });
 

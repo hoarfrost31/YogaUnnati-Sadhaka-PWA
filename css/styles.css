@@ -1866,6 +1866,26 @@ input {
   height: 14px;
 }
 
+.community-board-today {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 7px 0 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(127, 151, 128, 0.14);
+  color: #628164;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.community-board-today svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2.4;
+}
+
 .community-board-days {
   min-width: 44px;
   text-align: right;
