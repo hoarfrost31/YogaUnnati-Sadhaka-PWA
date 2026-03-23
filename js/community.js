@@ -19,6 +19,7 @@ const CLASS_REMINDER_KEY = "pwa_class_reminder_v1";
 let userId;
 let userEmail = "";
 let pendingAvatarUrl = "";
+let reminderPreferenceFromAccount = false;
 
 function getTestReminderMessage() {
   const practiceDates = readPracticeCache(userId);
@@ -70,7 +71,13 @@ function renderReminderSettings() {
   const permission = notificationsApi?.getPermission?.() || "unsupported";
   const isEnabled = readClassReminderPreference(userId);
 
-  classReminderToggle.checked = isSupported && permission === "granted" && isEnabled;
+  if (isSupported && permission === "granted" && reminderPreferenceFromAccount && !isEnabled) {
+    writeClassReminderPreference(userId, true);
+  }
+
+  const effectiveEnabled = readClassReminderPreference(userId);
+
+  classReminderToggle.checked = isSupported && permission === "granted" && effectiveEnabled;
   classReminderToggle.disabled = !isSupported || permission !== "granted";
 
   enableNotificationsBtn.disabled = !isSupported || permission === "granted";
@@ -84,7 +91,7 @@ function renderReminderSettings() {
   }
 
   if (permission === "granted") {
-    classReminderStatus.textContent = isEnabled
+    classReminderStatus.textContent = effectiveEnabled
       ? "Daily 9:00 PM reminder is on for tomorrow's class."
       : "Notifications are allowed. Turn on the switch to save your daily 9:00 PM reminder.";
     enableNotificationsBtn.textContent = "Notifications Enabled";
@@ -93,14 +100,18 @@ function renderReminderSettings() {
   }
 
   if (permission === "denied") {
-    classReminderStatus.textContent = "Notifications are blocked. Please enable them in browser settings first.";
+    classReminderStatus.textContent = reminderPreferenceFromAccount
+      ? "Your reminder was on before. Please re-enable notifications for this device."
+      : "Notifications are blocked. Please enable them in browser settings first.";
     enableNotificationsBtn.textContent = "Notifications Blocked";
     testNotificationBtn.textContent = "Test Blocked";
     return;
   }
 
-  classReminderStatus.textContent = "Enable notifications first, then we can save your daily 9:00 PM class reminder.";
-  enableNotificationsBtn.textContent = "Enable Notifications";
+  classReminderStatus.textContent = reminderPreferenceFromAccount
+    ? "Please re-enable notifications to restore your 9:00 PM class reminder on this device."
+    : "Enable notifications first, then we can save your daily 9:00 PM class reminder.";
+  enableNotificationsBtn.textContent = reminderPreferenceFromAccount ? "Re-enable Notifications" : "Enable Notifications";
   testNotificationBtn.textContent = "Send Test Notification";
 }
 
@@ -144,6 +155,7 @@ function renderProfile(profile) {
   const activeProfile = normalizeProfileData(profile);
   const displayName = activeProfile.displayName || DEFAULT_PROFILE_NAME;
   const avatarUrl = activeProfile.avatarUrl || "";
+  reminderPreferenceFromAccount = Boolean(activeProfile.classReminderEnabled);
 
   profileNameInput.value = activeProfile.displayName || "";
   profileNameHeading.textContent = displayName;
@@ -248,6 +260,7 @@ if (enableNotificationsBtn) {
 
       if (permission === "granted") {
         writeClassReminderPreference(userId, true);
+        await saveReminderPreference(userId, true);
         showToast("Notifications enabled");
       } else if (permission === "denied") {
         writeClassReminderPreference(userId, false);
@@ -265,7 +278,7 @@ if (enableNotificationsBtn) {
 }
 
 if (classReminderToggle) {
-  classReminderToggle.addEventListener("change", () => {
+  classReminderToggle.addEventListener("change", async () => {
     const notificationsApi = window.pwaNotifications;
     const permission = notificationsApi?.getPermission?.() || "unsupported";
 
@@ -277,6 +290,11 @@ if (classReminderToggle) {
     }
 
     writeClassReminderPreference(userId, classReminderToggle.checked);
+    try {
+      await saveReminderPreference(userId, classReminderToggle.checked);
+    } catch (error) {
+      console.error(error);
+    }
     showToast(classReminderToggle.checked ? "9 PM reminder saved" : "Reminder turned off");
     renderReminderSettings();
   });

@@ -58,6 +58,7 @@ function normalizeProfileData(profile = {}) {
   return {
     displayName: (profile.displayName || "").trim(),
     avatarUrl: normalizeAvatarUrl(profile.avatarUrl),
+    classReminderEnabled: Boolean(profile.classReminderEnabled),
   };
 }
 
@@ -99,6 +100,7 @@ function getProfileFromUser(user) {
   return normalizeProfileData({
     displayName: displayName || emailPrefix || DEFAULT_PROFILE_NAME,
     avatarUrl: metadata.avatar_data_url || metadata.avatar_url || "",
+    classReminderEnabled: Boolean(metadata.class_reminder_enabled),
   });
 }
 
@@ -214,6 +216,7 @@ async function saveCurrentUserProfile(userId, profile) {
     data: {
       display_name: cleanProfile.displayName,
       avatar_data_url: cleanProfile.avatarUrl,
+      class_reminder_enabled: cleanProfile.classReminderEnabled,
     },
   });
 
@@ -251,6 +254,31 @@ async function saveCurrentUserProfile(userId, profile) {
     }
   }
 
+  writeProfileCache(userId, savedProfile);
+  markRemoteRefresh("profile", userId);
+  return savedProfile;
+}
+
+async function saveReminderPreference(userId, enabled) {
+  const currentProfile = readProfileCache(userId);
+  const nextProfile = normalizeProfileData({
+    ...currentProfile,
+    classReminderEnabled: enabled,
+  });
+
+  const { data, error } = await window.supabaseClient.auth.updateUser({
+    data: {
+      display_name: nextProfile.displayName,
+      avatar_data_url: nextProfile.avatarUrl,
+      class_reminder_enabled: enabled,
+    },
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  const savedProfile = getProfileFromUser(data.user);
   writeProfileCache(userId, savedProfile);
   markRemoteRefresh("profile", userId);
   return savedProfile;
