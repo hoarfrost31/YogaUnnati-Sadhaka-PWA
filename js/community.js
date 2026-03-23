@@ -31,6 +31,9 @@ function getTestReminderMessage() {
       "Stay on track. See you tomorrow morning.",
       "Join us tomorrow morning.",
       "Keep your rhythm going. See you in class tomorrow morning.",
+      "Consistency is your only focus right now. Keep going.",
+      "Use the weekend to deepen, not drift away from your practice.",
+      "A new week begins. Stay committed to your practice and show up tomorrow.",
       "Sunday is for resetting. We will see you Monday morning.",
     ];
 
@@ -62,12 +65,14 @@ function getTestReminderMessage() {
     `${remainingDays} ${dayLabel} left to your next milestone. See you tomorrow morning.`,
     `Stay on track. ${remainingDays} ${dayLabel} left to your next milestone.`,
     `Join us tomorrow morning. ${remainingDays} ${dayLabel} left to your next milestone.`,
+    "Consistency is your only focus right now. Keep going.",
   ];
 
   if (weekday === 5) {
     messageVariants.push(
       `Before the weekend slips away, stay on track. ${remainingDays} ${dayLabel} left to your next milestone.`,
       `Heading into the weekend? Join us tomorrow morning and keep your rhythm alive.`,
+      "Use the weekend to deepen, not drift away from your practice.",
     );
   }
 
@@ -75,6 +80,7 @@ function getTestReminderMessage() {
     messageVariants.push(
       `Weekend practice counts too. ${remainingDays} ${dayLabel} left to your next milestone.`,
       `Stay on track this weekend. We will see you tomorrow morning.`,
+      "Use the weekend to deepen, not drift away from your practice.",
     );
   }
 
@@ -82,6 +88,7 @@ function getTestReminderMessage() {
     messageVariants.push(
       `Set up your week well. See you tomorrow morning for Monday's class.`,
       `Sunday reset. Come back strong tomorrow morning.`,
+      "A new week begins. Stay committed to your practice and show up tomorrow.",
     );
   }
 
