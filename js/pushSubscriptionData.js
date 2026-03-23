@@ -85,6 +85,24 @@ async function upsertPushSubscription(userId, subscription) {
     throw error;
   }
 
+  const { data: confirmedRow, error: confirmError } = await window.supabaseClient
+    .from("push_subscriptions")
+    .select("endpoint")
+    .eq("endpoint", row.endpoint)
+    .maybeSingle();
+
+  if (confirmError) {
+    if (isPushSubscriptionsTableMissing(confirmError)) {
+      return { ok: false, reason: "table_missing" };
+    }
+
+    throw confirmError;
+  }
+
+  if (!confirmedRow) {
+    return { ok: false, reason: "not_confirmed" };
+  }
+
   writePushSubscriptionCache(userId, row);
   return { ok: true, reason: "saved", row };
 }
