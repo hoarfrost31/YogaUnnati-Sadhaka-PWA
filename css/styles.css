@@ -835,7 +835,7 @@ input {
 
 .calendar-card {
   border-radius: 28px;
-  padding: 22px 18px 20px;
+  padding: 18px 16px 16px;
   margin-top: 12px;
 }
 
@@ -866,7 +866,7 @@ input {
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  margin-top: 16px;
+  margin-top: 12px;
   text-align: center;
   font-size: 0.72rem;
   font-weight: 700;
@@ -877,15 +877,15 @@ input {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .day {
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 42px;
+  min-height: 36px;
   border-radius: 16px;
   font-family: 'Sora', sans-serif;
   font-size: 0.86rem;
