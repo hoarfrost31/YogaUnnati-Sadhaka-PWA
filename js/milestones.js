@@ -94,7 +94,7 @@ function renderMilestones(practiceDates = []) {
             <span>${milestone.desc}</span>
           </div>
           <span class="badge-text">
-            ${isCompleted ? "Completed" : isCurrent ? '<i data-lucide="activity"></i><span>In Progress</span>' : '<i data-lucide="lock"></i><span>Locked</span>'}
+            ${isCompleted ? '<i data-lucide="check-circle-2"></i><span>Completed</span>' : isCurrent ? '<i data-lucide="activity"></i><span>In Progress</span>' : '<i data-lucide="lock"></i><span>Locked</span>'}
           </span>
         </div>
 
