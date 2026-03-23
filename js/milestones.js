@@ -19,6 +19,7 @@ async function initUser() {
 }
 
 const milestones = APP_MILESTONES;
+const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
 
 function scrollCurrentMilestoneIntoView() {
   const currentCard = document.querySelector(".milestone-card.current");
@@ -123,7 +124,9 @@ function renderMilestones(practiceDates = []) {
 async function initApp() {
   await initUser();
   renderMilestones(readPracticeCache(userId));
-  refreshMilestones();
+  if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
+    refreshMilestones();
+  }
 }
 
 document.addEventListener("visibilitychange", async () => {
@@ -132,7 +135,9 @@ document.addEventListener("visibilitychange", async () => {
   }
 
   try {
-    await refreshMilestones();
+    if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
+      await refreshMilestones();
+    }
   } catch (error) {
     console.error(error);
   }

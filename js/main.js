@@ -18,6 +18,8 @@ const homeMilestoneRemainingEl = document.getElementById("homeMilestoneRemaining
 const homeMilestoneBarFillEl = document.getElementById("homeMilestoneBarFill");
 const brandTaglineEl = document.getElementById("brandTagline");
 const HOME_MILESTONE_BAR_ANIMATED_KEY = "home_milestone_bar_animated_v1";
+const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
+const PROFILE_REFRESH_TTL_MS = 5 * 60 * 1000;
 
 // 👤 Temporary user (replace later with auth)
 // const userId = "user_1";
@@ -280,6 +282,7 @@ async function markToday() {
   }
 
   addPracticeDateToCache(userId, today);
+  markRemoteRefresh("practice_dates", userId);
   if (!practiceDates.includes(today)) {
     practiceDates.push(today);
   }
@@ -302,6 +305,7 @@ async function unmarkToday() {
   }
 
   removePracticeDateFromCache(userId, today);
+  markRemoteRefresh("practice_dates", userId);
   practiceDates = practiceDates.filter((date) => date !== today);
   syncHomeUI();
 }
@@ -362,10 +366,19 @@ document.addEventListener("visibilitychange", async () => {
   }
 
   try {
-    await Promise.all([
-      refreshPracticeDates(),
-      loadHomeProfile(),
-    ]);
+    const refreshTasks = [];
+
+    if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
+      refreshTasks.push(refreshPracticeDates());
+    }
+
+    if (shouldRefreshRemote("profile", userId, PROFILE_REFRESH_TTL_MS)) {
+      refreshTasks.push(loadHomeProfile());
+    }
+
+    if (refreshTasks.length) {
+      await Promise.all(refreshTasks);
+    }
   } catch (error) {
     console.error("Home refresh error:", error);
   }
@@ -410,10 +423,15 @@ if (weekCardLinkEl) {
 
 async function initApp() {
   await initUser();   // 🔥 must complete first
-  loadHomeProfile();
+  applyHomeProfile(readProfileCache(userId));
+  if (shouldRefreshRemote("profile", userId, PROFILE_REFRESH_TTL_MS)) {
+    loadHomeProfile();
+  }
   practiceDates = readPracticeCache(userId);
   syncHomeUI();
-  refreshPracticeDates();
+  if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
+    refreshPracticeDates();
+  }
 
 }
 

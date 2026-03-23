@@ -13,6 +13,7 @@ const progressStatusCardEl = document.getElementById("progressStatusCard");
 const progressStatusIconEl = document.getElementById("progressStatusIcon");
 const progressStatusTextEl = document.getElementById("progressStatusText");
 let progressStatusTimer = null;
+const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
 
 function getTodayIsoDate() {
   const now = new Date();
@@ -44,7 +45,7 @@ function canMarkPracticeForDate(dateString) {
   selectedDate.setHours(0, 0, 0, 0);
 
   const today = parseLocalDate(getTodayIsoDate());
-  const oldestAllowed = parseLocalDate(getRelativeIsoDate(-2));
+  const oldestAllowed = parseLocalDate(getRelativeIsoDate(-1));
 
   return selectedDate <= today && selectedDate >= oldestAllowed;
 }
@@ -197,7 +198,7 @@ function loadStats() {
     statusMessages.push({
       tone: "encouragement",
       icon: "🗓️",
-      text: "Missed yesterday? You can still mark the last 2 days.",
+      text: "Missed marking yesterday? You can still mark today or yesterday.",
       shine: false,
     });
   }
@@ -337,6 +338,7 @@ async function toggleTodayPractice() {
 
       practiceDates = practiceDates.filter((dateItem) => dateItem !== today);
       removePracticeDateFromCache(userId, today);
+      markRemoteRefresh("practice_dates", userId);
       showToast("Practice removed");
     } else {
       await supabaseClient
@@ -347,6 +349,7 @@ async function toggleTodayPractice() {
         practiceDates.push(today);
       }
       addPracticeDateToCache(userId, today);
+      markRemoteRefresh("practice_dates", userId);
       showToast("Practice marked");
     }
 
@@ -371,7 +374,9 @@ document.addEventListener("visibilitychange", async () => {
   }
 
   try {
-    await refreshPracticeDates();
+    if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
+      await refreshPracticeDates();
+    }
   } catch (error) {
     console.error(error);
   }
@@ -412,8 +417,8 @@ function openSheet(date, isActive) {
   } else {
     const todayIso = getTodayIsoDate();
     statusEl.textContent = date > todayIso
-      ? "You can only mark today or the last 2 days."
-      : "You can only backfill practice for the last 2 days.";
+      ? "You can only mark today or yesterday."
+      : "You can only backfill practice for yesterday.";
     btn.textContent = "Mark Unavailable";
     btn.className = "sheet-btn disabled";
     btn.disabled = true;
@@ -430,6 +435,7 @@ function openSheet(date, isActive) {
 
         practiceDates = practiceDates.filter((dateItem) => dateItem !== selectedDate);
         removePracticeDateFromCache(userId, selectedDate);
+        markRemoteRefresh("practice_dates", userId);
         selectedIsActive = false;
         showToast("Practice removed");
       } else {
@@ -441,6 +447,7 @@ function openSheet(date, isActive) {
           practiceDates.push(selectedDate);
         }
         addPracticeDateToCache(userId, selectedDate);
+        markRemoteRefresh("practice_dates", userId);
         selectedIsActive = true;
         showToast("Practice marked");
       }
@@ -496,7 +503,9 @@ async function initApp() {
   await initUser();
   practiceDates = readPracticeCache(userId);
   syncProgressUI(false);
-  refreshPracticeDates();
+  if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
+    refreshPracticeDates();
+  }
 }
 
 initApp();

@@ -144,6 +144,7 @@ async function ensureCurrentUserProfile(userId) {
     if (existingRow) {
       const profile = getProfileFromRow(existingRow, fallbackUser);
       writeProfileCache(userId, profile);
+      markRemoteRefresh("profile", userId);
       return profile;
     }
 
@@ -165,10 +166,12 @@ async function ensureCurrentUserProfile(userId) {
     const createdRow = await fetchProfileRow(userId);
     const profile = createdRow ? getProfileFromRow(createdRow, fallbackUser) : fallbackProfile;
     writeProfileCache(userId, profile);
+    markRemoteRefresh("profile", userId);
     return profile;
   } catch (profilesError) {
     if (isProfilesTableMissing(profilesError)) {
       writeProfileCache(userId, fallbackProfile);
+      markRemoteRefresh("profile", userId);
       return fallbackProfile;
     }
 
@@ -191,11 +194,13 @@ async function refreshCurrentUserProfile(userId) {
     const row = await fetchProfileRow(userId);
     const profile = row ? getProfileFromRow(row, fallbackUser) : getProfileFromUser(fallbackUser);
     writeProfileCache(userId, profile);
+    markRemoteRefresh("profile", userId);
     return profile;
   } catch (profilesError) {
     if (isProfilesTableMissing(profilesError)) {
       const fallbackProfile = getProfileFromUser(fallbackUser);
       writeProfileCache(userId, fallbackProfile);
+      markRemoteRefresh("profile", userId);
       return fallbackProfile;
     }
 
@@ -247,6 +252,7 @@ async function saveCurrentUserProfile(userId, profile) {
   }
 
   writeProfileCache(userId, savedProfile);
+  markRemoteRefresh("profile", userId);
   return savedProfile;
 }
 
@@ -263,5 +269,6 @@ async function fetchAllProfiles() {
     throw error;
   }
 
+  markRemoteRefresh("profiles_public", "");
   return data || [];
 }

@@ -1,5 +1,6 @@
 const PRACTICE_CACHE_PREFIX = "practice_logs_cache_v1:";
 const MILESTONE_STATE_CACHE_PREFIX = "milestone_state_v1:";
+const REMOTE_REFRESH_PREFIX = "remote_refresh_v1:";
 const APP_MILESTONES = [
   { days: 7, title: "Stiffness Relief", level: "Level 1", desc: "Loosen up the body", icon: "flower", image: "images/stiffness.jpg", imageClass: "milestone-image-stiffness" },
   { days: 21, title: "Strength & Balance", level: "Level 2", desc: "Build strength & balance", icon: "balance", image: "images/strength.jpg", imageClass: "milestone-image-strength" },
@@ -58,6 +59,37 @@ function getPracticeCacheKey(userId) {
 
 function getMilestoneStateCacheKey(userId) {
   return `${MILESTONE_STATE_CACHE_PREFIX}${userId}`;
+}
+
+function getRemoteRefreshKey(scope, userId = "") {
+  return `${REMOTE_REFRESH_PREFIX}${scope}:${userId || "global"}`;
+}
+
+function shouldRefreshRemote(scope, userId, maxAgeMs) {
+  try {
+    const raw = localStorage.getItem(getRemoteRefreshKey(scope, userId));
+    if (!raw) {
+      return true;
+    }
+
+    const lastRefreshedAt = Number(raw);
+    if (!Number.isFinite(lastRefreshedAt)) {
+      return true;
+    }
+
+    return Date.now() - lastRefreshedAt > maxAgeMs;
+  } catch (error) {
+    console.error("Remote refresh check error:", error);
+    return true;
+  }
+}
+
+function markRemoteRefresh(scope, userId) {
+  try {
+    localStorage.setItem(getRemoteRefreshKey(scope, userId), String(Date.now()));
+  } catch (error) {
+    console.error("Remote refresh mark error:", error);
+  }
 }
 
 function readPracticeCache(userId) {
@@ -123,6 +155,7 @@ async function fetchPracticeDates(userId) {
 
   const dates = data.map((item) => item.date);
   writePracticeCache(userId, dates);
+  markRemoteRefresh("practice_dates", userId);
   return dates;
 }
 

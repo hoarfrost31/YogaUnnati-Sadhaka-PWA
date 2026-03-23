@@ -2,6 +2,7 @@ const supabaseClient = window.supabaseClient;
 const COMMUNITY_BOARD_CACHE_PREFIX = "community_board_cache_v1:";
 
 const communityBoardListEl = document.getElementById("communityBoardList");
+const COMMUNITY_REFRESH_TTL_MS = 2 * 60 * 1000;
 
 let userId;
 
@@ -261,10 +262,16 @@ async function initApp() {
   renderBoard(hydrateCachedMembers(readCommunityBoardCache(userId)));
 
   try {
-    await ensureCurrentUserProfile(userId);
-    const members = await buildCommunityMembers();
-    writeCommunityBoardCache(userId, members);
-    renderBoard(members);
+    if (
+      shouldRefreshRemote("community_board", userId, COMMUNITY_REFRESH_TTL_MS) ||
+      shouldRefreshRemote("profiles_public", "", COMMUNITY_REFRESH_TTL_MS)
+    ) {
+      await ensureCurrentUserProfile(userId);
+      const members = await buildCommunityMembers();
+      writeCommunityBoardCache(userId, members);
+      markRemoteRefresh("community_board", userId);
+      renderBoard(members);
+    }
   } catch (error) {
     console.error(error);
   }
@@ -277,9 +284,15 @@ document.addEventListener("visibilitychange", async () => {
 
   try {
     renderBoard(hydrateCachedMembers(readCommunityBoardCache(userId)));
-    const members = await buildCommunityMembers();
-    writeCommunityBoardCache(userId, members);
-    renderBoard(members);
+    if (
+      shouldRefreshRemote("community_board", userId, COMMUNITY_REFRESH_TTL_MS) ||
+      shouldRefreshRemote("profiles_public", "", COMMUNITY_REFRESH_TTL_MS)
+    ) {
+      const members = await buildCommunityMembers();
+      writeCommunityBoardCache(userId, members);
+      markRemoteRefresh("community_board", userId);
+      renderBoard(members);
+    }
   } catch (error) {
     console.error(error);
   }
