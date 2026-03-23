@@ -71,8 +71,8 @@ function renderProgressStatus(messages) {
       window.setTimeout(() => {
         currentIndex = (currentIndex + 1) % messages.length;
         applyMessage(messages[currentIndex]);
-      }, 220);
-    }, 3400);
+      }, 360);
+    }, 4200);
   }
 }
 
