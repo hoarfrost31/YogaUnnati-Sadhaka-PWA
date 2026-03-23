@@ -1909,9 +1909,9 @@ input {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(94px + var(--safe-bottom));
+  bottom: calc(102px + var(--safe-bottom));
   width: 100%;
-  padding: 22px 24px 12px;
+  padding: 20px 24px 10px;
   z-index: 850;
   pointer-events: none;
 }
