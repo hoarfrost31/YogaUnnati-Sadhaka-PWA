@@ -125,6 +125,10 @@ function loadStats() {
     diffDays = Math.floor((todayDate - latestDate) / (1000 * 60 * 60 * 24));
   }
 
+  if (practiceDates.includes(getTodayIsoDate())) {
+    statusMessages.push({ tone: "encouragement", icon: "🌿", text: "Beautiful. Come back tomorrow too." });
+  }
+
   if (streak > 0 && diffDays === 1) {
     statusMessages.push({ tone: "warning", icon: "⚠️", text: "You haven't practiced today — your streak is at risk!" });
   } else if (streak > 0 && diffDays > 1) {
