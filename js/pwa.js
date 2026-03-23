@@ -1,9 +1,63 @@
+function ensureUpdatePrompt() {
+  let prompt = document.getElementById("pwaUpdatePrompt");
+  if (prompt) {
+    return prompt;
+  }
+
+  prompt = document.createElement("div");
+  prompt.id = "pwaUpdatePrompt";
+  prompt.className = "pwa-update-prompt hidden";
+  prompt.innerHTML = `
+    <div class="pwa-update-copy">
+      <strong>Update available</strong>
+      <span>Tap refresh to load the latest version.</span>
+    </div>
+    <button id="pwaUpdateBtn" class="pwa-update-btn" type="button">Refresh</button>
+  `;
+
+  document.body.appendChild(prompt);
+  return prompt;
+}
+
+function showUpdatePrompt(registration) {
+  const prompt = ensureUpdatePrompt();
+  const updateBtn = document.getElementById("pwaUpdateBtn");
+
+  prompt.classList.remove("hidden");
+
+  updateBtn.onclick = () => {
+    if (registration?.waiting) {
+      registration.waiting.postMessage({ type: "SKIP_WAITING" });
+      return;
+    }
+
+    window.location.reload();
+  };
+}
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     let hasRefreshedForUpdate = false;
 
     navigator.serviceWorker.register("sw.js").then((registration) => {
       registration.update().catch(() => {});
+
+      if (registration.waiting) {
+        showUpdatePrompt(registration);
+      }
+
+      registration.addEventListener("updatefound", () => {
+        const newWorker = registration.installing;
+        if (!newWorker) {
+          return;
+        }
+
+        newWorker.addEventListener("statechange", () => {
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            showUpdatePrompt(registration);
+          }
+        });
+      });
 
       navigator.serviceWorker.addEventListener("controllerchange", () => {
         if (hasRefreshedForUpdate) {

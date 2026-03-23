@@ -1,4 +1,4 @@
-const CACHE_NAME = "yogaunnati-pwa-v8";
+const CACHE_NAME = "yogaunnati-pwa-v9";
 const APP_SHELL_PATHS = [
   "",
   "index.html",
@@ -40,7 +40,6 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
-  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
@@ -54,6 +53,12 @@ self.addEventListener("activate", (event) => {
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("fetch", (event) => {
