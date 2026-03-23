@@ -65,6 +65,26 @@
     <p class="eyebrow-label">Profile Settings</p>
     <p class="community-note-text">You can update these anytime to keep your profile feeling current.</p>
   </section>
+
+  <section class="community-note-card reminder-card">
+    <p class="eyebrow-label">Reminders</p>
+    <div class="reminder-card-top">
+      <div>
+        <h3 class="reminder-title">Tomorrow's Class</h3>
+        <p class="reminder-copy">Get a reminder every day at 9:00 PM for the next day's class.</p>
+      </div>
+      <label class="reminder-switch">
+        <input id="classReminderToggle" type="checkbox">
+        <span class="reminder-switch-track"></span>
+      </label>
+    </div>
+    <p class="reminder-status" id="classReminderStatus">Notifications are off for now.</p>
+    <div class="profile-form-actions reminder-actions">
+      <button id="enableNotificationsBtn" class="secondary-btn" type="button">Enable Notifications</button>
+      <button id="testNotificationBtn" class="secondary-btn" type="button">Send Test Notification</button>
+    </div>
+    <p class="community-note-text reminder-note">This saves your 9 PM preference now. Live daily PWA delivery will use web push next.</p>
+  </section>
   </div>
 </div>
 

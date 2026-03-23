@@ -9,10 +9,81 @@ const profileEmailText = document.getElementById("profileEmailText");
 const saveProfileBtn = document.getElementById("saveProfileBtn");
 const removePhotoBtn = document.getElementById("removePhotoBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+const classReminderToggle = document.getElementById("classReminderToggle");
+const classReminderStatus = document.getElementById("classReminderStatus");
+const enableNotificationsBtn = document.getElementById("enableNotificationsBtn");
+const testNotificationBtn = document.getElementById("testNotificationBtn");
+
+const CLASS_REMINDER_KEY = "pwa_class_reminder_v1";
 
 let userId;
 let userEmail = "";
 let pendingAvatarUrl = "";
+
+function getReminderStorageKey(userIdValue) {
+  return `${CLASS_REMINDER_KEY}:${userIdValue || "guest"}`;
+}
+
+function readClassReminderPreference(userIdValue) {
+  try {
+    return localStorage.getItem(getReminderStorageKey(userIdValue)) === "on";
+  } catch (error) {
+    console.error("Reminder preference read error:", error);
+    return false;
+  }
+}
+
+function writeClassReminderPreference(userIdValue, enabled) {
+  try {
+    localStorage.setItem(getReminderStorageKey(userIdValue), enabled ? "on" : "off");
+  } catch (error) {
+    console.error("Reminder preference write error:", error);
+  }
+}
+
+function renderReminderSettings() {
+  if (!classReminderToggle || !classReminderStatus || !enableNotificationsBtn || !testNotificationBtn) {
+    return;
+  }
+
+  const notificationsApi = window.pwaNotifications;
+  const isSupported = notificationsApi?.isSupported?.() || false;
+  const permission = notificationsApi?.getPermission?.() || "unsupported";
+  const isEnabled = readClassReminderPreference(userId);
+
+  classReminderToggle.checked = isSupported && permission === "granted" && isEnabled;
+  classReminderToggle.disabled = !isSupported || permission !== "granted";
+
+  enableNotificationsBtn.disabled = !isSupported || permission === "granted";
+  testNotificationBtn.disabled = !isSupported || permission !== "granted";
+
+  if (!isSupported) {
+    classReminderStatus.textContent = "This browser does not support notifications for this app.";
+    enableNotificationsBtn.textContent = "Notifications Unavailable";
+    testNotificationBtn.textContent = "Test Unavailable";
+    return;
+  }
+
+  if (permission === "granted") {
+    classReminderStatus.textContent = isEnabled
+      ? "Daily 9:00 PM reminder is on for tomorrow's class."
+      : "Notifications are allowed. Turn on the switch to save your daily 9:00 PM reminder.";
+    enableNotificationsBtn.textContent = "Notifications Enabled";
+    testNotificationBtn.textContent = "Send Test Notification";
+    return;
+  }
+
+  if (permission === "denied") {
+    classReminderStatus.textContent = "Notifications are blocked. Please enable them in browser settings first.";
+    enableNotificationsBtn.textContent = "Notifications Blocked";
+    testNotificationBtn.textContent = "Test Blocked";
+    return;
+  }
+
+  classReminderStatus.textContent = "Enable notifications first, then we can save your daily 9:00 PM class reminder.";
+  enableNotificationsBtn.textContent = "Enable Notifications";
+  testNotificationBtn.textContent = "Send Test Notification";
+}
 
 async function initUser() {
   const { data: sessionData } = await supabaseClient.auth.getSession();
@@ -143,6 +214,76 @@ if (logoutBtn) {
   });
 }
 
+if (enableNotificationsBtn) {
+  enableNotificationsBtn.addEventListener("click", async () => {
+    const notificationsApi = window.pwaNotifications;
+
+    if (!notificationsApi?.isSupported?.()) {
+      showToast("Notifications are not supported here");
+      renderReminderSettings();
+      return;
+    }
+
+    try {
+      const permission = await notificationsApi.requestPermission();
+
+      if (permission === "granted") {
+        writeClassReminderPreference(userId, true);
+        showToast("Notifications enabled");
+      } else if (permission === "denied") {
+        writeClassReminderPreference(userId, false);
+        showToast("Notifications blocked");
+      } else {
+        showToast("Notification permission not granted");
+      }
+    } catch (error) {
+      console.error(error);
+      showToast("Could not enable notifications");
+    }
+
+    renderReminderSettings();
+  });
+}
+
+if (classReminderToggle) {
+  classReminderToggle.addEventListener("change", () => {
+    const notificationsApi = window.pwaNotifications;
+    const permission = notificationsApi?.getPermission?.() || "unsupported";
+
+    if (permission !== "granted") {
+      classReminderToggle.checked = false;
+      showToast("Enable notifications first");
+      renderReminderSettings();
+      return;
+    }
+
+    writeClassReminderPreference(userId, classReminderToggle.checked);
+    showToast(classReminderToggle.checked ? "9 PM reminder saved" : "Reminder turned off");
+    renderReminderSettings();
+  });
+}
+
+if (testNotificationBtn) {
+  testNotificationBtn.addEventListener("click", async () => {
+    const notificationsApi = window.pwaNotifications;
+    const permission = notificationsApi?.getPermission?.() || "unsupported";
+
+    if (permission !== "granted") {
+      showToast("Enable notifications first");
+      renderReminderSettings();
+      return;
+    }
+
+    try {
+      const sent = await notificationsApi.sendTestNotification();
+      showToast(sent ? "Test notification sent" : "Could not send notification");
+    } catch (error) {
+      console.error(error);
+      showToast("Could not send notification");
+    }
+  });
+}
+
 saveProfileBtn.addEventListener("click", async () => {
   const displayName = profileNameInput.value.trim();
 
@@ -175,6 +316,7 @@ saveProfileBtn.addEventListener("click", async () => {
 async function initApp() {
   await initUser();
   renderProfile(readProfileCache(userId));
+  renderReminderSettings();
 
   try {
     const profile = await ensureCurrentUserProfile(userId);
@@ -182,6 +324,8 @@ async function initApp() {
   } catch (error) {
     console.error(error);
   }
+
+  renderReminderSettings();
 }
 
 document.addEventListener("visibilitychange", async () => {
@@ -195,6 +339,8 @@ document.addEventListener("visibilitychange", async () => {
   } catch (error) {
     console.error(error);
   }
+
+  renderReminderSettings();
 });
 
 initApp();
