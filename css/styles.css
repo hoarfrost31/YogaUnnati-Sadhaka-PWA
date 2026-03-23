@@ -1317,6 +1317,17 @@ input {
   animation: fadeIn 0.4s ease;
 }
 
+.progress-message-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.progress-message-stack .streak-badge,
+.progress-message-stack .warning {
+  margin-top: 0;
+}
+
 .streak-badge {
   background: var(--accent-soft);
   color: var(--accent-deep);
