@@ -59,6 +59,38 @@ function writeCommunityBoardCache(userId, members) {
   }
 }
 
+function hydrateCachedMembers(members) {
+  if (!userId || !Array.isArray(members) || !members.length) {
+    return members;
+  }
+
+  const today = getTodayIsoDate();
+  const currentUserDates = readPracticeCache(userId);
+  const currentUserProfile = readProfileCache(userId);
+  const currentUserStreak = calculateStreak(currentUserDates);
+  const currentUserTotalDays = [...new Set(currentUserDates)].length;
+  const currentUserMilestoneState = getCurrentMilestoneState(
+    userId,
+    getMilestoneProgressCount(currentUserDates)
+  );
+
+  return members.map((member) => {
+    if (member.id !== userId) {
+      return member;
+    }
+
+    return {
+      ...member,
+      displayName: currentUserProfile.displayName || member.displayName,
+      avatarUrl: currentUserProfile.avatarUrl || "",
+      streak: currentUserStreak,
+      totalDays: currentUserTotalDays,
+      level: currentUserMilestoneState.milestone.level,
+      practicedToday: currentUserDates.includes(today),
+    };
+  });
+}
+
 async function initUser() {
   const { data: sessionData } = await supabaseClient.auth.getSession();
   if (sessionData?.session?.user) {
@@ -226,7 +258,7 @@ async function buildCommunityMembers() {
 
 async function initApp() {
   await initUser();
-  renderBoard(readCommunityBoardCache(userId));
+  renderBoard(hydrateCachedMembers(readCommunityBoardCache(userId)));
 
   try {
     await ensureCurrentUserProfile(userId);
@@ -244,6 +276,7 @@ document.addEventListener("visibilitychange", async () => {
   }
 
   try {
+    renderBoard(hydrateCachedMembers(readCommunityBoardCache(userId)));
     const members = await buildCommunityMembers();
     writeCommunityBoardCache(userId, members);
     renderBoard(members);
