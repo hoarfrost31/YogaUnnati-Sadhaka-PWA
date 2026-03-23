@@ -4,6 +4,7 @@ const button = document.querySelector(".program-btn");
 const weekStripEl = document.getElementById("weekStrip");
 const weekCardLinkEl = document.getElementById("weekCardLink");
 const homeAvatarEl = document.getElementById("homeAvatar");
+const homeAvatarInitialEl = document.getElementById("homeAvatarInitial");
 const communityAvatarImgEl = document.getElementById("communityAvatarImg");
 const communityAvatarInitialEl = document.getElementById("communityAvatarInitial");
 const communityProfileNameEl = document.getElementById("communityProfileName");
@@ -51,13 +52,20 @@ function applyHomeProfile(profile) {
   const activeProfile = normalizeProfileData(profile);
   const displayName = activeProfile.displayName || DEFAULT_PROFILE_NAME;
   const avatarSrc = activeProfile.avatarUrl || DEFAULT_PROFILE_AVATAR;
+  const hasCustomAvatar = Boolean(activeProfile.avatarUrl);
 
   if (homeAvatarEl) {
     homeAvatarEl.src = avatarSrc;
+    homeAvatarEl.classList.toggle("hidden", !hasCustomAvatar);
+  }
+
+  if (homeAvatarInitialEl) {
+    homeAvatarInitialEl.textContent = getInitials(displayName);
+    homeAvatarInitialEl.classList.toggle("hidden", hasCustomAvatar);
   }
 
   if (communityAvatarImgEl) {
-    if (activeProfile.avatarUrl) {
+    if (hasCustomAvatar) {
       communityAvatarImgEl.src = avatarSrc;
       communityAvatarImgEl.classList.remove("hidden");
     } else {
@@ -67,7 +75,7 @@ function applyHomeProfile(profile) {
 
   if (communityAvatarInitialEl) {
     communityAvatarInitialEl.textContent = getInitials(displayName);
-    communityAvatarInitialEl.classList.toggle("hidden", Boolean(activeProfile.avatarUrl));
+    communityAvatarInitialEl.classList.toggle("hidden", hasCustomAvatar);
   }
 
   if (communityProfileNameEl) {
