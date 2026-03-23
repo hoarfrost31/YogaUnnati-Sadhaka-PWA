@@ -1,5 +1,7 @@
 const TAB_HISTORY_KEY = "yogaunnati_tab_history";
 const TAB_PAGES = new Set(["index.html", "progress.html", "milestones.html", "community.html", "profile.html"]);
+const EXIT_PROMPT_KEY = "yogaunnati_exit_prompt_at";
+const EXIT_PROMPT_WINDOW_MS = 1800;
 
 function isInternalPageLink(anchor) {
   if (!anchor) {
@@ -47,6 +49,56 @@ function writeTabHistory(history) {
   sessionStorage.setItem(TAB_HISTORY_KEY, JSON.stringify(history.slice(-12)));
 }
 
+function clearExitPrompt() {
+  sessionStorage.removeItem(EXIT_PROMPT_KEY);
+}
+
+function shouldExitOnThisBackPress() {
+  const now = Date.now();
+  const lastPromptAt = Number(sessionStorage.getItem(EXIT_PROMPT_KEY) || 0);
+
+  if (now - lastPromptAt <= EXIT_PROMPT_WINDOW_MS) {
+    clearExitPrompt();
+    return true;
+  }
+
+  sessionStorage.setItem(EXIT_PROMPT_KEY, String(now));
+  return false;
+}
+
+function getOrCreateExitToast() {
+  let toast = document.getElementById("appExitToast");
+
+  if (toast) {
+    return toast;
+  }
+
+  toast = document.createElement("div");
+  toast.id = "appExitToast";
+  toast.className = "toast hidden";
+  document.body.appendChild(toast);
+  return toast;
+}
+
+function showExitPrompt() {
+  const toast = getOrCreateExitToast();
+  toast.textContent = "Press back again to exit";
+  toast.classList.remove("hidden");
+  toast.classList.remove("show");
+
+  window.setTimeout(() => {
+    toast.classList.add("show");
+  }, 10);
+
+  window.setTimeout(() => {
+    toast.classList.remove("show");
+
+    window.setTimeout(() => {
+      toast.classList.add("hidden");
+    }, 300);
+  }, EXIT_PROMPT_WINDOW_MS);
+}
+
 function getPreviousTrackedPage(currentPage) {
   const stack = readTabHistory();
 
@@ -82,8 +134,20 @@ function enableTabHistoryNavigation() {
     const { previousPage, nextHistory } = getPreviousTrackedPage(currentPage);
 
     if (previousPage && previousPage !== currentPage) {
-      writeTabHistory(nextHistory);
+      writeTabHistory(previousPage === "index.html" ? ["index.html"] : nextHistory);
       window.location.href = previousPage;
+      return;
+    }
+
+    if (currentPage === "index.html") {
+      if (shouldExitOnThisBackPress()) {
+        window.history.back();
+        return;
+      }
+
+      writeTabHistory(["index.html"]);
+      showExitPrompt();
+      window.history.pushState({ tabBackGuard: true, page: currentPage }, "", window.location.href);
       return;
     }
 
@@ -109,14 +173,22 @@ function enableNativeBackNavigation() {
     const { previousPage, nextHistory } = getPreviousTrackedPage(currentPage);
 
     if (previousPage && previousPage !== currentPage) {
-      writeTabHistory(nextHistory);
+      writeTabHistory(previousPage === "index.html" ? ["index.html"] : nextHistory);
       window.location.href = previousPage;
       return;
     }
 
     if (currentPage !== "index.html") {
+      clearExitPrompt();
       writeTabHistory(["index.html"]);
       window.location.href = "index.html";
+      return;
+    }
+
+    writeTabHistory(["index.html"]);
+
+    if (!shouldExitOnThisBackPress()) {
+      showExitPrompt();
       return;
     }
 
