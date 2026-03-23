@@ -2,7 +2,7 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     let hasRefreshedForUpdate = false;
 
-    navigator.serviceWorker.register("/sw.js").then((registration) => {
+    navigator.serviceWorker.register("sw.js").then((registration) => {
       registration.update().catch(() => {});
 
       navigator.serviceWorker.addEventListener("controllerchange", () => {

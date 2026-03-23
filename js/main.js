@@ -195,6 +195,7 @@ function setHomeMilestoneBarWidth(progressPercent) {
     }
 
     if (shouldAnimate) {
+      homeMilestoneBarFillEl.classList.add("animate-once");
       homeMilestoneBarFillEl.style.width = "0%";
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
@@ -202,17 +203,15 @@ function setHomeMilestoneBarWidth(progressPercent) {
         });
       });
     } else {
-      homeMilestoneBarFillEl.classList.add("no-animate");
+      homeMilestoneBarFillEl.classList.remove("animate-once");
       homeMilestoneBarFillEl.style.width = widthValue;
-      window.requestAnimationFrame(() => {
-        homeMilestoneBarFillEl.classList.remove("no-animate");
-      });
     }
 
     hasHydratedHomeMilestoneBar = true;
     return;
   }
 
+  homeMilestoneBarFillEl.classList.remove("animate-once");
   homeMilestoneBarFillEl.style.width = widthValue;
 }
 

@@ -439,11 +439,11 @@ input {
   border-radius: inherit;
   background: linear-gradient(90deg, var(--accent-deep) 0%, #dea16b 100%);
   box-shadow: 0 0 0 1px rgba(209, 134, 74, 0.05), 0 6px 12px rgba(209, 134, 74, 0.14);
-  transition: width 320ms ease;
+  transition: none;
 }
 
-.home-milestone-bar-fill.no-animate {
-  transition: none;
+.home-milestone-bar-fill.animate-once {
+  transition: width 320ms ease;
 }
 
 .program-btn,

@@ -62,6 +62,18 @@ function getTargetUnlockIsoDate(practiceDates) {
   return getRelativeIsoDate(daysOffset);
 }
 
+function formatFriendlyDate(dateString) {
+  if (!dateString) {
+    return "";
+  }
+
+  const date = parseLocalDate(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
 async function initUser() {
   const { data: sessionData } = await supabaseClient.auth.getSession();
   if (sessionData?.session?.user) {
@@ -161,8 +173,14 @@ function loadStats() {
     diffDays = Math.floor((todayDate - latestDate) / (1000 * 60 * 60 * 24));
   }
 
-  if (practiceDates.includes(getTodayIsoDate())) {
-    statusMessages.push({ tone: "encouragement", icon: "🌿", text: "Beautiful. Come back tomorrow too.", shine: false });
+  const targetUnlockDate = getTargetUnlockIsoDate(practiceDates);
+  if (practiceDates.includes(getTodayIsoDate()) && targetUnlockDate) {
+    statusMessages.push({
+      tone: "encouragement",
+      icon: "✨",
+      text: `Your next milestone is on ${formatFriendlyDate(targetUnlockDate)}.`,
+      shine: false,
+    });
   }
 
   if (streak > 3 && diffDays === 0) {
