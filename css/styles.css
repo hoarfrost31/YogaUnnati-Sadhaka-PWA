@@ -449,6 +449,28 @@ input {
   position: relative;
 }
 
+.program-btn:not(.is-done) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.program-btn:not(.is-done)::before {
+  content: "+";
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .index-page .program-card .program-btn {
   margin-top: 6px;
 }
