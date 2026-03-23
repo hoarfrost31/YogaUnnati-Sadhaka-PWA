@@ -1909,9 +1909,9 @@ input {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(114px + var(--safe-bottom));
+  bottom: calc(84px + var(--safe-bottom));
   width: 100%;
-  padding: 18px 24px 8px;
+  padding: 24px 24px 14px;
   z-index: 850;
   pointer-events: none;
 }
@@ -1919,8 +1919,11 @@ input {
 .community-board-fixed-footer::before {
   content: "";
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(247, 243, 237, 0) 0%, rgba(247, 243, 237, 0.88) 24%, #f7f3ed 58%);
+  left: 0;
+  right: 0;
+  top: -36px;
+  bottom: -12px;
+  background: linear-gradient(180deg, rgba(247, 243, 237, 0) 0%, rgba(247, 243, 237, 0.92) 26%, #f7f3ed 62%, #f7f3ed 100%);
 }
 
 .community-board-footer {
