@@ -332,13 +332,24 @@ if (enableNotificationsBtn) {
         console.error("Could not persist reminder preference to account:", error);
       }
 
+      let subscriptionResult = null;
       try {
-        await window.pushSubscriptions?.ensureSubscribed?.(userId);
+        subscriptionResult = await window.pushSubscriptions?.ensureSubscribed?.(userId);
       } catch (error) {
         console.error("Could not register push subscription:", error);
       }
 
-      showToast("Notifications enabled");
+      if (subscriptionResult?.ok) {
+        showToast("Notifications enabled");
+      } else if (subscriptionResult?.reason === "table_missing") {
+        showToast("Notifications enabled, but push table is missing");
+      } else if (subscriptionResult?.reason === "unconfigured") {
+        showToast("Notifications enabled, but push key is missing");
+      } else if (subscriptionResult?.reason === "unsupported") {
+        showToast("Notifications enabled on this device");
+      } else {
+        showToast("Notifications enabled, but push sync is not saved yet");
+      }
     } else if (permission === "denied") {
       writeClassReminderPreference(userId, false);
       await window.pushSubscriptions?.disable?.(userId);
