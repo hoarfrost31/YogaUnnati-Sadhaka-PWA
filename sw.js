@@ -71,18 +71,39 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  const isAppAsset =
-    requestUrl.pathname.endsWith(".js") ||
-    requestUrl.pathname.endsWith(".css") ||
-    requestUrl.pathname.endsWith(".html") ||
+  const isImageAsset =
     requestUrl.pathname.endsWith(".svg") ||
     requestUrl.pathname.endsWith(".png") ||
     requestUrl.pathname.endsWith(".jpg") ||
     requestUrl.pathname.endsWith(".jpeg") ||
-    requestUrl.pathname.endsWith(".webp") ||
+    requestUrl.pathname.endsWith(".webp");
+
+  const isCoreAsset =
+    requestUrl.pathname.endsWith(".js") ||
+    requestUrl.pathname.endsWith(".css") ||
+    requestUrl.pathname.endsWith(".html") ||
     requestUrl.pathname.endsWith(".webmanifest");
 
-  if (isAppAsset) {
+  if (isImageAsset) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        return fetch(event.request).then((networkResponse) => {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+          return networkResponse;
+        });
+      })
+    );
+    return;
+  }
+
+  if (isCoreAsset) {
     event.respondWith(
       fetch(event.request)
         .then((networkResponse) => {
