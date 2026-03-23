@@ -255,26 +255,35 @@ if (enableNotificationsBtn) {
       return;
     }
 
-    try {
-      const permission = await notificationsApi.requestPermission();
+    let permission = notificationsApi.getPermission();
 
-      if (permission === "granted") {
-        writeClassReminderPreference(userId, true);
-        try {
-          await saveReminderPreference(userId, true);
-        } catch (error) {
-          console.error("Could not persist reminder preference to account:", error);
+    if (permission !== "granted") {
+      try {
+        const requestedPermission = await notificationsApi.requestPermission();
+        if (requestedPermission && requestedPermission !== "default") {
+          permission = requestedPermission;
+        } else {
+          permission = notificationsApi.getPermission();
         }
-        showToast("Notifications enabled");
-      } else if (permission === "denied") {
-        writeClassReminderPreference(userId, false);
-        showToast("Notifications blocked");
-      } else {
-        showToast("Notification permission not granted");
+      } catch (error) {
+        console.error("Notification permission request failed:", error);
+        permission = notificationsApi.getPermission();
       }
-    } catch (error) {
-      console.error(error);
-      showToast("Could not enable notifications");
+    }
+
+    if (permission === "granted") {
+      writeClassReminderPreference(userId, true);
+      try {
+        await saveReminderPreference(userId, true);
+      } catch (error) {
+        console.error("Could not persist reminder preference to account:", error);
+      }
+      showToast("Notifications enabled");
+    } else if (permission === "denied") {
+      writeClassReminderPreference(userId, false);
+      showToast("Notifications blocked");
+    } else {
+      showToast("Notification permission not granted");
     }
 
     renderReminderSettings();
