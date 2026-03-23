@@ -18,6 +18,11 @@ function getTodayIsoDate() {
   return `${year}-${month}-${day}`;
 }
 
+function parseLocalDate(dateString) {
+  const [year, month, day] = String(dateString).split("-").map(Number);
+  return new Date(year, (month || 1) - 1, day || 1);
+}
+
 async function initUser() {
   const { data: sessionData } = await supabaseClient.auth.getSession();
   if (sessionData?.session?.user) {
@@ -56,9 +61,10 @@ function loadStats() {
   const dates = [...practiceDates].sort().reverse();
   let streak = 0;
   let compareDate = new Date();
+  compareDate.setHours(0, 0, 0, 0);
 
   for (let i = 0; i < dates.length; i++) {
-    const date = new Date(dates[i]);
+    const date = parseLocalDate(dates[i]);
     const diff = Math.floor((compareDate - date) / (1000 * 60 * 60 * 24));
 
     if (diff === 0 || diff === 1) {
@@ -85,8 +91,9 @@ function loadStats() {
   }
 
   const warningBox = document.getElementById("warningBox");
-  const latestDate = dates.length > 0 ? new Date(dates[0]) : null;
+  const latestDate = dates.length > 0 ? parseLocalDate(dates[0]) : null;
   const todayDate = new Date();
+  todayDate.setHours(0, 0, 0, 0);
 
   let diffDays = null;
   if (latestDate) {

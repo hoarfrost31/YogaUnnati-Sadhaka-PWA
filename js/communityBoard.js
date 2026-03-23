@@ -13,6 +13,11 @@ function getTodayIsoDate() {
   return `${year}-${month}-${day}`;
 }
 
+function parseLocalDate(dateString) {
+  const [year, month, day] = String(dateString).split("-").map(Number);
+  return new Date(year, (month || 1) - 1, day || 1);
+}
+
 function getCommunityBoardCacheKey(userId) {
   return `${COMMUNITY_BOARD_CACHE_PREFIX}${userId}`;
 }
@@ -74,9 +79,10 @@ function calculateStreak(practiceDates) {
   const dates = [...practiceDates].sort().reverse();
   let streak = 0;
   let compareDate = new Date();
+  compareDate.setHours(0, 0, 0, 0);
 
   for (let i = 0; i < dates.length; i++) {
-    const date = new Date(dates[i]);
+    const date = parseLocalDate(dates[i]);
     const diff = Math.floor((compareDate - date) / (1000 * 60 * 60 * 24));
 
     if (diff === 0 || diff === 1) {
