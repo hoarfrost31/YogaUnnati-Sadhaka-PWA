@@ -1402,6 +1402,11 @@ input {
   padding: 30px 26px;
 }
 
+.milestone-card.current {
+  padding-top: 26px;
+  padding-bottom: 24px;
+}
+
 .milestone-journey .milestone-card:not(:last-child)::after {
   content: "";
   position: absolute;
@@ -1492,6 +1497,10 @@ input {
   margin-bottom: 4px;
 }
 
+.milestone-card.current .milestone-title-row {
+  margin-bottom: 2px;
+}
+
 .milestone-title-icon {
   width: 42px;
   height: 42px;
@@ -1521,6 +1530,10 @@ input {
   font-size: 0.84rem;
   font-weight: 400;
   color: #567056;
+}
+
+.milestone-card.current .milestone-top p {
+  margin: 4px 0 3px;
 }
 
 .milestone-top span {
@@ -1558,6 +1571,10 @@ input {
   background: rgba(127, 151, 128, 0.12);
 }
 
+.milestone-card.current .progress-bar {
+  margin-top: 16px;
+}
+
 .milestone-card.locked .progress-bar {
   display: none;
 }
@@ -1581,6 +1598,10 @@ input {
 .progress-text {
   margin-top: 12px;
   color: var(--text-soft);
+}
+
+.milestone-card.current .progress-text {
+  margin-top: 9px;
 }
 
 .badge-text {
@@ -1621,6 +1642,10 @@ input {
 .remaining {
   margin-top: 10px;
   color: var(--text-faint);
+}
+
+.milestone-card.current .remaining {
+  margin-top: 8px;
 }
 
 .auth-body {
