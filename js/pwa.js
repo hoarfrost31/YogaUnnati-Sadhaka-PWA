@@ -20,6 +20,9 @@ if ("serviceWorker" in navigator) {
 }
 
 window.pwaNotifications = {
+  getAssetUrl(pathname) {
+    return new URL(pathname, window.location.href).toString();
+  },
   isStandalone() {
     return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true;
   },
@@ -56,20 +59,31 @@ window.pwaNotifications = {
     const title = "YogaUnnati";
     const options = {
       body: messageOverride || "Your reminder preview is ready.",
-      icon: "images/pwa-192.png",
-      badge: "images/pwa-192.png",
+      icon: this.getAssetUrl("images/pwa-192.png"),
       tag: "yogaunnati-test-notification",
       data: {
-        url: "./profile.html",
+        url: this.getAssetUrl("profile.html"),
       },
     };
 
     if (registration?.showNotification) {
-      await registration.showNotification(title, options);
-      return true;
+      try {
+        await registration.showNotification(title, {
+          ...options,
+          badge: this.getAssetUrl("images/pwa-192.png"),
+        });
+        return true;
+      } catch (error) {
+        console.error("Service worker notification failed:", error);
+      }
     }
 
-    new Notification(title, options);
-    return true;
+    try {
+      new Notification(title, options);
+      return true;
+    } catch (error) {
+      console.error("Direct notification failed:", error);
+      throw error;
+    }
   },
 };
