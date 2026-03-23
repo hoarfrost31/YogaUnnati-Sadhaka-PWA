@@ -1351,13 +1351,13 @@ input {
   border: 1px solid rgba(209, 134, 74, 0.12);
 }
 
-.progress-status-card.is-encouragement::after {
+.progress-status-card.has-shine.is-encouragement::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.36) 42%, transparent 72%);
+  background: linear-gradient(108deg, transparent 0%, rgba(255, 255, 255, 0.56) 40%, rgba(255, 255, 255, 0.18) 52%, transparent 72%);
   transform: translateX(-135%);
-  animation: progressStatusShimmer 3s ease-in-out infinite;
+  animation: progressStatusShimmer 2.6s ease-in-out infinite;
 }
 
 .progress-status-card.is-warning {

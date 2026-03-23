@@ -56,8 +56,9 @@ function renderProgressStatus(messages) {
   let currentIndex = 0;
 
   const applyMessage = (message) => {
-    progressStatusCardEl.classList.remove("is-warning", "is-encouragement", "is-switching");
+    progressStatusCardEl.classList.remove("is-warning", "is-encouragement", "is-switching", "has-shine");
     progressStatusCardEl.classList.add(message.tone === "warning" ? "is-warning" : "is-encouragement");
+    progressStatusCardEl.classList.toggle("has-shine", Boolean(message.shine));
     progressStatusIconEl.textContent = message.icon;
     progressStatusTextEl.textContent = message.text;
   };
@@ -105,15 +106,15 @@ function loadStats() {
 
   const statusMessages = [];
   if (streak === 0) {
-    statusMessages.push({ tone: "encouragement", icon: "💪", text: "Start your streak today" });
+    statusMessages.push({ tone: "encouragement", icon: "💪", text: "Start your streak today", shine: true });
   } else if (streak === 1) {
-    statusMessages.push({ tone: "encouragement", icon: "🔥", text: "1 day streak — good start!" });
+    statusMessages.push({ tone: "encouragement", icon: "🔥", text: "1 day streak - good start!", shine: true });
   } else if (streak < 5) {
-    statusMessages.push({ tone: "encouragement", icon: "🔥", text: `${streak} day streak — keep going!` });
+    statusMessages.push({ tone: "encouragement", icon: "🔥", text: `${streak} day streak - keep going!`, shine: true });
   } else if (streak < 10) {
-    statusMessages.push({ tone: "encouragement", icon: "🔥", text: `${streak} day streak — strong discipline!` });
+    statusMessages.push({ tone: "encouragement", icon: "🔥", text: `${streak} day streak - strong discipline!`, shine: true });
   } else {
-    statusMessages.push({ tone: "encouragement", icon: "🔥", text: `${streak} day streak — unstoppable!` });
+    statusMessages.push({ tone: "encouragement", icon: "🔥", text: `${streak} day streak - unstoppable!`, shine: true });
   }
 
   const latestDate = dates.length > 0 ? parseLocalDate(dates[0]) : null;
@@ -126,13 +127,13 @@ function loadStats() {
   }
 
   if (practiceDates.includes(getTodayIsoDate())) {
-    statusMessages.push({ tone: "encouragement", icon: "🌿", text: "Beautiful. Come back tomorrow too." });
+    statusMessages.push({ tone: "encouragement", icon: "🌿", text: "Beautiful. Come back tomorrow too.", shine: false });
   }
 
   if (streak > 0 && diffDays === 1) {
-    statusMessages.push({ tone: "warning", icon: "⚠️", text: "You haven't practiced today — your streak is at risk!" });
+    statusMessages.push({ tone: "warning", icon: "⚠️", text: "You haven't practiced today - your streak is at risk!" });
   } else if (streak > 0 && diffDays > 1) {
-    statusMessages.push({ tone: "warning", icon: "💔", text: "You missed your streak — start again today!" });
+    statusMessages.push({ tone: "warning", icon: "💔", text: "You missed your streak - start again today!" });
   }
 
   renderProgressStatus(statusMessages);
