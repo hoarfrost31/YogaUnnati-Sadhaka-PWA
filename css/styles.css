@@ -1056,7 +1056,7 @@ input {
 
 .program-card.small {
   margin-top: 14px;
-  padding: 12px 14px;
+  padding: 13px 15px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1073,8 +1073,8 @@ input {
 }
 
 .progress-page .program-card.small .program-icon {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   padding: 6px;
   border-radius: 12px;
 }
@@ -1090,12 +1090,12 @@ input {
 }
 
 .progress-page .program-card.small .program-left h2 {
-  font-size: 0.98rem;
+  font-size: 1.01rem;
   line-height: 1.06;
 }
 
 .progress-page .program-card.small .level {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
 }
 
 .progress-program-btn {
@@ -1103,10 +1103,10 @@ input {
   margin-top: 8px;
   margin-left: 21%;
   margin-right: 0;
-  padding: 8px 11px;
-  min-height: 36px;
+  padding: 8px 12px;
+  min-height: 37px;
   border-radius: 14px;
-  font-size: 0.76rem;
+  font-size: 0.77rem;
   box-shadow: 0 6px 14px rgba(209, 134, 74, 0.13);
 }
 
@@ -1122,14 +1122,14 @@ input {
 
 .radial-progress {
   position: relative;
-  width: 72px;
-  height: 72px;
+  width: 75px;
+  height: 75px;
   flex-shrink: 0;
 }
 
 .radial-progress-modern {
-  width: 72px;
-  height: 72px;
+  width: 75px;
+  height: 75px;
 }
 
 .radial-progress-ring {
@@ -1172,14 +1172,14 @@ input {
 
 .radial-progress-copy strong {
   font-family: 'Sora', sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.73rem;
   font-weight: 600;
   line-height: 1;
   color: var(--accent-deep);
 }
 
 .radial-progress-copy span {
-  font-size: 0.42rem;
+  font-size: 0.44rem;
   font-weight: 500;
   color: var(--accent);
   letter-spacing: 0.02em;
