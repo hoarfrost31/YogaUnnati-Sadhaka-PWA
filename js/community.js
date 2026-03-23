@@ -312,11 +312,16 @@ if (testNotificationBtn) {
     }
 
     try {
+      if (/iPhone|iPad|iPod/i.test(navigator.userAgent) && !notificationsApi?.isStandalone?.()) {
+        showToast("Add this app to Home Screen first to test notifications on iPhone.");
+        return;
+      }
+
       const sent = await notificationsApi.sendTestNotification(getTestReminderMessage());
       showToast(sent ? "Test notification sent" : "Could not send notification");
     } catch (error) {
       console.error(error);
-      showToast("Could not send notification");
+      showToast("Could not send notification on this device yet");
     }
   });
 }

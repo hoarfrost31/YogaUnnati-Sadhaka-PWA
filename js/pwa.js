@@ -20,6 +20,9 @@ if ("serviceWorker" in navigator) {
 }
 
 window.pwaNotifications = {
+  isStandalone() {
+    return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true;
+  },
   isSupported() {
     return "Notification" in window;
   },
@@ -42,7 +45,14 @@ window.pwaNotifications = {
       return false;
     }
 
-    const registration = await navigator.serviceWorker?.getRegistration?.();
+    let registration = null;
+
+    try {
+      registration = await navigator.serviceWorker?.ready;
+    } catch (error) {
+      console.error("Service worker not ready for notification:", error);
+    }
+
     const title = "YogaUnnati";
     const options = {
       body: messageOverride || "Your reminder preview is ready.",
