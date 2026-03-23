@@ -480,8 +480,8 @@ input {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: linear-gradient(90deg, var(--sage) 0%, #92ab92 100%);
-  box-shadow: 0 10px 22px rgba(127, 151, 128, 0.2);
+  background: linear-gradient(90deg, #8ca18a 0%, #98ac97 100%);
+  box-shadow: 0 5px 12px rgba(127, 151, 128, 0.075);
 }
 
 .program-btn.is-done::before {
@@ -492,8 +492,8 @@ input {
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.145);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.105);
   font-size: 0.92rem;
   font-weight: 900;
 }
@@ -1343,6 +1343,8 @@ input {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 0.08rem;
   font-size: 1rem;
 }
 

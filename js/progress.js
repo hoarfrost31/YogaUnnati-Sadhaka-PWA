@@ -152,12 +152,21 @@ function loadStats() {
     statusMessages.push({ tone: "encouragement", icon: "🌿", text: "Beautiful. Come back tomorrow too.", shine: false });
   }
 
+  if (streak > 3 && diffDays === 0) {
+    statusMessages.push({
+      tone: "encouragement",
+      icon: "ℹ️",
+      text: "2 missed days can reduce your total by 1.",
+      shine: false,
+    });
+  }
+
   const yesterdayIso = getRelativeIsoDate(-1);
   if (totalDays > 0 && !practiceDates.includes(yesterdayIso)) {
     statusMessages.push({
       tone: "encouragement",
       icon: "🗓️",
-      text: "Missed yesterday's practice? Don't worry - you can still mark the last 2 days.",
+      text: "Missed yesterday? You can still mark the last 2 days.",
       shine: false,
     });
   }
