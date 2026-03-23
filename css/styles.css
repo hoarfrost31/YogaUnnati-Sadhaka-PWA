@@ -252,25 +252,26 @@ input {
 .program-card-with-promo .program-btn {
   position: relative;
   z-index: 1;
+  max-width: calc(100% - 134px);
 }
 
 .program-promo {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 90px;
-  height: 80px;
-  border-radius: 22px;
+  top: 16px;
+  right: 0;
+  width: 128px;
+  height: calc(100% - 32px);
+  border-radius: 26px 0 0 26px;
   overflow: hidden;
-  opacity: 0.96;
-  box-shadow: 0 10px 24px rgba(36, 28, 19, 0.08);
+  opacity: 1;
+  box-shadow: none;
 }
 
 .program-promo::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(90deg, rgba(248, 246, 240, 0.9) 0%, rgba(248, 246, 240, 0.48) 34%, rgba(248, 246, 240, 0.14) 64%, rgba(248, 246, 240, 0.06) 100%);
 }
 
 .program-promo::before {
@@ -282,43 +283,43 @@ input {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transform: scale(1.06);
-  filter: saturate(0.98) contrast(1.01) brightness(1.01);
+  transform: scale(1.04);
+  filter: none;
 }
 
 .milestone-image-stiffness .program-promo-img,
 .milestone-image-stiffness .milestone-promo-img {
   object-position: center 22%;
   transform: scale(1.06);
-  filter: saturate(1) contrast(1.01) brightness(1.01);
+  filter: none;
 }
 
 .milestone-image-strength .program-promo-img,
 .milestone-image-strength .milestone-promo-img {
   object-position: center 28%;
   transform: scale(1.08);
-  filter: saturate(0.98) contrast(1.01) brightness(1.01);
+  filter: none;
 }
 
 .milestone-image-energy .program-promo-img,
 .milestone-image-energy .milestone-promo-img {
   object-position: center 34%;
   transform: scale(1.07);
-  filter: saturate(1) contrast(1.01) brightness(1.01);
+  filter: none;
 }
 
 .milestone-image-calm .program-promo-img,
 .milestone-image-calm .milestone-promo-img {
   object-position: center 18%;
   transform: scale(1.06);
-  filter: saturate(0.98) contrast(1) brightness(1.02);
+  filter: none;
 }
 
 .program-left {
   display: flex;
   align-items: flex-start;
   gap: 9px;
-  max-width: calc(100% - 108px);
+  max-width: calc(100% - 134px);
   min-height: 78px;
   padding-top: 0;
 }
@@ -1429,14 +1430,14 @@ input {
 
 .milestone-promo {
   position: absolute;
-  top: 56px;
-  right: 18px;
-  width: 88px;
-  height: 96px;
+  top: 18px;
+  right: 0;
+  width: 132px;
+  height: calc(100% - 36px);
   overflow: hidden;
-  border-radius: 22px;
-  opacity: 0.96;
-  box-shadow: 0 10px 24px rgba(36, 28, 19, 0.08);
+  border-radius: 28px 0 0 28px;
+  opacity: 0.98;
+  box-shadow: none;
 }
 
 .milestone-promo.is-current {
@@ -1447,7 +1448,7 @@ input {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(90deg, rgba(248, 246, 240, 0.88) 0%, rgba(248, 246, 240, 0.42) 34%, rgba(248, 246, 240, 0.12) 64%, rgba(248, 246, 240, 0.05) 100%);
 }
 
 .milestone-promo::before {
@@ -1459,8 +1460,8 @@ input {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transform: scale(1.06);
-  filter: saturate(0.98) contrast(1.01) brightness(1.01);
+  transform: scale(1.08);
+  filter: saturate(0.99) contrast(1.01) brightness(1.01);
 }
 
 .milestone-top {
@@ -1489,14 +1490,14 @@ input {
 .progress-bar,
 .progress-text,
 .remaining {
-  max-width: calc(100% - 106px);
+  max-width: calc(100% - 132px);
 }
 
 .current .milestone-top > div,
 .current .progress-bar,
 .current .progress-text,
 .current .remaining {
-  max-width: calc(100% - 106px);
+  max-width: calc(100% - 132px);
 }
 
 .milestone-title-row {
@@ -1551,17 +1552,23 @@ input {
 }
 
 .locked {
-  opacity: 0.6;
   box-shadow: var(--shadow-soft);
   border: 1.5px solid rgba(111, 102, 92, 0.14);
 }
 
+.milestone-card.locked .milestone-top > div,
+.milestone-card.locked .remaining {
+  opacity: 0.68;
+}
+
 .milestone-card.locked .milestone-promo {
-  opacity: 0.82;
+  top: 44px;
+  height: calc(100% - 62px);
+  opacity: 0.88;
 }
 
 .milestone-card.locked .milestone-promo::after {
-  background: rgba(255, 255, 255, 0.14);
+  background: linear-gradient(90deg, rgba(248, 246, 240, 0.91) 0%, rgba(248, 246, 240, 0.54) 38%, rgba(248, 246, 240, 0.2) 70%, rgba(248, 246, 240, 0.1) 100%);
 }
 
 .milestone-card.locked .milestone-promo-img {
@@ -1615,6 +1622,8 @@ input {
 
 .badge-text {
   white-space: nowrap;
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1631,6 +1640,20 @@ input {
   width: 13px;
   height: 13px;
   flex-shrink: 0;
+}
+
+.locked .badge-text {
+  margin-top: -8px;
+  background: rgba(248, 246, 240, 0.88);
+  border: 1px solid rgba(111, 102, 92, 0.16);
+  color: rgba(84, 74, 64, 0.96);
+  backdrop-filter: blur(4px);
+}
+
+.locked .badge-text svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.25;
 }
 
 .completed .badge-text {
