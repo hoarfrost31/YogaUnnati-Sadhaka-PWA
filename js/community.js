@@ -20,6 +20,25 @@ let userId;
 let userEmail = "";
 let pendingAvatarUrl = "";
 
+function getTestReminderMessage() {
+  const practiceDates = readPracticeCache(userId);
+  const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
+  const { milestone, remainingDays } = getCurrentMilestoneState(userId, milestoneProgressCount);
+
+  if (remainingDays <= 0) {
+    return `${milestone.title} is complete. Keep showing up tomorrow.`;
+  }
+
+  const dayLabel = remainingDays === 1 ? "day" : "days";
+  const messageVariants = [
+    `${remainingDays} ${dayLabel} left to your next milestone. See you tomorrow morning.`,
+    `Stay on track. ${remainingDays} ${dayLabel} left to your next milestone.`,
+  ];
+
+  const variantIndex = new Date().getDate() % messageVariants.length;
+  return messageVariants[variantIndex];
+}
+
 function getReminderStorageKey(userIdValue) {
   return `${CLASS_REMINDER_KEY}:${userIdValue || "guest"}`;
 }
@@ -275,7 +294,7 @@ if (testNotificationBtn) {
     }
 
     try {
-      const sent = await notificationsApi.sendTestNotification();
+      const sent = await notificationsApi.sendTestNotification(getTestReminderMessage());
       showToast(sent ? "Test notification sent" : "Could not send notification");
     } catch (error) {
       console.error(error);

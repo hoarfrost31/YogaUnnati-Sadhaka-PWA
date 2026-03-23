@@ -37,7 +37,7 @@ window.pwaNotifications = {
 
     return Notification.requestPermission();
   },
-  async sendTestNotification() {
+  async sendTestNotification(messageOverride = "") {
     if (!("Notification" in window) || Notification.permission !== "granted") {
       return false;
     }
@@ -45,7 +45,7 @@ window.pwaNotifications = {
     const registration = await navigator.serviceWorker?.getRegistration?.();
     const title = "YogaUnnati";
     const options = {
-      body: "This is a test reminder for tomorrow's class at 9:00 PM.",
+      body: messageOverride || "Your reminder preview is ready.",
       icon: "images/pwa-192.png",
       badge: "images/pwa-192.png",
       tag: "yogaunnati-test-notification",
