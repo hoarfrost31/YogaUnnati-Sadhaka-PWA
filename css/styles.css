@@ -2007,9 +2007,9 @@ input {
   position: absolute;
   left: 0;
   right: 0;
-  top: -18px;
+  top: -8px;
   bottom: -12px;
-  background: linear-gradient(180deg, rgba(247, 243, 237, 0) 0%, rgba(247, 243, 237, 0.78) 18%, #f7f3ed 42%, #f7f3ed 100%);
+  background: linear-gradient(180deg, rgba(247, 243, 237, 0) 0%, rgba(247, 243, 237, 0.84) 14%, #f7f3ed 34%, #f7f3ed 100%);
 }
 
 .community-board-footer {
