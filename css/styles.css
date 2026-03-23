@@ -1315,6 +1315,7 @@ input {
   overflow: hidden;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   min-height: 54px;
   padding: 13px 16px;
@@ -1341,6 +1342,7 @@ input {
   position: relative;
   z-index: 1;
   line-height: 1.35;
+  text-align: center;
 }
 
 .progress-status-card.is-encouragement {
