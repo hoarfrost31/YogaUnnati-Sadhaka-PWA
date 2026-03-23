@@ -9,7 +9,6 @@ const profileEmailText = document.getElementById("profileEmailText");
 const saveProfileBtn = document.getElementById("saveProfileBtn");
 const removePhotoBtn = document.getElementById("removePhotoBtn");
 const logoutBtn = document.getElementById("logoutBtn");
-const classReminderToggle = document.getElementById("classReminderToggle");
 const classReminderStatus = document.getElementById("classReminderStatus");
 const enableNotificationsBtn = document.getElementById("enableNotificationsBtn");
 const testNotificationBtn = document.getElementById("testNotificationBtn");
@@ -20,6 +19,7 @@ let userId;
 let userEmail = "";
 let pendingAvatarUrl = "";
 let reminderPreferenceFromAccount = false;
+let testReminderMessageIndex = 0;
 
 function getTestReminderMessage() {
   if (
@@ -27,25 +27,67 @@ function getTestReminderMessage() {
     typeof getMilestoneProgressCount !== "function" ||
     typeof getCurrentMilestoneState !== "function"
   ) {
-    return "Stay on track. See you tomorrow morning.";
+    const fallbackMessages = [
+      "Stay on track. See you tomorrow morning.",
+      "Join us tomorrow morning.",
+      "Keep your rhythm going. See you in class tomorrow morning.",
+      "Sunday is for resetting. We will see you Monday morning.",
+    ];
+
+    const message = fallbackMessages[testReminderMessageIndex % fallbackMessages.length];
+    testReminderMessageIndex += 1;
+    return message;
   }
 
   const practiceDates = readPracticeCache(userId);
   const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
   const { milestone, remainingDays } = getCurrentMilestoneState(userId, milestoneProgressCount);
+  const dayLabel = remainingDays === 1 ? "day" : "days";
+  const today = new Date();
+  const weekday = today.getDay();
 
   if (remainingDays <= 0) {
-    return `${milestone.title} is complete. Keep showing up tomorrow.`;
+    const completedMessages = [
+      `${milestone.title} is complete. Keep showing up tomorrow.`,
+      "Stay on track. We will see you tomorrow morning.",
+      "A beautiful step forward. Join us again tomorrow morning.",
+    ];
+
+    const message = completedMessages[testReminderMessageIndex % completedMessages.length];
+    testReminderMessageIndex += 1;
+    return message;
   }
 
-  const dayLabel = remainingDays === 1 ? "day" : "days";
   const messageVariants = [
     `${remainingDays} ${dayLabel} left to your next milestone. See you tomorrow morning.`,
     `Stay on track. ${remainingDays} ${dayLabel} left to your next milestone.`,
+    `Join us tomorrow morning. ${remainingDays} ${dayLabel} left to your next milestone.`,
   ];
 
-  const variantIndex = new Date().getDate() % messageVariants.length;
-  return messageVariants[variantIndex];
+  if (weekday === 5) {
+    messageVariants.push(
+      `Before the weekend slips away, stay on track. ${remainingDays} ${dayLabel} left to your next milestone.`,
+      `Heading into the weekend? Join us tomorrow morning and keep your rhythm alive.`,
+    );
+  }
+
+  if (weekday === 6) {
+    messageVariants.push(
+      `Weekend practice counts too. ${remainingDays} ${dayLabel} left to your next milestone.`,
+      `Stay on track this weekend. We will see you tomorrow morning.`,
+    );
+  }
+
+  if (weekday === 0) {
+    messageVariants.push(
+      `Set up your week well. See you tomorrow morning for Monday's class.`,
+      `Sunday reset. Come back strong tomorrow morning.`,
+    );
+  }
+
+  const message = messageVariants[testReminderMessageIndex % messageVariants.length];
+  testReminderMessageIndex += 1;
+  return message;
 }
 
 function getReminderStorageKey(userIdValue) {
@@ -70,7 +112,7 @@ function writeClassReminderPreference(userIdValue, enabled) {
 }
 
 function renderReminderSettings() {
-  if (!classReminderToggle || !classReminderStatus || !enableNotificationsBtn || !testNotificationBtn) {
+  if (!classReminderStatus || !enableNotificationsBtn || !testNotificationBtn) {
     return;
   }
 
@@ -84,11 +126,7 @@ function renderReminderSettings() {
   }
 
   const effectiveEnabled = readClassReminderPreference(userId);
-
-  classReminderToggle.checked = isSupported && permission === "granted" && effectiveEnabled;
-  classReminderToggle.disabled = !isSupported || permission !== "granted";
-
-  enableNotificationsBtn.disabled = !isSupported || permission === "granted";
+  enableNotificationsBtn.disabled = !isSupported;
   testNotificationBtn.disabled = !isSupported || permission !== "granted";
 
   if (!isSupported) {
@@ -100,9 +138,9 @@ function renderReminderSettings() {
 
   if (permission === "granted") {
     classReminderStatus.textContent = effectiveEnabled
-      ? "Daily 9:00 PM reminder is on for tomorrow's class."
-      : "Notifications are allowed. Turn on the switch to save your daily 9:00 PM reminder.";
-    enableNotificationsBtn.textContent = "Notifications Enabled";
+      ? "Notifications are on for this device."
+      : "Notifications are allowed on this device.";
+    enableNotificationsBtn.textContent = "Ask Again";
     testNotificationBtn.textContent = "Send Test Notification";
     return;
   }
@@ -111,15 +149,15 @@ function renderReminderSettings() {
     classReminderStatus.textContent = reminderPreferenceFromAccount
       ? "Your reminder was on before. Please re-enable notifications for this device."
       : "Notifications are blocked. Please enable them in browser settings first.";
-    enableNotificationsBtn.textContent = "Notifications Blocked";
+    enableNotificationsBtn.textContent = "Ask Again";
     testNotificationBtn.textContent = "Test Blocked";
     return;
   }
 
   classReminderStatus.textContent = reminderPreferenceFromAccount
-    ? "Please re-enable notifications to restore your 9:00 PM class reminder on this device."
-    : "Enable notifications first, then we can save your daily 9:00 PM class reminder.";
-  enableNotificationsBtn.textContent = reminderPreferenceFromAccount ? "Re-enable Notifications" : "Enable Notifications";
+    ? "Please re-enable notifications to restore them on this device."
+    : "Allow notifications to hear from us here.";
+  enableNotificationsBtn.textContent = "Ask for Notifications";
   testNotificationBtn.textContent = "Send Test Notification";
 }
 
@@ -294,29 +332,6 @@ if (enableNotificationsBtn) {
       showToast("Notification permission not granted");
     }
 
-    renderReminderSettings();
-  });
-}
-
-if (classReminderToggle) {
-  classReminderToggle.addEventListener("change", async () => {
-    const notificationsApi = window.pwaNotifications;
-    const permission = notificationsApi?.getPermission?.() || "unsupported";
-
-    if (permission !== "granted") {
-      classReminderToggle.checked = false;
-      showToast("Enable notifications first");
-      renderReminderSettings();
-      return;
-    }
-
-    writeClassReminderPreference(userId, classReminderToggle.checked);
-    try {
-      await saveReminderPreference(userId, classReminderToggle.checked);
-    } catch (error) {
-      console.error("Could not persist reminder preference to account:", error);
-    }
-    showToast(classReminderToggle.checked ? "9 PM reminder saved" : "Reminder turned off");
     renderReminderSettings();
   });
 }

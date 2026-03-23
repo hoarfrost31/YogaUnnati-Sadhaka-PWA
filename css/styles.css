@@ -1996,16 +1996,8 @@ input {
   gap: 0;
 }
 
-.reminder-card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 6px;
-}
-
 .reminder-title {
-  margin: 0;
+  margin: 8px 0 0;
   font-family: 'Sora', sans-serif;
   font-size: 1.02rem;
   font-weight: 600;
@@ -2037,58 +2029,6 @@ input {
   margin-top: 10px;
   font-size: 0.82rem;
   line-height: 1.5;
-}
-
-.reminder-switch {
-  position: relative;
-  width: 56px;
-  height: 34px;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.reminder-switch input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.reminder-switch-track {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 999px;
-  background: rgba(127, 151, 128, 0.2);
-  box-shadow: inset 0 0 0 1px rgba(86, 112, 86, 0.1);
-  transition: background 0.22s ease;
-}
-
-.reminder-switch-track::after {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  background: white;
-  box-shadow: 0 6px 14px rgba(36, 28, 19, 0.12);
-  transition: transform 0.22s ease;
-}
-
-.reminder-switch input:checked + .reminder-switch-track {
-  background: linear-gradient(90deg, var(--accent-deep) 0%, #d99258 100%);
-}
-
-.reminder-switch input:checked + .reminder-switch-track::after {
-  transform: translateX(22px);
-}
-
-.reminder-switch input:disabled + .reminder-switch-track {
-  opacity: 0.6;
 }
 
 .community-board-page .app-container {
