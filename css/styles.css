@@ -1955,13 +1955,13 @@ input {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  margin: 7px 0 0;
-  padding: 4px 9px;
+  margin: 10px 0 0;
+  padding: 5px 10px;
   border-radius: 999px;
   background: rgba(127, 151, 128, 0.14);
   color: #628164;
   font-family: 'Sora', sans-serif;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 600;
   box-shadow: 0 6px 14px rgba(127, 151, 128, 0.12);
   animation: communityTodayPulse 2.4s ease-in-out infinite;
@@ -1978,8 +1978,8 @@ input {
 
 .community-board-today svg {
   position: relative;
-  width: 12px;
-  height: 12px;
+  width: 13px;
+  height: 13px;
   stroke-width: 2.4;
   animation: communityTodayIconFloat 1.5s ease-in-out infinite;
 }
