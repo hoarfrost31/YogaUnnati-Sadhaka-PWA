@@ -917,7 +917,7 @@ input {
 
 .calendar-card {
   border-radius: 28px;
-  padding: 17px 15px 15px;
+  padding: 18px 15px 16px;
   margin-top: 10px;
 }
 
@@ -951,7 +951,7 @@ input {
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  margin-top: 12px;
+  margin-top: 13px;
   text-align: center;
   font-size: 0.69rem;
   font-weight: 700;
@@ -963,7 +963,7 @@ input {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 13px;
 }
 
 .progress-target-date-note {
@@ -974,7 +974,7 @@ input {
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 38px;
+  min-height: 40px;
   border-radius: 14px;
   font-family: 'Sora', sans-serif;
   font-size: 0.83rem;
