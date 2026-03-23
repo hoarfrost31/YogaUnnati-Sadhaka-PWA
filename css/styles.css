@@ -158,6 +158,7 @@ input {
   position: relative;
   display: block;
   line-height: 0;
+  text-decoration: none;
 }
 
 .avatar-initial-badge {
