@@ -184,4 +184,17 @@ async function initApp() {
   }
 }
 
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState !== "visible" || !userId) {
+    return;
+  }
+
+  try {
+    const profile = await refreshCurrentUserProfile(userId);
+    renderProfile(profile);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 initApp();

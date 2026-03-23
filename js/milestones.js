@@ -47,17 +47,17 @@ function scrollCurrentMilestoneIntoView() {
 async function refreshMilestones() {
   try {
     const dates = await fetchPracticeDates(userId);
-    renderMilestones([...new Set(dates)].length);
+    renderMilestones(dates);
   } catch (error) {
     console.error(error);
   }
 }
 
-function renderMilestones(totalDays) {
+function renderMilestones(practiceDates = []) {
   const container = document.getElementById("milestoneList");
   container.innerHTML = "";
 
-  const milestoneProgressCount = getMilestoneProgressCount(readPracticeCache(userId));
+  const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
   const currentState = getCurrentMilestoneState(userId, milestoneProgressCount);
 
   milestones.forEach((milestone, index) => {
@@ -122,8 +122,20 @@ function renderMilestones(totalDays) {
 
 async function initApp() {
   await initUser();
-  renderMilestones([...new Set(readPracticeCache(userId))].length);
+  renderMilestones(readPracticeCache(userId));
   refreshMilestones();
 }
+
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState !== "visible" || !userId) {
+    return;
+  }
+
+  try {
+    await refreshMilestones();
+  } catch (error) {
+    console.error(error);
+  }
+});
 
 initApp();

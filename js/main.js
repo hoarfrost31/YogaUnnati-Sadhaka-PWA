@@ -269,6 +269,21 @@ async function refreshPracticeDates() {
   }
 }
 
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState !== "visible" || !userId) {
+    return;
+  }
+
+  try {
+    await Promise.all([
+      refreshPracticeDates(),
+      loadHomeProfile(),
+    ]);
+  } catch (error) {
+    console.error("Home refresh error:", error);
+  }
+});
+
 // 🔁 Button toggle
 button.addEventListener("click", async () => {
   if (isMarked) {

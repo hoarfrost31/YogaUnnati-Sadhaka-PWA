@@ -247,6 +247,18 @@ async function refreshPracticeDates() {
   }
 }
 
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState !== "visible" || !userId) {
+    return;
+  }
+
+  try {
+    await refreshPracticeDates();
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("day")) {
     const date = e.target.dataset.date;

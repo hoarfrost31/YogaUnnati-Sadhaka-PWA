@@ -1,6 +1,6 @@
 const PROFILE_CACHE_PREFIX = "profile_cache_v1:";
 const DEFAULT_PROFILE_NAME = "Your Profile";
-const DEFAULT_PROFILE_AVATAR = "images/profile.jpg";
+const DEFAULT_PROFILE_AVATAR = "images/profile-placeholder.svg";
 
 function getProfileCacheKey(userId) {
   return `${PROFILE_CACHE_PREFIX}${userId}`;
@@ -125,6 +125,11 @@ async function ensureCurrentUserProfile(userId) {
     if (upsertError) {
       throw upsertError;
     }
+
+    const createdRow = await fetchProfileRow(userId);
+    const profile = createdRow ? getProfileFromRow(createdRow, fallbackUser) : fallbackProfile;
+    writeProfileCache(userId, profile);
+    return profile;
   } catch (profilesError) {
     if (isProfilesTableMissing(profilesError)) {
       writeProfileCache(userId, fallbackProfile);
@@ -175,7 +180,7 @@ async function saveCurrentUserProfile(userId, profile) {
     throw error;
   }
 
-  const savedProfile = getProfileFromUser(data.user);
+  let savedProfile = getProfileFromUser(data.user);
 
   try {
     const { error: profileError } = await window.supabaseClient
@@ -191,6 +196,13 @@ async function saveCurrentUserProfile(userId, profile) {
 
     if (profileError && !isProfilesTableMissing(profileError)) {
       throw profileError;
+    }
+
+    if (!profileError) {
+      const row = await fetchProfileRow(userId);
+      if (row) {
+        savedProfile = getProfileFromRow(row, data.user);
+      }
     }
   } catch (profilesError) {
     if (!isProfilesTableMissing(profilesError)) {

@@ -218,4 +218,18 @@ async function initApp() {
   }
 }
 
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState !== "visible" || !userId) {
+    return;
+  }
+
+  try {
+    const members = await buildCommunityMembers();
+    writeCommunityBoardCache(userId, members);
+    renderBoard(members);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 initApp();
