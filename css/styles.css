@@ -1274,6 +1274,13 @@ input {
   box-shadow: 0 10px 22px rgba(209, 134, 74, 0.18);
 }
 
+.sheet-btn.disabled {
+  background: rgba(127, 151, 128, 0.14);
+  color: var(--text-soft);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }

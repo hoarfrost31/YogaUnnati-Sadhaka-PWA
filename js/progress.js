@@ -16,6 +16,11 @@ let progressStatusTimer = null;
 
 function getTodayIsoDate() {
   const now = new Date();
+  return formatLocalDate(now);
+}
+
+function formatLocalDate(date) {
+  const now = new Date(date);
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
@@ -25,6 +30,23 @@ function getTodayIsoDate() {
 function parseLocalDate(dateString) {
   const [year, month, day] = String(dateString).split("-").map(Number);
   return new Date(year, (month || 1) - 1, day || 1);
+}
+
+function getRelativeIsoDate(offsetDays) {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + offsetDays);
+  return formatLocalDate(date);
+}
+
+function canMarkPracticeForDate(dateString) {
+  const selectedDate = parseLocalDate(dateString);
+  selectedDate.setHours(0, 0, 0, 0);
+
+  const today = parseLocalDate(getTodayIsoDate());
+  const oldestAllowed = parseLocalDate(getRelativeIsoDate(-2));
+
+  return selectedDate <= today && selectedDate >= oldestAllowed;
 }
 
 async function initUser() {
@@ -128,6 +150,16 @@ function loadStats() {
 
   if (practiceDates.includes(getTodayIsoDate())) {
     statusMessages.push({ tone: "encouragement", icon: "🌿", text: "Beautiful. Come back tomorrow too.", shine: false });
+  }
+
+  const yesterdayIso = getRelativeIsoDate(-1);
+  if (totalDays > 0 && !practiceDates.includes(yesterdayIso)) {
+    statusMessages.push({
+      tone: "encouragement",
+      icon: "🗓️",
+      text: "Missed yesterday's practice? Don't worry - you can still mark the last 2 days.",
+      shine: false,
+    });
   }
 
   if (streak > 0 && diffDays === 1) {
@@ -319,19 +351,30 @@ function openSheet(date, isActive) {
   const dateEl = document.getElementById("sheetDate");
   const statusEl = document.getElementById("sheetStatus");
   const btn = document.getElementById("sheetActionBtn");
+  const canMarkSelectedDate = canMarkPracticeForDate(date);
 
   selectedDate = date;
   selectedIsActive = isActive;
   dateEl.textContent = date;
+  btn.disabled = false;
+  btn.onclick = null;
 
   if (isActive) {
     statusEl.textContent = "You practiced on this day";
     btn.textContent = "Unmark Practice";
     btn.className = "sheet-btn unmark";
-  } else {
+  } else if (canMarkSelectedDate) {
     statusEl.textContent = "No practice recorded";
     btn.textContent = "Mark Practice";
     btn.className = "sheet-btn mark";
+  } else {
+    const todayIso = getTodayIsoDate();
+    statusEl.textContent = date > todayIso
+      ? "You can only mark today or the last 2 days."
+      : "You can only backfill practice for the last 2 days.";
+    btn.textContent = "Mark Unavailable";
+    btn.className = "sheet-btn disabled";
+    btn.disabled = true;
   }
 
   btn.onclick = async () => {
