@@ -22,6 +22,14 @@ let pendingAvatarUrl = "";
 let reminderPreferenceFromAccount = false;
 
 function getTestReminderMessage() {
+  if (
+    typeof readPracticeCache !== "function" ||
+    typeof getMilestoneProgressCount !== "function" ||
+    typeof getCurrentMilestoneState !== "function"
+  ) {
+    return "Stay on track. See you tomorrow morning.";
+  }
+
   const practiceDates = readPracticeCache(userId);
   const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
   const { milestone, remainingDays } = getCurrentMilestoneState(userId, milestoneProgressCount);
