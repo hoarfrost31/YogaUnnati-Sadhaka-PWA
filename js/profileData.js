@@ -1,6 +1,10 @@
 const PROFILE_CACHE_PREFIX = "profile_cache_v1:";
 const DEFAULT_PROFILE_NAME = "Your Profile";
 const DEFAULT_PROFILE_AVATAR = "images/profile-placeholder.svg";
+const LEGACY_DEFAULT_AVATAR_PATHS = new Set([
+  "images/profile.jpg",
+  "/images/profile.jpg",
+]);
 
 function getProfileCacheKey(userId) {
   return `${PROFILE_CACHE_PREFIX}${userId}`;
@@ -19,10 +23,28 @@ function getInitials(name) {
     .join("");
 }
 
+function normalizeAvatarUrl(avatarUrl = "") {
+  const safeAvatarUrl = (avatarUrl || "").trim();
+
+  if (!safeAvatarUrl) {
+    return "";
+  }
+
+  if (LEGACY_DEFAULT_AVATAR_PATHS.has(safeAvatarUrl)) {
+    return "";
+  }
+
+  if (/\/images\/profile\.jpg(?:\?|#|$)/i.test(safeAvatarUrl)) {
+    return "";
+  }
+
+  return safeAvatarUrl;
+}
+
 function normalizeProfileData(profile = {}) {
   return {
     displayName: (profile.displayName || "").trim(),
-    avatarUrl: profile.avatarUrl || "",
+    avatarUrl: normalizeAvatarUrl(profile.avatarUrl),
   };
 }
 
