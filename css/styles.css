@@ -1308,6 +1308,7 @@ input {
 
 .progress-message-stack {
   margin-top: 10px;
+  margin-bottom: -4px;
 }
 
 .progress-status-card {
