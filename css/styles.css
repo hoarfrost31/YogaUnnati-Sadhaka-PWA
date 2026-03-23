@@ -1796,16 +1796,17 @@ input {
 
 #communityBoardList {
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 
 .community-board-entry {
   display: grid;
   grid-template-columns: auto auto 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 14px;
-  border-radius: 22px;
+  align-items: start;
+  column-gap: 14px;
+  row-gap: 8px;
+  padding: 18px 16px;
+  border-radius: 24px;
 }
 
 .community-board-rank {
@@ -1813,6 +1814,7 @@ input {
   display: grid;
   place-items: center;
   color: #f3bd17;
+  align-self: center;
 }
 
 .community-board-rank svg {
@@ -1822,14 +1824,15 @@ input {
 }
 
 .community-board-avatar {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   overflow: hidden;
   border-radius: 999px;
   background: rgba(127, 151, 128, 0.12);
   display: grid;
   place-items: center;
   box-shadow: var(--shadow-soft);
+  align-self: center;
 }
 
 .community-board-avatar-img {
@@ -1847,18 +1850,20 @@ input {
 
 .community-board-copy {
   min-width: 0;
+  padding-top: 1px;
 }
 
 .community-board-name-line {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 6px;
+  gap: 7px;
 }
 
 .community-board-name-line h3 {
   margin: 0;
   font-family: 'Sora', sans-serif;
-  font-size: 1.03rem;
+  font-size: 1.05rem;
   font-weight: 600;
   line-height: 1.1;
 }
@@ -1869,7 +1874,7 @@ input {
 }
 
 .community-board-level {
-  margin: 5px 0 0;
+  margin: 7px 0 0;
   color: #567056;
   font-size: 0.84rem;
   font-weight: 500;
@@ -1879,7 +1884,7 @@ input {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   color: #d2875f;
   font-size: 0.88rem;
 }
@@ -1895,8 +1900,8 @@ input {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin: 7px 0 0;
-  padding: 4px 10px;
+  margin: 10px 0 0;
+  padding: 5px 11px;
   border-radius: 999px;
   background: rgba(127, 151, 128, 0.14);
   color: #628164;
@@ -1966,14 +1971,16 @@ input {
 }
 
 .community-board-days {
-  min-width: 44px;
+  min-width: 52px;
   text-align: right;
+  align-self: center;
+  padding-left: 6px;
 }
 
 .community-board-days strong {
   display: block;
   font-family: 'Sora', sans-serif;
-  font-size: 1.8rem;
+  font-size: 1.74rem;
   font-weight: 600;
   line-height: 1;
   color: #2d425a;
@@ -2000,9 +2007,9 @@ input {
   position: absolute;
   left: 0;
   right: 0;
-  top: -36px;
+  top: -18px;
   bottom: -12px;
-  background: linear-gradient(180deg, rgba(247, 243, 237, 0) 0%, rgba(247, 243, 237, 0.92) 26%, #f7f3ed 62%, #f7f3ed 100%);
+  background: linear-gradient(180deg, rgba(247, 243, 237, 0) 0%, rgba(247, 243, 237, 0.78) 18%, #f7f3ed 42%, #f7f3ed 100%);
 }
 
 .community-board-footer {
