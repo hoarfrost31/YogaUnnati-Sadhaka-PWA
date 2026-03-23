@@ -57,21 +57,11 @@ window.pwaNotifications = {
     }
 
     const title = "YogaUnnati";
-    const options = {
-      body: messageOverride || "Your reminder preview is ready.",
-      icon: this.getAssetUrl("images/pwa-192.png"),
-      tag: "yogaunnati-test-notification",
-      data: {
-        url: this.getAssetUrl("profile.html"),
-      },
-    };
+    const body = messageOverride || "Your reminder preview is ready.";
 
     if (registration?.showNotification) {
       try {
-        await registration.showNotification(title, {
-          ...options,
-          badge: this.getAssetUrl("images/pwa-192.png"),
-        });
+        await registration.showNotification(title, { body });
         return true;
       } catch (error) {
         console.error("Service worker notification failed:", error);
@@ -79,7 +69,7 @@ window.pwaNotifications = {
     }
 
     try {
-      new Notification(title, options);
+      new Notification(title, { body });
       return true;
     } catch (error) {
       console.error("Direct notification failed:", error);

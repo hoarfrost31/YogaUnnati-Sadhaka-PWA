@@ -334,7 +334,8 @@ if (testNotificationBtn) {
       showToast(sent ? "Test notification sent" : "Could not send notification");
     } catch (error) {
       console.error(error);
-      showToast("Could not send notification on this device yet");
+      const message = error?.message ? `Notification failed: ${error.message}` : "Could not send notification on this device yet";
+      showToast(message);
     }
   });
 }
