@@ -1,4 +1,4 @@
-const CACHE_NAME = "yogaunnati-pwa-v1";
+const CACHE_NAME = "yogaunnati-pwa-v2";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -58,7 +58,41 @@ self.addEventListener("fetch", (event) => {
 
   if (event.request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match("/index.html"))
+      fetch(event.request)
+        .then((networkResponse) => {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request).then((cachedPage) => cachedPage || caches.match("/index.html")))
+    );
+    return;
+  }
+
+  const isAppAsset =
+    requestUrl.pathname.endsWith(".js") ||
+    requestUrl.pathname.endsWith(".css") ||
+    requestUrl.pathname.endsWith(".html") ||
+    requestUrl.pathname.endsWith(".svg") ||
+    requestUrl.pathname.endsWith(".png") ||
+    requestUrl.pathname.endsWith(".jpg") ||
+    requestUrl.pathname.endsWith(".jpeg") ||
+    requestUrl.pathname.endsWith(".webp") ||
+    requestUrl.pathname.endsWith(".webmanifest");
+
+  if (isAppAsset) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request))
     );
     return;
   }
