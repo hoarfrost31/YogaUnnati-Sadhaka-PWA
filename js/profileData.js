@@ -16,11 +16,15 @@ function getInitials(name) {
     return "Y";
   }
 
-  return safeName
-    .split(/\s+/)
+  const initials = safeName
+    .split(/[\s._-]+/)
     .slice(0, 2)
+    .map((part) => part.replace(/^[^A-Za-z0-9]+/, ""))
+    .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase())
     .join("");
+
+  return initials || "Y";
 }
 
 function normalizeAvatarUrl(avatarUrl = "") {
