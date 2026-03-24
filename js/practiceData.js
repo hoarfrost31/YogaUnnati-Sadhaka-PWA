@@ -2,7 +2,7 @@ const PRACTICE_CACHE_PREFIX = "practice_logs_cache_v1:";
 const MILESTONE_STATE_CACHE_PREFIX = "milestone_state_v1:";
 const REMOTE_REFRESH_PREFIX = "remote_refresh_v1:";
 const APP_MILESTONES = [
-  { days: 7, title: "Sankalpa", level: "Level 1", desc: "Committed Beginning", benefits: ["Restores natural mobility", "Reduced stiffness and tension", "Improves morning ease"], icon: "flower", image: "images/stiffness.jpg", imageClass: "milestone-image-stiffness" },
+  { days: 7, title: "Sankalpa", level: "Level 1", desc: "Committed Beginning", icon: "flower", image: "images/stiffness.jpg", imageClass: "milestone-image-stiffness" },
   { days: 21, title: "Sthirata", level: "Level 2", desc: "Balanced Body, Steady Mind", icon: "balance", image: "images/strength.jpg", imageClass: "milestone-image-strength" },
   { days: 48, title: "Ananda", level: "Level 3", desc: "Joy, Ease and Vitality", icon: "sun", image: "images/energy.jpg", imageClass: "milestone-image-energy" },
   { days: 90, title: "Paramananda", level: "Level 4", desc: "Deeper Bliss and lasting Stillness", icon: "lotus", image: "images/calm.jpg", imageClass: "milestone-image-calm" }
