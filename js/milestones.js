@@ -78,6 +78,13 @@ function renderMilestones(practiceDates = []) {
     }
 
     const remaining = Math.max(0, milestone.days - milestoneProgressCount);
+    const benefitsMarkup = Array.isArray(milestone.benefits) && milestone.benefits.length
+      ? `
+        <div class="milestone-benefits">
+          ${milestone.benefits.map((benefit) => `<span class="milestone-benefit-chip">${benefit}</span>`).join("")}
+        </div>
+      `
+      : "";
 
     container.innerHTML += `
       <div class="milestone-card ${status}">
@@ -93,6 +100,7 @@ function renderMilestones(practiceDates = []) {
             </div>
             <p>${milestone.level}</p>
             <span>${milestone.desc}</span>
+            ${benefitsMarkup}
           </div>
           <span class="badge-text">
             ${isCompleted ? '<i data-lucide="check-circle-2"></i><span>Completed</span>' : isCurrent ? '<i data-lucide="activity"></i><span>In Progress</span>' : '<i data-lucide="lock"></i><span>Locked</span>'}
