@@ -27,6 +27,11 @@ function exitAppIfPossible() {
   return false;
 }
 
+function navigateToPage(url) {
+  clearExitPrompt();
+  window.location.replace(url);
+}
+
 function isInternalPageLink(anchor) {
   if (!anchor) {
     return false;
@@ -159,7 +164,7 @@ function enableTabHistoryNavigation() {
 
     if (previousPage && previousPage !== currentPage) {
       writeTabHistory(previousPage === "index.html" ? ["index.html"] : nextHistory);
-      window.location.href = previousPage;
+      navigateToPage(previousPage);
       return;
     }
 
@@ -201,14 +206,14 @@ function enableNativeBackNavigation() {
 
     if (previousPage && previousPage !== currentPage) {
       writeTabHistory(previousPage === "index.html" ? ["index.html"] : nextHistory);
-      window.location.href = previousPage;
+      navigateToPage(previousPage);
       return;
     }
 
     if (currentPage !== "index.html") {
       clearExitPrompt();
       writeTabHistory(["index.html"]);
-      window.location.href = "index.html";
+      navigateToPage("index.html");
       return;
     }
 
@@ -248,4 +253,7 @@ document.addEventListener("click", (event) => {
   if (!isInternalPageLink(anchor)) {
     return;
   }
+
+  event.preventDefault();
+  navigateToPage(anchor.href);
 });
