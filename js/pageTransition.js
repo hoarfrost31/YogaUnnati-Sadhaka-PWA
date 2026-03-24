@@ -166,7 +166,8 @@ function enableTabHistoryNavigation() {
     if (currentPage === "index.html") {
       if (shouldExitOnThisBackPress()) {
         if (!exitAppIfPossible()) {
-          window.history.back();
+          writeTabHistory(["index.html"]);
+          window.history.pushState({ tabBackGuard: true, page: currentPage }, "", window.location.href);
         }
         return;
       }
