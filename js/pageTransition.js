@@ -3,6 +3,30 @@ const TAB_PAGES = new Set(["index.html", "progress.html", "milestones.html", "co
 const EXIT_PROMPT_KEY = "yogaunnati_exit_prompt_at";
 const EXIT_PROMPT_WINDOW_MS = 1800;
 
+function getAppPlugin() {
+  return window.Capacitor?.Plugins?.App || null;
+}
+
+function exitAppIfPossible() {
+  const appPlugin = getAppPlugin();
+
+  if (typeof appPlugin?.exitApp === "function") {
+    appPlugin.exitApp();
+    return true;
+  }
+
+  if (typeof window.navigator?.app?.exitApp === "function") {
+    window.navigator.app.exitApp();
+    return true;
+  }
+
+  if (typeof window.close === "function") {
+    window.close();
+  }
+
+  return false;
+}
+
 function isInternalPageLink(anchor) {
   if (!anchor) {
     return false;
@@ -141,7 +165,9 @@ function enableTabHistoryNavigation() {
 
     if (currentPage === "index.html") {
       if (shouldExitOnThisBackPress()) {
-        window.history.back();
+        if (!exitAppIfPossible()) {
+          window.history.back();
+        }
         return;
       }
 
@@ -163,7 +189,7 @@ function enableNativeBackNavigation() {
     return;
   }
 
-  const appPlugin = window.Capacitor?.Plugins?.App;
+  const appPlugin = getAppPlugin();
 
   if (!appPlugin?.addListener) {
     return;
@@ -192,9 +218,7 @@ function enableNativeBackNavigation() {
       return;
     }
 
-    if (typeof appPlugin.exitApp === "function") {
-      appPlugin.exitApp();
-    }
+    exitAppIfPossible();
   });
 }
 
