@@ -2,6 +2,7 @@ const TAB_HISTORY_KEY = "yogaunnati_tab_history";
 const TAB_PAGES = new Set(["index.html", "progress.html", "milestones.html", "community.html", "profile.html"]);
 const EXIT_PROMPT_KEY = "yogaunnati_exit_prompt_at";
 const EXIT_PROMPT_WINDOW_MS = 1800;
+let lastTouchNavAt = 0;
 
 function getAppPlugin() {
   return window.Capacitor?.Plugins?.App || null;
@@ -240,6 +241,11 @@ enableTabHistoryNavigation();
 enableNativeBackNavigation();
 
 document.addEventListener("click", (event) => {
+  if (Date.now() - lastTouchNavAt < 700) {
+    event.preventDefault();
+    return;
+  }
+
   if (event.defaultPrevented || event.button !== 0) {
     return;
   }
@@ -257,3 +263,25 @@ document.addEventListener("click", (event) => {
   event.preventDefault();
   navigateToPage(anchor.href);
 });
+
+document.addEventListener("touchstart", (event) => {
+  const anchor = event.target.closest(".nav-item[href]");
+
+  if (!isInternalPageLink(anchor)) {
+    return;
+  }
+
+  event.preventDefault();
+}, { passive: false });
+
+document.addEventListener("touchend", (event) => {
+  const anchor = event.target.closest(".nav-item[href]");
+
+  if (!isInternalPageLink(anchor)) {
+    return;
+  }
+
+  event.preventDefault();
+  lastTouchNavAt = Date.now();
+  navigateToPage(anchor.href);
+}, { passive: false });

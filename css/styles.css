@@ -38,6 +38,25 @@ body {
   font-family: 'Inter', sans-serif;
   background: transparent;
   position: relative;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable="true"],
+[contenteditable=""] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: auto;
 }
 
 .page-shell .page-content {
@@ -305,22 +324,22 @@ input {
 
 .milestone-image-strength .program-promo-img,
 .milestone-image-strength .milestone-promo-img {
-  object-position: center 28%;
-  transform: scale(1.08);
+  object-position: center 24%;
+  transform: scale(1.14);
   filter: none;
 }
 
 .milestone-image-energy .program-promo-img,
 .milestone-image-energy .milestone-promo-img {
-  object-position: center 34%;
-  transform: scale(1.07);
+  object-position: center 26%;
+  transform: scale(1.15);
   filter: none;
 }
 
 .milestone-image-calm .program-promo-img,
 .milestone-image-calm .milestone-promo-img {
-  object-position: center 18%;
-  transform: scale(1.06);
+  object-position: center 16%;
+  transform: scale(1.11);
   filter: none;
 }
 
@@ -904,6 +923,11 @@ input {
   font-family: 'Sora', sans-serif;
   font-size: 0.72rem;
   font-weight: 500;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: manipulation;
 }
 
 .nav-item svg {

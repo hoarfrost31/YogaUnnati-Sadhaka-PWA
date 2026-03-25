@@ -35,6 +35,24 @@ function showUpdatePrompt(registration) {
   };
 }
 
+document.addEventListener("contextmenu", (event) => {
+  event.preventDefault();
+});
+
+document.addEventListener("selectstart", (event) => {
+  if (event.target.closest("input, textarea, [contenteditable='true'], [contenteditable='']")) {
+    return;
+  }
+
+  event.preventDefault();
+});
+
+document.addEventListener("dragstart", (event) => {
+  if (event.target instanceof HTMLImageElement) {
+    event.preventDefault();
+  }
+});
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     let hasRefreshedForUpdate = false;
