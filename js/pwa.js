@@ -53,6 +53,24 @@ document.addEventListener("dragstart", (event) => {
   }
 });
 
+document.addEventListener("selectionchange", () => {
+  const activeElement = document.activeElement;
+  const isEditable =
+    activeElement instanceof HTMLInputElement ||
+    activeElement instanceof HTMLTextAreaElement ||
+    activeElement?.getAttribute?.("contenteditable") === "true" ||
+    activeElement?.getAttribute?.("contenteditable") === "";
+
+  if (isEditable) {
+    return;
+  }
+
+  const selection = window.getSelection?.();
+  if (selection && selection.rangeCount > 0 && String(selection).trim()) {
+    selection.removeAllRanges();
+  }
+});
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     let hasRefreshedForUpdate = false;
