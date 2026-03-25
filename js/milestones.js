@@ -94,7 +94,7 @@ function renderMilestones(practiceDates = []) {
             <span>${milestone.desc}</span>
           </div>
           <span class="badge-text">
-            ${isCompleted ? '<i data-lucide="check-circle-2"></i><span>Completed</span>' : isCurrent ? '<i data-lucide="activity"></i><span>In Progress</span>' : '<i data-lucide="lock"></i><span>Locked</span>'}
+            ${isCompleted ? `${getUiIconSvg("check-circle-2")}<span>Completed</span>` : isCurrent ? `${getUiIconSvg("activity")}<span>In Progress</span>` : `${getUiIconSvg("lock")}<span>Locked</span>`}
           </span>
         </div>
 
@@ -112,11 +112,6 @@ function renderMilestones(practiceDates = []) {
       </div>
     `;
   });
-
-  if (window.lucide?.createIcons) {
-    window.lucide.createIcons();
-  }
-
   scrollCurrentMilestoneIntoView();
 }
 

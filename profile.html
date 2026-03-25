@@ -12,8 +12,6 @@
   <title>Profile</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
-
   <link rel="stylesheet" href="css/styles.css"/>
 </head>
 <body class="community-page page-shell">
@@ -23,13 +21,12 @@
 <div class="app-container">
   <div class="page-content">
   <a href="javascript:void(0)" class="back-link" id="profileBackLink">
-    <i data-lucide="arrow-left"></i>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
     <span>Back</span>
   </a>
 
   <div class="profile-page-header">
     <h1 class="page-title">Profile</h1>
-    <button id="logoutBtn" class="logout-btn" type="button">Logout</button>
   </div>
   <p class="subtitle">Set the name and photo people will recognize</p>
 
@@ -67,14 +64,17 @@
   </section>
 
   <section class="community-note-card reminder-card">
-    <p class="eyebrow-label">Notifications</p>
-    <h3 class="reminder-title">Stay in the loop</h3>
-    <p class="reminder-copy">Allow notifications for class updates and practice reminders.</p>
-    <p class="reminder-status" id="classReminderStatus">Notifications are off for now.</p>
-    <div class="profile-form-actions reminder-actions">
-      <button id="enableNotificationsBtn" class="secondary-btn" type="button">Ask for Notifications</button>
-      <button id="testNotificationBtn" class="secondary-btn" type="button">Send Test Notification</button>
+    <div class="reminder-toggle-row">
+      <div class="reminder-toggle-copy">
+        <h3 class="reminder-title">Keep Notifications On</h3>
+        <p class="reminder-copy">Allow notifications for class updates and practice reminders.</p>
+      </div>
+      <label class="reminder-switch" for="enableNotificationsToggle" aria-label="Enable notifications">
+        <input id="enableNotificationsToggle" type="checkbox">
+        <span class="reminder-switch-slider" aria-hidden="true"></span>
+      </label>
     </div>
+    <p class="reminder-status" id="classReminderStatus">Notifications are off for now.</p>
   </section>
   </div>
 </div>
@@ -110,9 +110,5 @@
 <script src="js/pwa.js"></script>
 <script src="js/pageTransition.js"></script>
 <script src="js/community.js"></script>
-
-<script>
-  lucide.createIcons();
-</script>
 </body>
 </html>

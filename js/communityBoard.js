@@ -135,14 +135,14 @@ function getMemberMarkup(member, index, isCurrentUser) {
     ? `<img src="${member.avatarUrl}" alt="${member.displayName}" class="community-board-avatar-img" />`
     : `<span>${getInitials(member.displayName)}</span>`;
   const todayBadge = member.practicedToday
-    ? `<p class="community-board-today"><i data-lucide="check"></i><span>Practiced today</span></p>`
+    ? `<p class="community-board-today">${getUiIconSvg("check")}<span>Practiced today</span></p>`
     : "";
 
   return `
     <a href="member.html?uid=${encodeURIComponent(member.id)}" class="community-board-entry-link" aria-label="Open ${member.displayName}'s profile">
     <article class="community-board-entry">
       <div class="community-board-rank">
-        <i data-lucide="${index === 0 ? "medal" : "sparkles"}"></i>
+        ${getUiIconSvg(index === 0 ? "medal" : "sparkles")}
       </div>
 
       <div class="community-board-avatar">
@@ -155,7 +155,7 @@ function getMemberMarkup(member, index, isCurrentUser) {
           ${identityLabel}
         </div>
         <p class="community-board-level">${member.level}</p>
-        <p class="community-board-streak"><i data-lucide="flame"></i> <span>${member.streak} day streak</span></p>
+        <p class="community-board-streak">${getUiIconSvg("flame")} <span>${member.streak} day streak</span></p>
         ${todayBadge}
       </div>
 
@@ -190,10 +190,6 @@ function renderBoard(members) {
   communityBoardListEl.innerHTML = members
     .map((member, index) => getMemberMarkup(member, index, member.id === userId))
     .join("");
-
-  if (window.lucide?.createIcons) {
-    window.lucide.createIcons();
-  }
 }
 
 async function buildCommunityMembers() {

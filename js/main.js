@@ -26,6 +26,7 @@ const brandTaglineEl = document.getElementById("brandTagline");
 const todayPracticeActionsEl = document.getElementById("todayPracticeActions");
 const HOME_MILESTONE_BAR_ANIMATED_KEY = "home_milestone_bar_animated_v1";
 const TOMORROW_RSVP_KEY = "yogaunnati_tomorrow_rsvp";
+const CLASS_REMINDER_KEY = "pwa_class_reminder_v1";
 const HOME_COMMUNITY_CACHE_PREFIX = "home_community_today_v1:";
 const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
 const PROFILE_REFRESH_TTL_MS = 5 * 60 * 1000;
@@ -102,6 +103,19 @@ function calculateCurrentStreak(practiceDates) {
 
 function getHomeCommunityCacheKey(userId) {
   return `${HOME_COMMUNITY_CACHE_PREFIX}${userId}`;
+}
+
+function getReminderStorageKey(userIdValue) {
+  return `${CLASS_REMINDER_KEY}:${userIdValue || "guest"}`;
+}
+
+function readClassReminderPreference(userIdValue) {
+  try {
+    return localStorage.getItem(getReminderStorageKey(userIdValue)) === "on";
+  } catch (error) {
+    console.error("Reminder preference read error:", error);
+    return false;
+  }
 }
 
 function readHomeCommunityCache(userId) {
@@ -380,6 +394,100 @@ function initTomorrowRsvp() {
     }
 
     applyTomorrowRsvp(finalValue);
+  });
+}
+
+function goToCommunityPage() {
+  if (typeof window.navigateToPage === "function") {
+    window.navigateToPage("community.html");
+    return;
+  }
+
+  window.location.href = "community.html";
+}
+
+function initTodayPracticeCardLink() {
+  if (!todayPracticeCardEl) {
+    return;
+  }
+
+  const isInteractiveSubtarget = (target) => Boolean(
+    target?.closest(".today-practice-btn, button, a, input, textarea, select")
+  );
+
+  todayPracticeCardEl.addEventListener("click", (event) => {
+    if (isInteractiveSubtarget(event.target)) {
+      return;
+    }
+
+    goToCommunityPage();
+  });
+
+  todayPracticeCardEl.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    if (isInteractiveSubtarget(event.target)) {
+      return;
+    }
+
+    event.preventDefault();
+    goToCommunityPage();
+  });
+}
+
+function shouldShowHomeNotificationsPrompt() {
+  const notificationsApi = window.pwaNotifications;
+  const isSupported = notificationsApi?.isSupported?.() || false;
+  const permission = notificationsApi?.getPermission?.() || "unsupported";
+  if (!userId || !isSupported) {
+    return false;
+  }
+
+  if (permission === "granted") {
+    return false;
+  }
+
+  const cachedProfile = readProfileCache(userId);
+  const remindersEnabledFromAccount = Boolean(cachedProfile.classReminderEnabled);
+  const remindersEnabled = readClassReminderPreference(userId) || remindersEnabledFromAccount;
+
+  return !remindersEnabled;
+}
+
+function showHomeNotificationsPrompt() {
+  if (!shouldShowHomeNotificationsPrompt()) {
+    return;
+  }
+
+  const popup = document.createElement("div");
+  popup.className = "notifications-popup hidden";
+  popup.innerHTML = `
+    <p class="notifications-popup-title">Keep notifications on</p>
+    <p class="notifications-popup-text">Allow them for class updates and practice reminders.</p>
+    <div class="notifications-popup-actions">
+      <button type="button" class="notifications-popup-btn secondary" data-action="later">Later</button>
+      <button type="button" class="notifications-popup-btn primary" data-action="turn-on">Turn On</button>
+    </div>
+  `;
+
+  popup.addEventListener("click", (event) => {
+    const action = event.target.closest("[data-action]")?.dataset.action;
+    if (!action) {
+      return;
+    }
+
+    popup.remove();
+
+    if (action === "turn-on") {
+      window.location.href = "profile.html";
+    }
+  });
+
+  document.body.appendChild(popup);
+  window.requestAnimationFrame(() => {
+    popup.classList.remove("hidden");
   });
 }
 
@@ -817,8 +925,13 @@ async function initApp() {
     refreshHomeCommunitySnapshot();
   }
 
+  window.setTimeout(() => {
+    showHomeNotificationsPrompt();
+  }, 650);
+
 }
 
 initBrandTaglineRotation();
 initTomorrowRsvp();
+initTodayPracticeCardLink();
 initApp();

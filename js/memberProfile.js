@@ -5,6 +5,8 @@ const memberProfileNameEl = document.getElementById("memberProfileName");
 const memberProfileStatusEl = document.getElementById("memberProfileStatus");
 const memberProfileSinceEl = document.getElementById("memberProfileSince");
 const memberProfileEditLinkEl = document.getElementById("memberProfileEditLink");
+const memberLogoutBtn = document.getElementById("memberLogoutBtn");
+const memberProfileActionsMountEl = document.getElementById("memberProfileActionsMount");
 const memberMilestoneIconEl = document.getElementById("memberMilestoneIcon");
 const memberMilestoneTitleEl = document.getElementById("memberMilestoneTitle");
 const memberMilestoneLevelEl = document.getElementById("memberMilestoneLevel");
@@ -12,7 +14,119 @@ const memberTotalDaysEl = document.getElementById("memberTotalDays");
 const memberStreakEl = document.getElementById("memberStreak");
 const MEMBER_PROFILE_CACHE_PREFIX = "member_profile_cache_v1:";
 const MEMBER_PROFILE_REFRESH_TTL_MS = 2 * 60 * 1000;
+const GOOGLE_REVIEW_URL = "https://g.page/r/CWcsUmi4imb4EBM/review";
 let currentUserId = "";
+
+function showToast(message) {
+  let toast = document.getElementById("toast");
+
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "toast";
+    toast.className = "toast hidden";
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = message;
+  toast.classList.remove("hidden");
+
+  setTimeout(() => {
+    toast.classList.add("show");
+  }, 10);
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+
+    setTimeout(() => {
+      toast.classList.add("hidden");
+    }, 300);
+  }, 2200);
+}
+
+async function invitePeople() {
+  const shareMessage = "Hey, I've been attending these yoga sessions regularly and it's been really helpful. Thought you might want to check it out.";
+  const shareUrl = "https://www.yogaunnati.com/en";
+  const shareData = {
+    title: "YogaUnnati",
+    text: shareMessage,
+    url: shareUrl,
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(`${shareMessage} ${shareUrl}`);
+      showToast("Invite link copied");
+      return;
+    }
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      return;
+    }
+
+    console.error("Invite share failed:", error);
+  }
+
+  showToast("Could not share right now");
+}
+
+function openGoogleReview() {
+  window.open(GOOGLE_REVIEW_URL, "_blank", "noopener,noreferrer");
+}
+
+async function logout() {
+  await window.supabaseClient.auth.signOut();
+  window.location.href = "auth.html";
+}
+
+function renderOwnProfileActions(isOwnProfile) {
+  if (!memberProfileActionsMountEl) {
+    return;
+  }
+
+  if (!isOwnProfile) {
+    memberProfileActionsMountEl.innerHTML = "";
+    return;
+  }
+
+  memberProfileActionsMountEl.innerHTML = `
+    <section class="profile-actions-grid" aria-label="Profile actions">
+      <button type="button" class="profile-action-card" id="invitePeopleBtn">
+        <span class="profile-action-icon" aria-hidden="true">
+          ${getUiIconSvg("user-plus")}
+        </span>
+        <span class="profile-action-copy">
+          <span class="profile-action-title">Invite Friends</span>
+          <span class="profile-action-text">Invite a friend and stay on track together.</span>
+        </span>
+        ${getUiIconSvg("chevron-right", "profile-action-arrow")}
+      </button>
+
+      <button type="button" class="profile-action-card" id="reviewGoogleBtn">
+        <span class="profile-action-icon" aria-hidden="true">
+          ${getUiIconSvg("star")}
+        </span>
+        <span class="profile-action-copy">
+          <span class="profile-action-title">Review Us on Google</span>
+          <span class="profile-action-text">Support the studio with a quick review.</span>
+        </span>
+        ${getUiIconSvg("chevron-right", "profile-action-arrow")}
+      </button>
+    </section>
+  `;
+
+  memberProfileActionsMountEl.querySelector("#invitePeopleBtn")?.addEventListener("click", async () => {
+    await invitePeople();
+  });
+
+  memberProfileActionsMountEl.querySelector("#reviewGoogleBtn")?.addEventListener("click", () => {
+    openGoogleReview();
+  });
+}
 
 function getTodayIsoDate() {
   const now = new Date();
@@ -198,6 +312,20 @@ function renderMemberProfile(snapshot) {
   memberStreakEl.textContent = String(snapshot.streak);
 }
 
+function setOwnProfileActionsVisible(isOwnProfile) {
+  if (memberProfileEditLinkEl) {
+    memberProfileEditLinkEl.classList.toggle("hidden", !isOwnProfile);
+    memberProfileEditLinkEl.hidden = !isOwnProfile;
+  }
+
+  if (memberLogoutBtn) {
+    memberLogoutBtn.classList.toggle("hidden", !isOwnProfile);
+    memberLogoutBtn.hidden = !isOwnProfile;
+  }
+
+  renderOwnProfileActions(isOwnProfile);
+}
+
 async function initMemberProfile() {
   const params = new URLSearchParams(window.location.search);
   const memberId = params.get("uid");
@@ -219,9 +347,7 @@ async function initMemberProfile() {
     currentUserId = sessionData.session.user.id;
   }
 
-  if (memberProfileEditLinkEl) {
-    memberProfileEditLinkEl.classList.toggle("hidden", memberId !== currentUserId);
-  }
+  setOwnProfileActionsVisible(memberId === currentUserId);
 
   if (memberId === currentUserId) {
     const selfSnapshot = buildCachedSelfSnapshot(memberId);
@@ -298,3 +424,9 @@ if (memberBackLinkEl) {
 }
 
 initMemberProfile();
+
+if (memberLogoutBtn) {
+  memberLogoutBtn.addEventListener("click", async () => {
+    await logout();
+  });
+}

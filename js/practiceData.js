@@ -66,6 +66,33 @@ function getMilestoneIconSvg(iconName) {
   return icons[iconName] || icons.flower;
 }
 
+function getUiIconSvg(iconName, className = "") {
+  const classAttr = className ? ` class="${className}"` : "";
+  const icons = {
+    "arrow-left": `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>`,
+    "settings-2": `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"></path><path d="M14 17H4"></path><circle cx="7" cy="17" r="2"></circle><circle cx="17" cy="7" r="2"></circle></svg>`,
+    calendar: `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"></rect><path d="M8 3.5v3"></path><path d="M16 3.5v3"></path><path d="M3.5 9.5h17"></path></svg>`,
+    flame: `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.8c2.1 2.2 3.5 4.6 3.5 7 0 3.8-2.4 6.2-5.5 6.9-3.1-.7-5.5-3.1-5.5-6.9 0-2.2 1.2-4.1 3.3-5.9.1 1.7.8 3 2.1 4 .1-1.7.8-3.4 2.1-5.1Z"></path></svg>`,
+    leaf: `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20c6.5 0 11-4.5 12-12-7.5.5-12 5-12 12Z"></path><path d="M6 20c1.5-4.5 5-8 10.5-10.5"></path></svg>`,
+    heart: `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20c-5.2-3.9-8-6.2-8-9.6 0-2.4 1.8-4.4 4.2-4.4 1.7 0 3 .9 3.8 2.2.8-1.3 2.1-2.2 3.8-2.2 2.4 0 4.2 2 4.2 4.4 0 3.4-2.8 5.7-8 9.6Z"></path></svg>`,
+    infinity: `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 8.5c-2.4 0-3.7 1.5-6.5 4.5-2.8-3-4.1-4.5-6.5-4.5a4 4 0 1 0 0 8c2.4 0 3.7-1.5 6.5-4.5 2.8 3 4.1 4.5 6.5 4.5a4 4 0 1 0 0-8Z"></path></svg>`,
+    "chevron-right": `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>`,
+    trophy: `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4.5h8v3a4 4 0 0 1-8 0v-3Z"></path><path d="M6 6H4.8A1.8 1.8 0 0 0 3 7.8 3.2 3.2 0 0 0 6.2 11"></path><path d="M18 6h1.2A1.8 1.8 0 0 1 21 7.8 3.2 3.2 0 0 1 17.8 11"></path><path d="M12 11.5v3.5"></path><path d="M9.5 19.5h5"></path></svg>`,
+    "user-plus": `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4"></path><circle cx="10" cy="9" r="3"></circle><path d="M19 8v6"></path><path d="M16 11h6"></path></svg>`,
+    star: `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 4 2.4 4.9 5.4.8-3.9 3.8.9 5.5-4.8-2.6-4.8 2.6.9-5.5L4.2 9.7l5.4-.8L12 4Z"></path></svg>`,
+    check: `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4.2 4.2L19 6.8"></path></svg>`,
+    medal: `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m7 4 2.5 5"></path><path d="M17 4 14.5 9"></path><circle cx="12" cy="14" r="4.5"></circle><path d="m12 11.5.9 1.8 2 .3-1.4 1.4.3 2-1.8-.9-1.8.9.3-2-1.4-1.4 2-.3.9-1.8Z"></path></svg>`,
+    sparkles: `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.3 3.7L17 8l-3.7 1.3L12 13l-1.3-3.7L7 8l3.7-1.3L12 3Z"></path><path d="m18.5 14 0.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"></path><path d="m5.5 14 0.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"></path></svg>`,
+    lock: `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8.5a4 4 0 1 1 8 0V11"></path></svg>`,
+    activity: `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-4 4 8 2-4h6"></path></svg>`,
+    "check-circle-2": `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12 2.2 2.2 4.8-4.8"></path></svg>`,
+    "calendar-heart": `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"></rect><path d="M8 3.5v3"></path><path d="M16 3.5v3"></path><path d="M3.5 9.5h17"></path><path d="M12 17c-2.4-1.8-3.7-3-3.7-4.6 0-1.2.9-2.1 2-2.1.8 0 1.4.4 1.7 1 .3-.6.9-1 1.7-1 1.1 0 2 1 2 2.1 0 1.6-1.3 2.8-3.7 4.6Z"></path></svg>`,
+    "log-out": `<svg viewBox="0 0 24 24"${classAttr} fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17 21 12 16 7"></path><path d="M21 12H9"></path></svg>`,
+  };
+
+  return icons[iconName] || "";
+}
+
 function getPracticeCacheKey(userId) {
   return `${PRACTICE_CACHE_PREFIX}${userId}`;
 }
