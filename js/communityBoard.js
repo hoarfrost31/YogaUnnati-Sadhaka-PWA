@@ -139,6 +139,7 @@ function getMemberMarkup(member, index, isCurrentUser) {
     : "";
 
   return `
+    <a href="member.html?uid=${encodeURIComponent(member.id)}" class="community-board-entry-link" aria-label="Open ${member.displayName}'s profile">
     <article class="community-board-entry">
       <div class="community-board-rank">
         <i data-lucide="${index === 0 ? "medal" : "sparkles"}"></i>
@@ -163,6 +164,7 @@ function getMemberMarkup(member, index, isCurrentUser) {
         <span>days</span>
       </div>
     </article>
+    </a>
   `;
 }
 

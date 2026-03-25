@@ -3,28 +3,33 @@ const MILESTONE_STATE_CACHE_PREFIX = "milestone_state_v1:";
 const REMOTE_REFRESH_PREFIX = "remote_refresh_v1:";
 const APP_MILESTONES = [
   { days: 7, title: "Sankalpa", level: "Level 1", desc: "Committed Beginning", icon: "flower", image: "images/Sankalpa.jpg", imageClass: "milestone-image-stiffness" },
-  { days: 21, title: "Sthirata", level: "Level 2", desc: "Balanced Body, Steady Mind", icon: "balance", image: "images/strength.jpg", imageClass: "milestone-image-strength" },
+  { days: 21, title: "Sthirata", level: "Level 2", desc: "Balanced Body, Steady Mind", icon: "mountain", image: "images/strength.jpg", imageClass: "milestone-image-strength" },
   { days: 48, title: "Ananda", level: "Level 3", desc: "Joy, Ease and Vitality", icon: "sun", image: "images/Ananda.jpg", imageClass: "milestone-image-energy" },
   { days: 90, title: "Paramananda", level: "Level 4", desc: "Deeper Bliss and lasting Stillness", icon: "lotus", image: "images/calm.jpg", imageClass: "milestone-image-calm" }
 ];
 
 function getMilestoneIconSvg(iconName) {
   const icons = {
-    flower: `
-      <svg viewBox="0 0 24 24" class="program-flower-icon milestone-icon-svg" fill="none">
-        <path d="M12 6.2C10.9 4.8 9.5 4 8 4C6 4 4.7 5.5 4.7 7.3c0 2.7 2.7 4.4 7.3 7.9 4.6-3.5 7.3-5.2 7.3-7.9C19.3 5.5 18 4 16 4c-1.5 0-2.9.8-4 2.2Z" />
-        <path d="M12 7.4c.9 1.5 1.4 2.8 1.4 4.1 0 2.7-1.4 5.2-1.4 8.5 0-3.3-1.4-5.8-1.4-8.5 0-1.3.5-2.6 1.4-4.1Z" />
-        <path d="M8.2 11.8c-1.9-.1-3.3.2-4.4.9-1.5 1-1.9 3-.9 4.5 1.5 2.3 4.6 1.9 9.1 1.4-.9-5.7-1.8-6.4-3.8-6.8Z" />
-        <path d="M15.8 11.8c1.9-.1 3.3.2 4.4.9 1.5 1 1.9 3 .9 4.5-1.5 2.3-4.6 1.9-9.1 1.4.9-5.7 1.8-6.4 3.8-6.8Z" />
+    flame: `
+      <svg viewBox="0 0 24 24" class="milestone-icon-svg" fill="none">
+        <path d="M12.4 4.2c2.8 2.1 4.8 4.7 4.8 8 0 3.5-2.2 6.3-5.2 7.6-3-1.3-5.2-4.1-5.2-7.6 0-2.2 1.1-4 3-5.7.2 1.8 1.1 3.1 2.6 4.1-.2-2.2.6-4.4 2-6.4Z" />
+        <path d="M12 11.1c1.5 1.1 2.4 2.3 2.4 3.8 0 1.7-1 3.2-2.4 4.2-1.4-1-2.4-2.5-2.4-4.2 0-1.5.9-2.7 2.4-3.8Z" />
       </svg>
     `,
-    balance: `
+    mountain: `
       <svg viewBox="0 0 24 24" class="milestone-icon-svg" fill="none">
-        <path d="M12 4v15" />
-        <path d="M7 7h10" />
-        <path d="M5 7 3 11h4L5 7Z" />
-        <path d="m19 7-2 4h4l-2-4Z" />
-        <path d="M9 20h6" />
+        <path d="M3.8 19.2 9.5 9.1l3 4.4" />
+        <path d="M9.8 19.2 14.8 11l5.4 8.2" />
+        <path d="m13.7 12.8 1.1-1.8 1.2 1.8" />
+      </svg>
+    `,
+    sunrise: `
+      <svg viewBox="0 0 24 24" class="milestone-icon-svg" fill="none">
+        <path d="M5 17a7 7 0 0 1 14 0" />
+        <path d="M3.5 19.5h17" />
+        <path d="M12 6.2v3.2" />
+        <path d="m6.9 10.2 1.7 1.4" />
+        <path d="m17.1 10.2-1.7 1.4" />
       </svg>
     `,
     sun: `
@@ -38,6 +43,14 @@ function getMilestoneIconSvg(iconName) {
         <path d="m16.2 16.2 1.7 1.7" />
         <path d="m17.9 6.1-1.7 1.7" />
         <path d="m7.8 16.2-1.7 1.7" />
+      </svg>
+    `,
+    flower: `
+      <svg viewBox="0 0 24 24" class="program-flower-icon milestone-icon-svg" fill="none">
+        <path d="M12 6.2C10.9 4.8 9.5 4 8 4C6 4 4.7 5.5 4.7 7.3c0 2.7 2.7 4.4 7.3 7.9 4.6-3.5 7.3-5.2 7.3-7.9C19.3 5.5 18 4 16 4c-1.5 0-2.9.8-4 2.2Z" />
+        <path d="M12 7.4c.9 1.5 1.4 2.8 1.4 4.1 0 2.7-1.4 5.2-1.4 8.5 0-3.3-1.4-5.8-1.4-8.5 0-1.3.5-2.6 1.4-4.1Z" />
+        <path d="M8.2 11.8c-1.9-.1-3.3.2-4.4.9-1.5 1-1.9 3-.9 4.5 1.5 2.3 4.6 1.9 9.1 1.4-.9-5.7-1.8-6.4-3.8-6.8Z" />
+        <path d="M15.8 11.8c1.9-.1 3.3.2 4.4.9 1.5 1 1.9 3 .9 4.5-1.5 2.3-4.6 1.9-9.1 1.4.9-5.7 1.8-6.4 3.8-6.8Z" />
       </svg>
     `,
     lotus: `

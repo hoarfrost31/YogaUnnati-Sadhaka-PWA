@@ -17,7 +17,9 @@ const homeMilestoneProgressEl = document.getElementById("homeMilestoneProgress")
 const homeMilestoneRemainingEl = document.getElementById("homeMilestoneRemaining");
 const homeMilestoneBarFillEl = document.getElementById("homeMilestoneBarFill");
 const brandTaglineEl = document.getElementById("brandTagline");
+const todayPracticeActionsEl = document.getElementById("todayPracticeActions");
 const HOME_MILESTONE_BAR_ANIMATED_KEY = "home_milestone_bar_animated_v1";
+const TOMORROW_RSVP_KEY = "yogaunnati_tomorrow_rsvp";
 const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
 const PROFILE_REFRESH_TTL_MS = 5 * 60 * 1000;
 
@@ -50,6 +52,61 @@ function initBrandTaglineRotation() {
       brandTaglineEl.classList.remove("is-switching");
     }, 420);
   }, 5000);
+}
+
+function applyTomorrowRsvp(value) {
+  if (!todayPracticeActionsEl) {
+    return;
+  }
+
+  todayPracticeActionsEl.querySelectorAll(".today-practice-btn").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.rsvp === value);
+  });
+}
+
+function initTomorrowRsvp() {
+  if (!todayPracticeActionsEl) {
+    return;
+  }
+
+  let saved = "";
+  try {
+    saved = localStorage.getItem(TOMORROW_RSVP_KEY) || "";
+  } catch (error) {
+    saved = "";
+  }
+
+  applyTomorrowRsvp(saved);
+
+  todayPracticeActionsEl.addEventListener("click", (event) => {
+    const buttonEl = event.target.closest(".today-practice-btn");
+    if (!buttonEl) {
+      return;
+    }
+
+    const nextValue = buttonEl.dataset.rsvp || "";
+    let currentValue = "";
+
+    try {
+      currentValue = localStorage.getItem(TOMORROW_RSVP_KEY) || "";
+    } catch (error) {
+      currentValue = "";
+    }
+
+    const finalValue = currentValue === nextValue ? "" : nextValue;
+
+    try {
+      if (finalValue) {
+        localStorage.setItem(TOMORROW_RSVP_KEY, finalValue);
+      } else {
+        localStorage.removeItem(TOMORROW_RSVP_KEY);
+      }
+    } catch (error) {
+      console.error("RSVP save error:", error);
+    }
+
+    applyTomorrowRsvp(finalValue);
+  });
 }
 
 function applyHomeProfile(profile) {
@@ -436,4 +493,5 @@ async function initApp() {
 }
 
 initBrandTaglineRotation();
+initTomorrowRsvp();
 initApp();
