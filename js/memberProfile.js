@@ -1,5 +1,6 @@
 const memberProfileAvatarEl = document.getElementById("memberProfileAvatar");
 const memberProfileInitialEl = document.getElementById("memberProfileInitial");
+const memberProfilePremiumCrownEl = document.getElementById("memberProfilePremiumCrown");
 const memberBackLinkEl = document.getElementById("memberBackLink");
 const memberProfileNameEl = document.getElementById("memberProfileName");
 const memberProfileStatusEl = document.getElementById("memberProfileStatus");
@@ -304,6 +305,7 @@ function buildMemberSnapshot(memberId, profileRow, practiceDates) {
     memberId,
     displayName,
     avatarUrl,
+    isPremium: profile.membershipTier === "premium",
     practicedToday,
     totalDays,
     streak,
@@ -338,6 +340,8 @@ function renderMemberProfile(snapshot) {
     return;
   }
 
+  const avatarShellEl = memberProfileAvatarEl?.closest(".member-profile-avatar-shell");
+
   memberProfileNameEl.textContent = snapshot.displayName || "Yoga Member";
   memberProfileStatusEl.textContent = snapshot.status || "Walking the path with steady practice.";
   memberProfileSinceEl.textContent = snapshot.firstPracticeDate
@@ -353,6 +357,15 @@ function renderMemberProfile(snapshot) {
     memberProfileInitialEl.classList.remove("hidden");
     memberProfileAvatarEl.classList.add("hidden");
   }
+
+  if (memberProfilePremiumCrownEl) {
+    memberProfilePremiumCrownEl.innerHTML = snapshot.isPremium
+      ? getUiIconSvg("crown")
+      : "";
+    memberProfilePremiumCrownEl.classList.toggle("hidden", !snapshot.isPremium);
+  }
+
+  avatarShellEl?.classList.toggle("is-premium", Boolean(snapshot.isPremium));
 
   memberMilestoneIconEl.innerHTML = getMilestoneIconSvg(snapshot.milestoneIcon);
   memberMilestoneTitleEl.textContent = snapshot.milestoneTitle;
@@ -422,7 +435,7 @@ async function initMemberProfile() {
   const [profileResult, practiceResult] = await Promise.all([
     window.supabaseClient
       .from("profiles")
-      .select("id, display_name, avatar_url")
+      .select("id, display_name, avatar_url, membership_tier")
       .eq("id", memberId)
       .maybeSingle(),
     window.supabaseClient

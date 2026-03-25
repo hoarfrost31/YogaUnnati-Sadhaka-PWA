@@ -139,6 +139,9 @@ function calculateStreak(practiceDates) {
 
 function getMemberMarkup(member, index, isCurrentUser) {
   const identityLabel = isCurrentUser ? "<span>(You)</span>" : "";
+  const premiumCrownMarkup = member.isPremium
+    ? `<span class="premium-crown-badge premium-crown-badge-small" aria-hidden="true">${getUiIconSvg("crown")}</span>`
+    : "";
   const avatarMarkup = member.avatarUrl
     ? `<img src="${member.avatarUrl}" alt="${member.displayName}" class="community-board-avatar-img" />`
     : `<span>${getInitials(member.displayName)}</span>`;
@@ -153,7 +156,8 @@ function getMemberMarkup(member, index, isCurrentUser) {
         ${getUiIconSvg(index === 0 ? "medal" : "sparkles")}
       </div>
 
-      <div class="community-board-avatar">
+      <div class="community-board-avatar ${member.isPremium ? "is-premium" : ""}">
+        ${premiumCrownMarkup}
         ${avatarMarkup}
       </div>
 
@@ -194,7 +198,7 @@ function renderCommunityLockedState() {
 
   const previewMembers = hydrateCachedMembers(readCommunityBoardCache(userId));
   const previewMarkup = (previewMembers.length ? previewMembers : [
-    { id: "preview-1", displayName: "Yoga Member", avatarUrl: "", streak: 7, totalDays: 12, level: "Level 1", practicedToday: true },
+    { id: "preview-1", displayName: "Yoga Member", avatarUrl: "", isPremium: true, streak: 7, totalDays: 12, level: "Level 1", practicedToday: true },
     { id: "preview-2", displayName: "Yoga Member", avatarUrl: "", streak: 5, totalDays: 9, level: "Level 1", practicedToday: false },
     { id: "preview-3", displayName: "Yoga Member", avatarUrl: "", streak: 3, totalDays: 6, level: "Level 1", practicedToday: true },
   ]).map((member, index) => getMemberMarkup(member, index, false)).join("");
@@ -329,6 +333,7 @@ async function buildCommunityMembers() {
       id: memberId,
       displayName,
       avatarUrl: profile.avatarUrl || "",
+      isPremium: profile.membershipTier === "premium",
       streak,
       totalDays,
       level: milestoneState.milestone.level,
