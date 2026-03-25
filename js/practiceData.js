@@ -2,6 +2,7 @@ const PRACTICE_CACHE_PREFIX = "practice_logs_cache_v1:";
 const PRACTICE_MUTATION_QUEUE_PREFIX = "practice_mutations_v1:";
 const MILESTONE_STATE_CACHE_PREFIX = "milestone_state_v1:";
 const REMOTE_REFRESH_PREFIX = "remote_refresh_v1:";
+const HOME_COMMUNITY_CACHE_PREFIX = "home_community_today_v1:";
 const APP_MILESTONES = [
   { days: 7, title: "Sankalpa", level: "Level 1", desc: "Committed Beginning", icon: "flower", image: "images/Sankalpa.jpg", imageClass: "milestone-image-stiffness" },
   { days: 21, title: "Sthirata", level: "Level 2", desc: "Balanced Body, Steady Mind", icon: "mountain", image: "images/strength.jpg", imageClass: "milestone-image-strength" },
@@ -110,6 +111,10 @@ function getRemoteRefreshKey(scope, userId = "") {
   return `${REMOTE_REFRESH_PREFIX}${scope}:${userId || "global"}`;
 }
 
+function getHomeCommunityCacheKey(userId) {
+  return `${HOME_COMMUNITY_CACHE_PREFIX}${userId}`;
+}
+
 function shouldRefreshRemote(scope, userId, maxAgeMs) {
   try {
     const raw = localStorage.getItem(getRemoteRefreshKey(scope, userId));
@@ -135,6 +140,77 @@ function markRemoteRefresh(scope, userId) {
   } catch (error) {
     console.error("Remote refresh mark error:", error);
   }
+}
+
+function readHomeCommunityCache(userId) {
+  if (!userId) {
+    return null;
+  }
+
+  try {
+    const raw = localStorage.getItem(getHomeCommunityCacheKey(userId));
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (error) {
+    console.error("Home community cache read error:", error);
+    return null;
+  }
+}
+
+function writeHomeCommunityCache(userId, snapshot) {
+  if (!userId || !snapshot) {
+    return;
+  }
+
+  try {
+    localStorage.setItem(
+      getHomeCommunityCacheKey(userId),
+      JSON.stringify({
+        count: Number(snapshot.count) || 0,
+        members: Array.isArray(snapshot.members) ? snapshot.members : [],
+        updatedAt: Date.now(),
+      }),
+    );
+  } catch (error) {
+    console.error("Home community cache write error:", error);
+  }
+}
+
+function syncHomeCommunityCacheForTodayMutation(userId, mutationType) {
+  if (!userId) {
+    return;
+  }
+
+  const profile = typeof readProfileCache === "function" ? readProfileCache(userId) : {};
+  const currentUserMember = {
+    id: userId,
+    displayName: profile?.displayName || "Sadhaka",
+    avatarUrl: profile?.avatarUrl || "",
+  };
+  const baseSnapshot = readHomeCommunityCache(userId) || { count: 0, members: [] };
+  const existingMembers = Array.isArray(baseSnapshot.members) ? [...baseSnapshot.members] : [];
+  const withoutCurrentUser = existingMembers.filter((member) => member.id !== userId);
+  const hadCurrentUser = existingMembers.some((member) => member.id === userId);
+  let nextCount = Math.max(0, Number(baseSnapshot.count) || 0);
+  let nextMembers = withoutCurrentUser;
+
+  if (mutationType === "mark") {
+    nextMembers = [currentUserMember, ...withoutCurrentUser];
+    if (!hadCurrentUser) {
+      nextCount += 1;
+    }
+  } else if (hadCurrentUser) {
+    nextCount = Math.max(0, nextCount - 1);
+  }
+
+  writeHomeCommunityCache(userId, {
+    count: nextCount,
+    members: nextMembers.slice(0, Math.max(3, nextCount)),
+  });
 }
 
 function readPracticeCache(userId) {
@@ -243,6 +319,9 @@ function applyPracticeMutationLocally(userId, practiceDates, mutationType, date)
   const normalizedDates = [...new Set(nextDates)].sort();
   writePracticeCache(userId, normalizedDates);
   markRemoteRefresh("practice_dates", userId);
+  if (date === formatPracticeIsoDate(new Date())) {
+    syncHomeCommunityCacheForTodayMutation(userId, mutationType);
+  }
   return normalizedDates;
 }
 
