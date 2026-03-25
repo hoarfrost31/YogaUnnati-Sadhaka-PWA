@@ -1,10 +1,11 @@
-const CACHE_NAME = "yogaunnati-pwa-v11";
+const CACHE_NAME = "yogaunnati-pwa-v12";
 const APP_SHELL_PATHS = [
   "",
   "index.html",
   "progress.html",
   "milestones.html",
   "community.html",
+  "member.html",
   "profile.html",
   "auth.html",
   "manifest.webmanifest",
@@ -21,6 +22,7 @@ const APP_SHELL_PATHS = [
   "js/milestones.js",
   "js/communityBoard.js",
   "js/community.js",
+  "js/memberProfile.js",
   "js/auth.js",
   "images/logo.png",
   "images/pwa-192.png",
