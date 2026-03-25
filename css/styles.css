@@ -631,6 +631,10 @@ input {
   min-width: 104px;
 }
 
+.today-practice-card.is-empty .today-practice-actions {
+  display: none;
+}
+
 .today-practice-avatar {
   width: 34px;
   height: 34px;
@@ -654,9 +658,22 @@ input {
   object-fit: cover;
 }
 
+.today-practice-avatar span {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #6d5a4c;
+}
+
+.today-practice-avatar.is-placeholder {
+  background: rgba(127, 151, 128, 0.1);
+  border-color: rgba(252, 250, 247, 0.98);
+  box-shadow: none;
+}
+
 .today-practice-more {
   font-family: 'Sora', sans-serif;
-  font-size: 1rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: var(--accent-deep);
   background: rgba(255, 247, 238, 0.95);

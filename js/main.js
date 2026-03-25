@@ -5,6 +5,10 @@ const weekStripEl = document.getElementById("weekStrip");
 const weekCardLinkEl = document.getElementById("weekCardLink");
 const homeAvatarEl = document.getElementById("homeAvatar");
 const homeAvatarInitialEl = document.getElementById("homeAvatarInitial");
+const todayPracticeCardEl = document.getElementById("todayPracticeCard");
+const todayPracticeClusterEl = document.getElementById("todayPracticeCluster");
+const todayPracticeTitleEl = document.getElementById("todayPracticeTitle");
+const todayPracticeQuestionEl = document.getElementById("todayPracticeQuestion");
 const communityAvatarImgEl = document.getElementById("communityAvatarImg");
 const communityAvatarInitialEl = document.getElementById("communityAvatarInitial");
 const communityProfileNameEl = document.getElementById("communityProfileName");
@@ -20,8 +24,10 @@ const brandTaglineEl = document.getElementById("brandTagline");
 const todayPracticeActionsEl = document.getElementById("todayPracticeActions");
 const HOME_MILESTONE_BAR_ANIMATED_KEY = "home_milestone_bar_animated_v1";
 const TOMORROW_RSVP_KEY = "yogaunnati_tomorrow_rsvp";
+const HOME_COMMUNITY_CACHE_PREFIX = "home_community_today_v1:";
 const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
 const PROFILE_REFRESH_TTL_MS = 5 * 60 * 1000;
+const COMMUNITY_HOME_REFRESH_TTL_MS = 2 * 60 * 1000;
 
 // 👤 Temporary user (replace later with auth)
 // const userId = "user_1";
@@ -30,6 +36,7 @@ let practiceDates = [];
 let taglineIndex = 0;
 let taglineTimer = null;
 let hasHydratedHomeMilestoneBar = false;
+let homeCommunitySnapshot = null;
 
 const BRAND_TAGLINES = [
   "Hatha Yoga in its purest form",
@@ -52,6 +59,240 @@ function initBrandTaglineRotation() {
       brandTaglineEl.classList.remove("is-switching");
     }, 420);
   }, 5000);
+}
+
+function parseLocalDate(dateString) {
+  const [year, month, day] = String(dateString).split("-").map(Number);
+  return new Date(year, (month || 1) - 1, day || 1);
+}
+
+function calculateCurrentStreak(practiceDates) {
+  const dates = [...new Set(practiceDates)].sort().reverse();
+  let streak = 0;
+  let compareDate = new Date();
+  compareDate.setHours(0, 0, 0, 0);
+
+  for (let i = 0; i < dates.length; i += 1) {
+    const date = parseLocalDate(dates[i]);
+    const diff = Math.floor((compareDate - date) / (1000 * 60 * 60 * 24));
+
+    if (diff === 0 || diff === 1) {
+      streak += 1;
+      compareDate = date;
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+}
+
+function getHomeCommunityCacheKey(userId) {
+  return `${HOME_COMMUNITY_CACHE_PREFIX}${userId}`;
+}
+
+function readHomeCommunityCache(userId) {
+  if (!userId) {
+    return null;
+  }
+
+  try {
+    const raw = localStorage.getItem(getHomeCommunityCacheKey(userId));
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (error) {
+    console.error("Home community cache read error:", error);
+    return null;
+  }
+}
+
+function writeHomeCommunityCache(userId, snapshot) {
+  if (!userId || !snapshot) {
+    return;
+  }
+
+  try {
+    localStorage.setItem(
+      getHomeCommunityCacheKey(userId),
+      JSON.stringify({
+        count: Number(snapshot.count) || 0,
+        members: Array.isArray(snapshot.members) ? snapshot.members : [],
+        updatedAt: Date.now(),
+      })
+    );
+  } catch (error) {
+    console.error("Home community cache write error:", error);
+  }
+}
+
+function getHomeCommunityFallbackQuestion() {
+  const streak = calculateCurrentStreak(practiceDates);
+  if (streak > 0) {
+    return `Protect your ${streak}-day streak. Practice today.`;
+  }
+
+  return "Start your streak with today's practice.";
+}
+
+function renderTodayPracticeCluster(members, totalCount) {
+  if (!todayPracticeClusterEl) {
+    return;
+  }
+
+  if (!Array.isArray(members) || totalCount <= 0) {
+    todayPracticeClusterEl.innerHTML = `
+      <span class="today-practice-avatar is-placeholder"><span>Y</span></span>
+      <span class="today-practice-avatar is-placeholder"><span>O</span></span>
+      <span class="today-practice-avatar is-placeholder"><span>G</span></span>
+    `;
+    return;
+  }
+
+  const visibleMembers = members.slice(0, 3);
+  const extraCount = Math.max(0, totalCount - visibleMembers.length);
+
+  todayPracticeClusterEl.innerHTML = visibleMembers
+    .map((member) => {
+      const displayName = member.displayName || DEFAULT_PROFILE_NAME;
+      const avatarUrl = normalizeAvatarUrl(member.avatarUrl);
+
+      if (avatarUrl) {
+        return `<span class="today-practice-avatar"><img src="${avatarUrl}" alt="${displayName}" loading="lazy" /></span>`;
+      }
+
+      return `<span class="today-practice-avatar"><span>${getInitials(displayName)}</span></span>`;
+    })
+    .join("")
+    + (extraCount > 0
+      ? `<span class="today-practice-avatar today-practice-more">+${extraCount}</span>`
+      : "");
+}
+
+function renderHomeCommunitySnapshot(snapshot) {
+  if (!todayPracticeCardEl || !todayPracticeTitleEl || !todayPracticeQuestionEl) {
+    return;
+  }
+
+  const safeSnapshot = snapshot && typeof snapshot === "object"
+    ? snapshot
+    : { count: 0, members: [] };
+  const count = Number(safeSnapshot.count) || 0;
+  const members = Array.isArray(safeSnapshot.members) ? safeSnapshot.members : [];
+
+  homeCommunitySnapshot = {
+    count,
+    members,
+  };
+
+  renderTodayPracticeCluster(members, count);
+
+  if (count > 0) {
+    todayPracticeCardEl.classList.remove("is-empty");
+    todayPracticeTitleEl.textContent = count === 1
+      ? "1 person practiced today"
+      : `${count} people practiced today`;
+    todayPracticeQuestionEl.textContent = "Will you join tomorrow?";
+    return;
+  }
+
+  todayPracticeCardEl.classList.add("is-empty");
+  todayPracticeTitleEl.textContent = "No one has practiced today yet";
+  todayPracticeQuestionEl.textContent = getHomeCommunityFallbackQuestion();
+}
+
+function getCurrentUserCommunityMember() {
+  const profile = readProfileCache(userId);
+  return {
+    id: userId,
+    displayName: profile.displayName || DEFAULT_PROFILE_NAME,
+    avatarUrl: profile.avatarUrl || "",
+  };
+}
+
+function syncHomeCommunitySnapshotForTodayPractice(isPracticedToday) {
+  if (!userId) {
+    return;
+  }
+
+  const baseSnapshot = homeCommunitySnapshot || readHomeCommunityCache(userId) || { count: 0, members: [] };
+  const existingMembers = Array.isArray(baseSnapshot.members) ? [...baseSnapshot.members] : [];
+  const withoutCurrentUser = existingMembers.filter((member) => member.id !== userId);
+
+  let nextMembers = withoutCurrentUser;
+  let nextCount = Math.max(0, Number(baseSnapshot.count) || 0);
+
+  if (isPracticedToday) {
+    nextMembers = [getCurrentUserCommunityMember(), ...withoutCurrentUser];
+    if (!existingMembers.some((member) => member.id === userId)) {
+      nextCount += 1;
+    }
+  } else if (existingMembers.some((member) => member.id === userId)) {
+    nextCount = Math.max(0, nextCount - 1);
+  }
+
+  const nextSnapshot = {
+    count: nextCount,
+    members: nextMembers.slice(0, Math.max(3, nextCount)),
+  };
+
+  writeHomeCommunityCache(userId, nextSnapshot);
+  renderHomeCommunitySnapshot(nextSnapshot);
+}
+
+async function buildHomeCommunitySnapshot() {
+  const today = getTodayIsoDate();
+  const [profiles, practiceLogsResult] = await Promise.all([
+    fetchAllProfiles(),
+    supabaseClient.from("practice_logs").select("user_id").eq("date", today),
+  ]);
+
+  if (practiceLogsResult.error) {
+    throw practiceLogsResult.error;
+  }
+
+  const uniqueMemberIds = [...new Set((practiceLogsResult.data || []).map((row) => row.user_id).filter(Boolean))];
+  const profileMap = new Map(
+    profiles.map((profileRow) => [
+      profileRow.id,
+      getProfileFromRow(profileRow),
+    ])
+  );
+
+  const members = uniqueMemberIds.map((memberId) => {
+    const cachedProfile = memberId === userId ? readProfileCache(memberId) : null;
+    const profile = profileMap.get(memberId) || cachedProfile || normalizeProfileData();
+    const displayName = profile.displayName || (memberId === userId ? DEFAULT_PROFILE_NAME : "Yoga Member");
+
+    return {
+      id: memberId,
+      displayName,
+      avatarUrl: profile.avatarUrl || "",
+    };
+  });
+
+  return {
+    count: uniqueMemberIds.length,
+    members,
+  };
+}
+
+async function refreshHomeCommunitySnapshot() {
+  if (!userId) {
+    return;
+  }
+
+  try {
+    const snapshot = await buildHomeCommunitySnapshot();
+    writeHomeCommunityCache(userId, snapshot);
+    markRemoteRefresh("community_today", userId);
+    renderHomeCommunitySnapshot(snapshot);
+  } catch (error) {
+    console.error("Home community refresh error:", error);
+  }
 }
 
 function applyTomorrowRsvp(value) {
@@ -344,6 +585,7 @@ async function markToday() {
     practiceDates.push(today);
   }
   syncHomeUI();
+  syncHomeCommunitySnapshotForTodayPractice(true);
 }
 
 
@@ -365,6 +607,7 @@ async function unmarkToday() {
   markRemoteRefresh("practice_dates", userId);
   practiceDates = practiceDates.filter((date) => date !== today);
   syncHomeUI();
+  syncHomeCommunitySnapshotForTodayPractice(false);
 }
 
 function renderWeek(practiceDates) {
@@ -433,6 +676,13 @@ document.addEventListener("visibilitychange", async () => {
       refreshTasks.push(loadHomeProfile());
     }
 
+    if (
+      shouldRefreshRemote("community_today", userId, COMMUNITY_HOME_REFRESH_TTL_MS) ||
+      shouldRefreshRemote("profiles_public", "", COMMUNITY_HOME_REFRESH_TTL_MS)
+    ) {
+      refreshTasks.push(refreshHomeCommunitySnapshot());
+    }
+
     if (refreshTasks.length) {
       await Promise.all(refreshTasks);
     }
@@ -486,8 +736,15 @@ async function initApp() {
   }
   practiceDates = readPracticeCache(userId);
   syncHomeUI();
+  renderHomeCommunitySnapshot(readHomeCommunityCache(userId));
   if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
     refreshPracticeDates();
+  }
+  if (
+    shouldRefreshRemote("community_today", userId, COMMUNITY_HOME_REFRESH_TTL_MS) ||
+    shouldRefreshRemote("profiles_public", "", COMMUNITY_HOME_REFRESH_TTL_MS)
+  ) {
+    refreshHomeCommunitySnapshot();
   }
 
 }
