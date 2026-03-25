@@ -2,6 +2,7 @@ const supabaseClient = window.supabaseClient;
 
 const profileNameInput = document.getElementById("profileNameInput");
 const profileImageInput = document.getElementById("profileImageInput");
+const profileBackLink = document.getElementById("profileBackLink");
 const profileAvatarPreview = document.getElementById("profileAvatarPreview");
 const profileAvatarInitial = document.getElementById("profileAvatarInitial");
 const profileNameHeading = document.getElementById("profileNameHeading");
@@ -28,13 +29,10 @@ function getTestReminderMessage() {
     typeof getCurrentMilestoneState !== "function"
   ) {
     const fallbackMessages = [
-      "Stay on track. See you tomorrow morning.",
-      "Join us tomorrow morning.",
-      "Keep your rhythm going. See you in class tomorrow morning.",
-      "Consistency is your only focus right now. Keep going.",
-      "Use the weekend to deepen, not drift away from your practice.",
-      "A new week begins. Stay committed to your practice and show up tomorrow.",
-      "Sunday is for resetting. We will see you Monday morning.",
+      "Tomorrow is Day 2. See you!",
+      "Day 2 starts soon!",
+      "You were missed today. Join tomorrow!",
+      "Going good. Your next milestone in 6 days.",
     ];
 
     const message = fallbackMessages[testReminderMessageIndex % fallbackMessages.length];
@@ -44,53 +42,18 @@ function getTestReminderMessage() {
 
   const practiceDates = readPracticeCache(userId);
   const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
-  const { milestone, remainingDays } = getCurrentMilestoneState(userId, milestoneProgressCount);
+  const state = getCurrentMilestoneState(userId, milestoneProgressCount);
+  const remainingDays = state.remainingDays;
+  const nextDayNumber = Math.min(state.completedWithinMilestone + 1, state.totalWithinMilestone);
   const dayLabel = remainingDays === 1 ? "day" : "days";
-  const today = new Date();
-  const weekday = today.getDay();
-
-  if (remainingDays <= 0) {
-    const completedMessages = [
-      `${milestone.title} is complete. Keep showing up tomorrow.`,
-      "Stay on track. We will see you tomorrow morning.",
-      "A beautiful step forward. Join us again tomorrow morning.",
-    ];
-
-    const message = completedMessages[testReminderMessageIndex % completedMessages.length];
-    testReminderMessageIndex += 1;
-    return message;
-  }
-
   const messageVariants = [
-    `${remainingDays} ${dayLabel} left to your next milestone. See you tomorrow morning.`,
-    `Stay on track. ${remainingDays} ${dayLabel} left to your next milestone.`,
-    `Join us tomorrow morning. ${remainingDays} ${dayLabel} left to your next milestone.`,
-    "Consistency is your only focus right now. Keep going.",
+    `Tomorrow is Day ${nextDayNumber}. See you!`,
+    `Day ${nextDayNumber} starts soon!`,
+    "You were missed today. Join tomorrow!",
+    remainingDays <= 0
+      ? "Going good. Your next milestone is ready."
+      : `Going good. Your next milestone in ${remainingDays} ${dayLabel}.`,
   ];
-
-  if (weekday === 5) {
-    messageVariants.push(
-      `Before the weekend slips away, stay on track. ${remainingDays} ${dayLabel} left to your next milestone.`,
-      `Heading into the weekend? Join us tomorrow morning and keep your rhythm alive.`,
-      "Use the weekend to deepen, not drift away from your practice.",
-    );
-  }
-
-  if (weekday === 6) {
-    messageVariants.push(
-      `Weekend practice counts too. ${remainingDays} ${dayLabel} left to your next milestone.`,
-      `Stay on track this weekend. We will see you tomorrow morning.`,
-      "Use the weekend to deepen, not drift away from your practice.",
-    );
-  }
-
-  if (weekday === 0) {
-    messageVariants.push(
-      `Set up your week well. See you tomorrow morning for Monday's class.`,
-      `Sunday reset. Come back strong tomorrow morning.`,
-      "A new week begins. Stay committed to your practice and show up tomorrow.",
-    );
-  }
 
   const message = messageVariants[testReminderMessageIndex % messageVariants.length];
   testReminderMessageIndex += 1;
@@ -184,6 +147,23 @@ async function initUser() {
 
   userId = data.user.id;
   userEmail = data.user.email || "";
+}
+
+function initProfileBackLink() {
+  if (!profileBackLink) {
+    return;
+  }
+
+  profileBackLink.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    if (userId) {
+      window.location.href = `member.html?uid=${encodeURIComponent(userId)}`;
+      return;
+    }
+
+    window.location.href = "index.html";
+  });
 }
 
 function showToast(message) {
@@ -420,6 +400,7 @@ saveProfileBtn.addEventListener("click", async () => {
 
 async function initApp() {
   await initUser();
+  initProfileBackLink();
   renderProfile(readProfileCache(userId));
   renderReminderSettings();
 

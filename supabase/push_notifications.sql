@@ -5,13 +5,32 @@ create table if not exists public.push_subscriptions (
   p256dh text,
   auth text,
   enabled boolean not null default true,
+  timezone text,
   user_agent text,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
 
+alter table public.push_subscriptions
+  add column if not exists timezone text;
+
 create index if not exists push_subscriptions_user_id_idx
   on public.push_subscriptions (user_id);
+
+create index if not exists push_subscriptions_timezone_idx
+  on public.push_subscriptions (timezone);
+
+create table if not exists public.push_notification_log (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
+  subscription_id uuid not null references public.push_subscriptions(id) on delete cascade,
+  notification_type text not null,
+  local_date date not null,
+  created_at timestamptz not null default timezone('utc', now()),
+  unique (subscription_id, notification_type, local_date)
+);
+
+alter table public.push_notification_log enable row level security;
 
 create or replace function public.set_push_subscriptions_updated_at()
 returns trigger

@@ -133,7 +133,7 @@ window.pwaNotifications = {
 
     return Notification.requestPermission();
   },
-  async sendTestNotification(messageOverride = "") {
+  async sendNotification(title = "YogaUnnati", body = "Your reminder is ready.") {
     if (!("Notification" in window) || Notification.permission !== "granted") {
       return false;
     }
@@ -145,9 +145,6 @@ window.pwaNotifications = {
     } catch (error) {
       console.error("Service worker not ready for notification:", error);
     }
-
-    const title = "YogaUnnati";
-    const body = messageOverride || "Your reminder preview is ready.";
 
     if (registration?.showNotification) {
       try {
@@ -165,5 +162,8 @@ window.pwaNotifications = {
       console.error("Direct notification failed:", error);
       throw error;
     }
+  },
+  async sendTestNotification(messageOverride = "") {
+    return this.sendNotification("YogaUnnati", messageOverride || "Your reminder preview is ready.");
   },
 };

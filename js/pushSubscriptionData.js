@@ -68,6 +68,7 @@ function subscriptionToRow(userId, subscription) {
     auth: payload.keys?.auth || null,
     enabled: true,
     user_agent: navigator.userAgent,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
   };
 }
 

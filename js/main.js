@@ -3,12 +3,14 @@
 const button = document.querySelector(".program-btn");
 const weekStripEl = document.getElementById("weekStrip");
 const weekCardLinkEl = document.getElementById("weekCardLink");
+const homeAvatarLinkEl = document.getElementById("homeAvatarLink");
 const homeAvatarEl = document.getElementById("homeAvatar");
 const homeAvatarInitialEl = document.getElementById("homeAvatarInitial");
 const todayPracticeCardEl = document.getElementById("todayPracticeCard");
 const todayPracticeClusterEl = document.getElementById("todayPracticeCluster");
 const todayPracticeTitleEl = document.getElementById("todayPracticeTitle");
 const todayPracticeQuestionEl = document.getElementById("todayPracticeQuestion");
+const homeTargetDateNoteEl = document.getElementById("homeTargetDateNote");
 const communityAvatarImgEl = document.getElementById("communityAvatarImg");
 const communityAvatarInitialEl = document.getElementById("communityAvatarInitial");
 const communityProfileNameEl = document.getElementById("communityProfileName");
@@ -42,6 +44,17 @@ const BRAND_TAGLINES = [
   "Hatha Yoga in its purest form",
   "Mastering body and mind",
 ];
+
+function getCommunityPlaceholderAvatarMarkup() {
+  return `
+    <span class="today-practice-avatar is-placeholder" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="3.2"></circle>
+        <path d="M6.5 18a5.5 5.5 0 0 1 11 0"></path>
+      </svg>
+    </span>
+  `;
+}
 
 function initBrandTaglineRotation() {
   if (!brandTaglineEl || BRAND_TAGLINES.length < 2 || taglineTimer) {
@@ -129,13 +142,30 @@ function writeHomeCommunityCache(userId, snapshot) {
   }
 }
 
+function getHomeCommunityFallbackTitle() {
+  const streak = calculateCurrentStreak(practiceDates);
+  if (streak > 0) {
+    return `Protect your ${streak}-day streak today`;
+  }
+
+  const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
+  const state = getCurrentMilestoneState(userId, milestoneProgressCount);
+  const dayLabel = state.remainingDays === 1 ? "day" : "days";
+
+  if (state.remainingDays > 0) {
+    return `${state.remainingDays} ${dayLabel} to your next milestone`;
+  }
+
+  return "Keep your practice moving today";
+}
+
 function getHomeCommunityFallbackQuestion() {
   const streak = calculateCurrentStreak(practiceDates);
   if (streak > 0) {
-    return `Protect your ${streak}-day streak. Practice today.`;
+    return "A small step today keeps your momentum alive.";
   }
 
-  return "Start your streak with today's practice.";
+  return "Show up today and keep your progress moving.";
 }
 
 function renderTodayPracticeCluster(members, totalCount) {
@@ -145,31 +175,34 @@ function renderTodayPracticeCluster(members, totalCount) {
 
   if (!Array.isArray(members) || totalCount <= 0) {
     todayPracticeClusterEl.innerHTML = `
-      <span class="today-practice-avatar is-placeholder"><span>Y</span></span>
-      <span class="today-practice-avatar is-placeholder"><span>O</span></span>
-      <span class="today-practice-avatar is-placeholder"><span>G</span></span>
+      ${getCommunityPlaceholderAvatarMarkup()}
+      ${getCommunityPlaceholderAvatarMarkup()}
+      ${getCommunityPlaceholderAvatarMarkup()}
+      <span class="today-practice-avatar today-practice-more">+</span>
     `;
     return;
   }
 
   const visibleMembers = members.slice(0, 3);
-  const extraCount = Math.max(0, totalCount - visibleMembers.length);
+  const slots = Array.from({ length: 3 }, (_, index) => visibleMembers[index] || null);
 
-  todayPracticeClusterEl.innerHTML = visibleMembers
-    .map((member) => {
+  todayPracticeClusterEl.innerHTML = slots
+    .map((member, index) => {
+      if (!member) {
+        return getCommunityPlaceholderAvatarMarkup();
+      }
+
       const displayName = member.displayName || DEFAULT_PROFILE_NAME;
       const avatarUrl = normalizeAvatarUrl(member.avatarUrl);
 
       if (avatarUrl) {
-        return `<span class="today-practice-avatar"><img src="${avatarUrl}" alt="${displayName}" loading="lazy" /></span>`;
+        return `<span class="today-practice-avatar" style="z-index:${4 - index}"><img src="${avatarUrl}" alt="${displayName}" loading="lazy" /></span>`;
       }
 
-      return `<span class="today-practice-avatar"><span>${getInitials(displayName)}</span></span>`;
+      return `<span class="today-practice-avatar" style="z-index:${4 - index}"><span>${getInitials(displayName)}</span></span>`;
     })
     .join("")
-    + (extraCount > 0
-      ? `<span class="today-practice-avatar today-practice-more">+${extraCount}</span>`
-      : "");
+    + `<span class="today-practice-avatar today-practice-more" style="z-index:1">+</span>`;
 }
 
 function renderHomeCommunitySnapshot(snapshot) {
@@ -200,7 +233,7 @@ function renderHomeCommunitySnapshot(snapshot) {
   }
 
   todayPracticeCardEl.classList.add("is-empty");
-  todayPracticeTitleEl.textContent = "No one has practiced today yet";
+  todayPracticeTitleEl.textContent = getHomeCommunityFallbackTitle();
   todayPracticeQuestionEl.textContent = getHomeCommunityFallbackQuestion();
 }
 
@@ -556,6 +589,22 @@ function renderHomeMilestoneProgress() {
   }
 }
 
+async function maybeSendProgressNotification() {
+  const notificationsApi = window.pwaNotifications;
+  if (!notificationsApi?.isSupported?.() || notificationsApi.getPermission?.() !== "granted") {
+    return;
+  }
+
+  try {
+    await notificationsApi.sendNotification(
+      "YogaUnnati",
+      getPracticeProgressNotificationMessage(userId, practiceDates),
+    );
+  } catch (error) {
+    console.error("Progress notification error:", error);
+  }
+}
+
 // ➕ Insert today's practice
 async function markToday() {
   const today = getTodayIsoDate();
@@ -586,6 +635,7 @@ async function markToday() {
   }
   syncHomeUI();
   syncHomeCommunitySnapshotForTodayPractice(true);
+  await maybeSendProgressNotification();
 }
 
 
@@ -622,6 +672,8 @@ function renderWeek(practiceDates) {
 
   const startOfWeek = new Date(todayDate);
   startOfWeek.setDate(todayDate.getDate() - todayDate.getDay());
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
 
   const practicedSet = new Set(practiceDates);
   weekStripEl.innerHTML = "";
@@ -638,15 +690,30 @@ function renderWeek(practiceDates) {
     const isToday = formattedDate === today;
     const isDone = practicedSet.has(formattedDate);
     const isTargetUnlockDay = formattedDate === targetUnlockDate;
+    const previousDate = new Date(date);
+    previousDate.setDate(date.getDate() - 1);
+    const previousFormattedDate = getTodayIsoDateForDate(previousDate);
+    const isPrevDone = practicedSet.has(previousFormattedDate);
+    const streakClass = isDone && isPrevDone ? "streak" : "";
+    const streakStartClass = isDone && isPrevDone && i === 0 ? "streak-start" : "";
 
     const dayLabel = date.toLocaleDateString("en-US", { weekday: "short" }).slice(0, 1);
 
     weekStripEl.innerHTML += `
-      <div class="week-day ${isDone ? "done" : ""} ${isToday ? "today" : ""} ${isTargetUnlockDay ? "target-unlock" : ""}">
+      <div class="week-day ${isDone ? "done" : ""} ${isToday ? "today" : ""} ${isTargetUnlockDay ? "target-unlock" : ""} ${streakClass} ${streakStartClass}">
         <span class="week-day-label">${dayLabel}</span>
         <span class="week-day-date">${date.getDate()}</span>
       </div>
     `;
+  }
+
+  if (homeTargetDateNoteEl) {
+    const shouldShowTargetNote = Boolean(
+      targetUnlockDate &&
+      parseLocalDate(targetUnlockDate) >= startOfWeek &&
+      parseLocalDate(targetUnlockDate) <= endOfWeek
+    );
+    homeTargetDateNoteEl.classList.toggle("hidden", !shouldShowTargetNote);
   }
 
 }
@@ -730,6 +797,9 @@ if (weekCardLinkEl) {
 
 async function initApp() {
   await initUser();   // 🔥 must complete first
+  if (homeAvatarLinkEl && userId) {
+    homeAvatarLinkEl.href = `member.html?uid=${encodeURIComponent(userId)}`;
+  }
   applyHomeProfile(readProfileCache(userId));
   if (shouldRefreshRemote("profile", userId, PROFILE_REFRESH_TTL_MS)) {
     loadHomeProfile();

@@ -291,3 +291,15 @@ function getCurrentMilestoneState(userId, totalDays) {
     remainingDays: Math.max(0, milestone.days - uniqueTotalDays),
   };
 }
+
+function getPracticeProgressNotificationMessage(userId, practiceDates) {
+  const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
+  const state = getCurrentMilestoneState(userId, milestoneProgressCount);
+
+  if (state.remainingDays <= 0) {
+    return "Going good. Your next milestone is ready.";
+  }
+
+  const dayLabel = state.remainingDays === 1 ? "day" : "days";
+  return `Going good. Your next milestone in ${state.remainingDays} ${dayLabel}.`;
+}

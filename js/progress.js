@@ -45,9 +45,7 @@ function canMarkPracticeForDate(dateString) {
   selectedDate.setHours(0, 0, 0, 0);
 
   const today = parseLocalDate(getTodayIsoDate());
-  const oldestAllowed = parseLocalDate(getRelativeIsoDate(-1));
-
-  return selectedDate <= today && selectedDate >= oldestAllowed;
+  return selectedDate <= today;
 }
 
 function getTargetUnlockIsoDate(practiceDates) {
@@ -320,6 +318,22 @@ function updateProgressTodayButton() {
   }
 }
 
+async function maybeSendProgressNotification() {
+  const notificationsApi = window.pwaNotifications;
+  if (!notificationsApi?.isSupported?.() || notificationsApi.getPermission?.() !== "granted") {
+    return;
+  }
+
+  try {
+    await notificationsApi.sendNotification(
+      "YogaUnnati",
+      getPracticeProgressNotificationMessage(userId, practiceDates),
+    );
+  } catch (error) {
+    console.error("Progress notification error:", error);
+  }
+}
+
 async function toggleTodayPractice() {
   if (!userId) {
     return;
@@ -351,6 +365,7 @@ async function toggleTodayPractice() {
       addPracticeDateToCache(userId, today);
       markRemoteRefresh("practice_dates", userId);
       showToast("Practice marked");
+      await maybeSendProgressNotification();
     }
 
     syncProgressUI(true);
@@ -417,8 +432,8 @@ function openSheet(date, isActive) {
   } else {
     const todayIso = getTodayIsoDate();
     statusEl.textContent = date > todayIso
-      ? "You can only mark today or yesterday."
-      : "You can only backfill practice for yesterday.";
+      ? "You can only mark today or earlier."
+      : "You can mark any earlier day right now.";
     btn.textContent = "Mark Unavailable";
     btn.className = "sheet-btn disabled";
     btn.disabled = true;
@@ -450,6 +465,7 @@ function openSheet(date, isActive) {
         markRemoteRefresh("practice_dates", userId);
         selectedIsActive = true;
         showToast("Practice marked");
+        await maybeSendProgressNotification();
       }
 
       closeSheet();

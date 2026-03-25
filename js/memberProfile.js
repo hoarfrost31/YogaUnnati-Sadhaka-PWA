@@ -1,8 +1,10 @@
 const memberProfileAvatarEl = document.getElementById("memberProfileAvatar");
 const memberProfileInitialEl = document.getElementById("memberProfileInitial");
+const memberBackLinkEl = document.getElementById("memberBackLink");
 const memberProfileNameEl = document.getElementById("memberProfileName");
 const memberProfileStatusEl = document.getElementById("memberProfileStatus");
 const memberProfileSinceEl = document.getElementById("memberProfileSince");
+const memberProfileEditLinkEl = document.getElementById("memberProfileEditLink");
 const memberMilestoneIconEl = document.getElementById("memberMilestoneIcon");
 const memberMilestoneTitleEl = document.getElementById("memberMilestoneTitle");
 const memberMilestoneLevelEl = document.getElementById("memberMilestoneLevel");
@@ -10,6 +12,7 @@ const memberTotalDaysEl = document.getElementById("memberTotalDays");
 const memberStreakEl = document.getElementById("memberStreak");
 const MEMBER_PROFILE_CACHE_PREFIX = "member_profile_cache_v1:";
 const MEMBER_PROFILE_REFRESH_TTL_MS = 2 * 60 * 1000;
+let currentUserId = "";
 
 function getTodayIsoDate() {
   const now = new Date();
@@ -154,6 +157,19 @@ function buildMemberSnapshot(memberId, profileRow, practiceDates) {
   };
 }
 
+function buildCachedSelfSnapshot(memberId) {
+  const profile = readProfileCache(memberId);
+  const practiceDates = readPracticeCache(memberId);
+  return buildMemberSnapshot(
+    memberId,
+    {
+      display_name: profile.displayName,
+      avatar_url: profile.avatarUrl,
+    },
+    practiceDates,
+  );
+}
+
 function renderMemberProfile(snapshot) {
   if (!snapshot) {
     return;
@@ -198,6 +214,19 @@ async function initMemberProfile() {
       window.location.href = "auth.html";
       return;
     }
+    currentUserId = data.user.id;
+  } else {
+    currentUserId = sessionData.session.user.id;
+  }
+
+  if (memberProfileEditLinkEl) {
+    memberProfileEditLinkEl.classList.toggle("hidden", memberId !== currentUserId);
+  }
+
+  if (memberId === currentUserId) {
+    const selfSnapshot = buildCachedSelfSnapshot(memberId);
+    writeMemberProfileCache(memberId, selfSnapshot);
+    renderMemberProfile(selfSnapshot);
   }
 
   const cachedSnapshot = readMemberProfileCache(memberId);
@@ -237,6 +266,35 @@ async function initMemberProfile() {
 
   writeMemberProfileCache(memberId, snapshot);
   renderMemberProfile(snapshot);
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") {
+    return;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const memberId = params.get("uid");
+  if (!memberId || memberId !== currentUserId) {
+    return;
+  }
+
+  const selfSnapshot = buildCachedSelfSnapshot(memberId);
+  writeMemberProfileCache(memberId, selfSnapshot);
+  renderMemberProfile(selfSnapshot);
+});
+
+if (memberBackLinkEl) {
+  memberBackLinkEl.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+
+    window.location.href = "index.html";
+  });
 }
 
 initMemberProfile();
