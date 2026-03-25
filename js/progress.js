@@ -14,6 +14,82 @@ const progressStatusIconEl = document.getElementById("progressStatusIcon");
 const progressStatusTextEl = document.getElementById("progressStatusText");
 let progressStatusTimer = null;
 const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
+const HOME_COMMUNITY_CACHE_PREFIX = "home_community_today_v1:";
+
+function getHomeCommunityCacheKey(userId) {
+  return `${HOME_COMMUNITY_CACHE_PREFIX}${userId}`;
+}
+
+function readHomeCommunityCache(userId) {
+  if (!userId) {
+    return null;
+  }
+
+  try {
+    const raw = localStorage.getItem(getHomeCommunityCacheKey(userId));
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (error) {
+    console.error("Progress home community cache read error:", error);
+    return null;
+  }
+}
+
+function writeHomeCommunityCache(userId, snapshot) {
+  if (!userId || !snapshot) {
+    return;
+  }
+
+  try {
+    localStorage.setItem(
+      getHomeCommunityCacheKey(userId),
+      JSON.stringify({
+        count: Number(snapshot.count) || 0,
+        members: Array.isArray(snapshot.members) ? snapshot.members : [],
+        updatedAt: Date.now(),
+      }),
+    );
+  } catch (error) {
+    console.error("Progress home community cache write error:", error);
+  }
+}
+
+function syncHomeCommunitySnapshotForTodayPractice(isPracticedToday) {
+  if (!userId) {
+    return;
+  }
+
+  const profile = readProfileCache(userId);
+  const currentUserMember = {
+    id: userId,
+    displayName: profile.displayName || DEFAULT_PROFILE_NAME,
+    avatarUrl: profile.avatarUrl || "",
+  };
+  const baseSnapshot = readHomeCommunityCache(userId) || { count: 0, members: [] };
+  const existingMembers = Array.isArray(baseSnapshot.members) ? [...baseSnapshot.members] : [];
+  const withoutCurrentUser = existingMembers.filter((member) => member.id !== userId);
+
+  let nextMembers = withoutCurrentUser;
+  let nextCount = Math.max(0, Number(baseSnapshot.count) || 0);
+
+  if (isPracticedToday) {
+    nextMembers = [currentUserMember, ...withoutCurrentUser];
+    if (!existingMembers.some((member) => member.id === userId)) {
+      nextCount += 1;
+    }
+  } else if (existingMembers.some((member) => member.id === userId)) {
+    nextCount = Math.max(0, nextCount - 1);
+  }
+
+  writeHomeCommunityCache(userId, {
+    count: nextCount,
+    members: nextMembers.slice(0, Math.max(3, nextCount)),
+  });
+}
 
 function getTodayIsoDate() {
   const now = new Date();
@@ -353,6 +429,7 @@ async function toggleTodayPractice() {
       practiceDates = practiceDates.filter((dateItem) => dateItem !== today);
       removePracticeDateFromCache(userId, today);
       markRemoteRefresh("practice_dates", userId);
+      syncHomeCommunitySnapshotForTodayPractice(false);
       showToast("Practice removed");
       const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
       window.appAnalytics?.track("unmark_practice", {
@@ -371,6 +448,7 @@ async function toggleTodayPractice() {
       }
       addPracticeDateToCache(userId, today);
       markRemoteRefresh("practice_dates", userId);
+      syncHomeCommunitySnapshotForTodayPractice(true);
       showToast("Practice marked");
       const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
       window.appAnalytics?.track("mark_practice", {
@@ -465,6 +543,9 @@ function openSheet(date, isActive) {
         practiceDates = practiceDates.filter((dateItem) => dateItem !== selectedDate);
         removePracticeDateFromCache(userId, selectedDate);
         markRemoteRefresh("practice_dates", userId);
+        if (selectedDate === getTodayIsoDate()) {
+          syncHomeCommunitySnapshotForTodayPractice(false);
+        }
         selectedIsActive = false;
         showToast("Practice removed");
         const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
@@ -484,6 +565,9 @@ function openSheet(date, isActive) {
         }
         addPracticeDateToCache(userId, selectedDate);
         markRemoteRefresh("practice_dates", userId);
+        if (selectedDate === getTodayIsoDate()) {
+          syncHomeCommunitySnapshotForTodayPractice(true);
+        }
         selectedIsActive = true;
         showToast("Practice marked");
         const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
