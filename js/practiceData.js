@@ -203,6 +203,13 @@ function normalizePracticeDates(practiceDates) {
   return [...new Set(practiceDates)].sort();
 }
 
+function formatPracticeIsoDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function getMilestoneProgressCount(practiceDates, referenceDate = new Date()) {
   const uniqueDates = normalizePracticeDates(practiceDates);
 
@@ -219,6 +226,16 @@ function getMilestoneProgressCount(practiceDates, referenceDate = new Date()) {
   }
 
   const practicedSet = new Set(uniqueDates);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (reference >= today) {
+    const todayIso = formatPracticeIsoDate(today);
+    if (!practicedSet.has(todayIso)) {
+      reference.setDate(today.getDate() - 1);
+    }
+  }
+
   let consecutiveMisses = 0;
   let maxPenalty = 0;
 
