@@ -4,6 +4,11 @@ const ANALYTICS_SESSION_ID_KEY = "analytics_session_id_v1";
 const ANALYTICS_PAGEVIEW_KEY_PREFIX = "analytics_pageview_v1:";
 const ANALYTICS_MAX_QUEUE_SIZE = 200;
 const ANALYTICS_BATCH_SIZE = 20;
+window.ANALYTICS_ENABLED = window.ANALYTICS_ENABLED ?? false;
+
+function analyticsIsEnabled() {
+  return window.ANALYTICS_ENABLED !== false;
+}
 
 function analyticsSafeRandomId() {
   if (window.crypto?.randomUUID) {
@@ -116,6 +121,10 @@ window.appAnalytics = (() => {
   }
 
   function enqueue(eventName, properties = {}) {
+    if (!analyticsIsEnabled()) {
+      return;
+    }
+
     const queue = analyticsReadQueue();
     queue.push(createEvent(eventName, properties));
     analyticsWriteQueue(queue);
@@ -152,7 +161,7 @@ window.appAnalytics = (() => {
   }
 
   async function flush() {
-    if (isFlushing || !navigator.onLine || !window.supabaseClient) {
+    if (!analyticsIsEnabled() || isFlushing || !navigator.onLine || !window.supabaseClient) {
       return;
     }
 
@@ -187,6 +196,10 @@ window.appAnalytics = (() => {
   }
 
   function trackPageView(extraProperties = {}) {
+    if (!analyticsIsEnabled()) {
+      return;
+    }
+
     const cacheKey = analyticsPageviewCacheKey();
     if (analyticsReadStorage(window.sessionStorage, cacheKey) === "sent") {
       return;
@@ -207,6 +220,10 @@ window.appAnalytics = (() => {
     }
 
     initStarted = true;
+    if (!analyticsIsEnabled()) {
+      return;
+    }
+
     currentUserId = await resolveCurrentUserId();
     trackPageView();
     scheduleFlush(150);
@@ -234,11 +251,23 @@ window.appAnalytics = (() => {
   });
 
   return {
+    isEnabled() {
+      return analyticsIsEnabled();
+    },
+    setEnabled(enabled) {
+      window.ANALYTICS_ENABLED = Boolean(enabled);
+    },
     identify(userId) {
+      if (!analyticsIsEnabled()) {
+        return;
+      }
       currentUserId = userId || null;
       scheduleFlush(150);
     },
     track(eventName, properties = {}) {
+      if (!analyticsIsEnabled()) {
+        return;
+      }
       enqueue(eventName, properties);
       scheduleFlush(250);
     },

@@ -74,9 +74,19 @@ document.addEventListener("selectionchange", () => {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     let hasRefreshedForUpdate = false;
+    let activeRegistration = null;
+
+    const checkForServiceWorkerUpdate = () => {
+      activeRegistration?.update?.().catch(() => {});
+
+      if (activeRegistration?.waiting) {
+        showUpdatePrompt(activeRegistration);
+      }
+    };
 
     navigator.serviceWorker.register("sw.js").then((registration) => {
-      registration.update().catch(() => {});
+      activeRegistration = registration;
+      checkForServiceWorkerUpdate();
 
       if (registration.waiting) {
         showUpdatePrompt(registration);
@@ -102,6 +112,14 @@ if ("serviceWorker" in navigator) {
 
         hasRefreshedForUpdate = true;
         window.location.reload();
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState !== "visible") {
+          return;
+        }
+
+        checkForServiceWorkerUpdate();
       });
     }).catch((error) => {
       console.error("Service worker registration failed:", error);
