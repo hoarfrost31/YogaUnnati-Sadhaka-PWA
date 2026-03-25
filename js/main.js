@@ -118,6 +118,19 @@ function readClassReminderPreference(userIdValue) {
   }
 }
 
+function readClassReminderPreferenceState(userIdValue) {
+  try {
+    const raw = localStorage.getItem(getReminderStorageKey(userIdValue));
+    if (raw === "on" || raw === "off") {
+      return raw;
+    }
+  } catch (error) {
+    console.error("Reminder preference state read error:", error);
+  }
+
+  return null;
+}
+
 function readHomeCommunityCache(userId) {
   if (!userId) {
     return null;
@@ -445,15 +458,31 @@ function shouldShowHomeNotificationsPrompt() {
     return false;
   }
 
+  const cachedProfile = readProfileCache(userId);
+  const remindersEnabledFromAccount = Boolean(cachedProfile.classReminderEnabled);
+  const reminderPreferenceState = readClassReminderPreferenceState(userId);
+
   if (permission === "granted") {
+    if (reminderPreferenceState === "off") {
+      return true;
+    }
+
+    if (reminderPreferenceState === "on" || remindersEnabledFromAccount) {
+      return false;
+    }
+
     return false;
   }
 
-  const cachedProfile = readProfileCache(userId);
-  const remindersEnabledFromAccount = Boolean(cachedProfile.classReminderEnabled);
-  const remindersEnabled = readClassReminderPreference(userId) || remindersEnabledFromAccount;
+  if (reminderPreferenceState === "off") {
+    return true;
+  }
 
-  return !remindersEnabled;
+  if (reminderPreferenceState === "on" || remindersEnabledFromAccount) {
+    return false;
+  }
+
+  return permission !== "granted";
 }
 
 function showHomeNotificationsPrompt() {

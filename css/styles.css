@@ -929,6 +929,12 @@ input {
   color: var(--sage);
 }
 
+.stat-card img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
 .stat-card h2 {
   margin: 10px 0 4px;
   font-size: 1.45rem;
@@ -2753,6 +2759,12 @@ input {
 .community-board-streak svg {
   width: 13px;
   height: 13px;
+}
+
+.community-board-streak img {
+  width: 13px;
+  height: 13px;
+  object-fit: contain;
 }
 
 .community-board-today {
