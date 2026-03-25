@@ -444,6 +444,10 @@ input {
   text-align: right;
 }
 
+.program-progress-note.is-completed {
+  color: var(--sage);
+}
+
 .home-milestone-bar {
   width: 100%;
   height: 8px;
@@ -461,6 +465,11 @@ input {
   background: linear-gradient(110deg, #c97a3a 0%, #dea16b 42%, #f0c180 58%, #d88f52 100%);
   box-shadow: 0 0 0 1px rgba(209, 134, 74, 0.05), 0 6px 12px rgba(209, 134, 74, 0.14);
   transition: none;
+}
+
+.home-milestone-bar-fill.is-completed {
+  background: linear-gradient(90deg, #758a74 0%, #b1bfa9 100%);
+  box-shadow: 0 0 0 1px rgba(127, 151, 128, 0.08), 0 6px 12px rgba(127, 151, 128, 0.16);
 }
 
 .home-milestone-bar-fill::after,
@@ -1389,6 +1398,60 @@ a.is-premium-locked::after {
   min-height: calc(100vh - 48px - var(--safe-top) - var(--safe-bottom));
 }
 
+.premium-inline-lock-card {
+  margin-top: 14px;
+}
+
+.premium-inline-title {
+  margin: 18px 0 0;
+  font-family: 'Sora', sans-serif;
+  font-size: 1.24rem;
+  font-weight: 600;
+  line-height: 1.16;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.premium-inline-subtitle {
+  margin-top: 10px;
+}
+
+.premium-preview-shell {
+  position: relative;
+  margin-top: 14px;
+}
+
+.premium-page-preview {
+  filter: blur(2.2px);
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+.premium-page-preview-milestones {
+  display: grid;
+  gap: 14px;
+}
+
+.premium-page-preview-community {
+  display: grid;
+  gap: 10px;
+}
+
+.premium-page-lock-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+  background: rgba(247, 243, 237, 0.18);
+}
+
+.premium-page-lock-overlay .premium-inline-lock-card {
+  width: 100%;
+  max-width: 356px;
+}
+
 .premium-back-btn {
   align-self: flex-start;
   background: none;
@@ -1457,6 +1520,10 @@ a.is-premium-locked::after {
 
 .premium-unlock-btn {
   margin-top: 2px;
+}
+
+.premium-reset-btn {
+  margin-top: 10px;
 }
 
 .premium-secondary-link {
@@ -1650,6 +1717,23 @@ a.is-premium-locked::after {
   font-size: 0.8rem;
 }
 
+.program-completed-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 6px 0 0;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(127, 151, 128, 0.12);
+  color: #6f8c70;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.69rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .progress-program-btn {
   width: 60%;
   margin-top: 8px;
@@ -1708,6 +1792,10 @@ a.is-premium-locked::after {
   stroke-dashoffset: 100.53;
 }
 
+.radial-progress.is-completed .radial-progress-value {
+  stroke: #7f9780;
+}
+
 .radial-progress.radial-progress-animate .radial-progress-value {
   transition: stroke-dashoffset 320ms ease;
 }
@@ -1735,6 +1823,14 @@ a.is-premium-locked::after {
   font-weight: 500;
   color: var(--accent);
   letter-spacing: 0.02em;
+}
+
+.radial-progress.is-completed .radial-progress-copy strong {
+  color: var(--sage);
+}
+
+.radial-progress.is-completed .radial-progress-copy span {
+  color: #8aa18a;
 }
 
 
@@ -2300,8 +2396,9 @@ a.is-premium-locked::after {
 
 .milestone-card.premium-locked {
   overflow: hidden;
-  border: 1.5px solid rgba(209, 134, 74, 0.18);
-  background: linear-gradient(180deg, rgba(255, 250, 244, 0.96) 0%, rgba(250, 242, 233, 0.94) 100%);
+  border: 1.5px solid rgba(209, 134, 74, 0.22);
+  background: linear-gradient(180deg, rgba(255, 251, 246, 0.98) 0%, rgba(249, 241, 232, 0.95) 100%);
+  box-shadow: 0 18px 40px rgba(131, 92, 58, 0.12);
 }
 
 .milestone-card.premium-locked .milestone-top p,
@@ -2309,78 +2406,104 @@ a.is-premium-locked::after {
 .milestone-card.premium-locked .progress-bar,
 .milestone-card.premium-locked .progress-text,
 .milestone-card.premium-locked .remaining {
-  filter: blur(2px);
-  opacity: 0.5;
+  filter: blur(1.4px);
+  opacity: 0.42;
 }
 
 .milestone-card.premium-locked .milestone-title-row,
 .milestone-card.premium-locked .milestone-title-icon,
-.milestone-card.premium-locked .milestone-top h3,
-.milestone-card.premium-locked .badge-text {
-  opacity: 0.88;
+.milestone-card.premium-locked .milestone-top h3 {
+  opacity: 0.93;
   filter: none;
 }
 
 .milestone-card.premium-locked .milestone-promo {
-  opacity: 0.86;
+  opacity: 0.92;
+}
+
+.milestone-card.premium-locked .badge-text {
+  display: none;
+}
+
+.milestone-premium-group {
+  position: relative;
+  margin-top: 14px;
+}
+
+.milestone-premium-stack {
+  display: grid;
+  gap: 14px;
+  filter: blur(2px);
+  opacity: 0.78;
 }
 
 .milestone-premium-overlay {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 3;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-start;
+  justify-content: flex-start;
+  align-items: center;
   gap: 12px;
-  padding: 28px 26px;
-  background: linear-gradient(180deg, rgba(247, 243, 237, 0.05) 0%, rgba(247, 243, 237, 0.34) 34%, rgba(247, 243, 237, 0.82) 74%, rgba(247, 243, 237, 0.94) 100%);
+  padding: 0;
+  background: rgba(255, 250, 244, 0.36);
+  border-radius: 26px;
 }
 
-.milestone-premium-overlay p {
-  max-width: 240px;
+.milestone-premium-panel {
+  width: min(100%, 320px);
+  padding: 18px 18px 16px;
+  border-radius: 22px;
+  background: rgba(255, 251, 246, 0.96);
+  border: 1px solid rgba(209, 134, 74, 0.14);
+  box-shadow: 0 18px 38px rgba(104, 78, 56, 0.12);
+  backdrop-filter: blur(10px);
+  text-align: left;
+}
+
+.milestone-premium-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(209, 134, 74, 0.12);
+  color: #c07b48;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.milestone-premium-panel h2 {
+  margin: 10px 0 8px;
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.milestone-premium-panel p {
   margin: 0;
-  color: #7a5f50;
-  font-size: 0.88rem;
-  line-height: 1.45;
+  color: #7b6352;
+  font-size: 0.87rem;
+  line-height: 1.5;
 }
 
 .milestone-premium-btn {
+  margin-top: 12px;
   border: 0;
   border-radius: 999px;
-  padding: 11px 16px;
+  min-height: 40px;
+  padding: 11px 18px;
   font-family: 'Sora', sans-serif;
   font-size: 0.82rem;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(135deg, #cf8552 0%, #b76d3c 100%);
-  box-shadow: 0 10px 24px rgba(191, 120, 69, 0.22);
-}
-
-.milestone-premium-note {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 14px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  background: rgba(255, 249, 242, 0.88);
-  border: 1px solid rgba(209, 134, 74, 0.14);
-  color: #7d6453;
-}
-
-.milestone-premium-note svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  color: #c68554;
-}
-
-.milestone-premium-note p {
-  margin: 0;
-  font-size: 0.84rem;
-  line-height: 1.45;
+  background: linear-gradient(135deg, #cf8552 0%, #b86b39 100%);
+  box-shadow: 0 12px 26px rgba(191, 120, 69, 0.24);
 }
 
 .milestone-tail-note {
@@ -2388,10 +2511,11 @@ a.is-premium-locked::after {
   align-items: center;
   gap: 14px;
   margin-top: 16px;
-  padding: 16px 18px;
+  padding: 17px 18px;
   border-radius: 22px;
   background: linear-gradient(180deg, rgba(255, 250, 244, 0.96) 0%, rgba(250, 243, 236, 0.94) 100%);
-  border: 1px dashed rgba(209, 134, 74, 0.28);
+  border: 1px solid rgba(209, 134, 74, 0.18);
+  box-shadow: 0 14px 28px rgba(131, 92, 58, 0.08);
 }
 
 .milestone-tail-icon {
@@ -2937,6 +3061,12 @@ a.is-premium-locked::after {
   line-height: 1.45;
 }
 
+.community-board-note-preview {
+  filter: blur(2px);
+  opacity: 0.24;
+  pointer-events: none;
+}
+
 .community-board-list {
   position: relative;
   margin-top: 16px;
@@ -2955,6 +3085,21 @@ a.is-premium-locked::after {
   row-gap: 5px;
   padding: 14px 13px;
   border-radius: 20px;
+}
+
+.community-board-entry-placeholder {
+  min-height: 86px;
+  background:
+    linear-gradient(180deg, rgba(255, 251, 246, 0.88) 0%, rgba(246, 239, 230, 0.84) 100%);
+  border: 1px solid rgba(209, 134, 74, 0.08);
+}
+
+.community-board-entry-note {
+  background: rgba(249, 239, 227, 0.72);
+}
+
+.community-board-entry-note .community-board-copy {
+  justify-content: center;
 }
 
 .community-board-rank {
@@ -3180,21 +3325,39 @@ a.is-premium-locked::after {
   margin-inline: auto;
 }
 
-.community-premium-preview #communityBoardList,
-.community-premium-preview .community-board-fixed-footer {
-  filter: blur(4px);
-  opacity: 0.78;
-  pointer-events: none;
-  user-select: none;
-}
-
 .community-premium-mask {
   position: absolute;
-  inset: 20px 10px auto 10px;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.community-premium-group {
+  position: relative;
+  margin-top: 10px;
+}
+
+.community-premium-stack {
+  display: grid;
+  gap: 10px;
+  filter: blur(2px);
+  opacity: 0.8;
+}
+
+.community-premium-stack .community-board-entry-link {
+  pointer-events: none;
+}
+
+.community-premium-mask-panel {
+  position: absolute;
+  inset: 0;
   z-index: 3;
   display: flex;
+  align-items: flex-start;
   justify-content: center;
-  pointer-events: none;
+  padding: 0;
+  background: rgba(255, 250, 244, 0.36);
+  border-radius: 24px;
 }
 
 .community-premium-card {
@@ -3204,7 +3367,13 @@ a.is-premium-locked::after {
   background: rgba(255, 251, 246, 0.96);
   border: 1px solid rgba(209, 134, 74, 0.14);
   box-shadow: 0 18px 38px rgba(104, 78, 56, 0.12);
+  backdrop-filter: blur(10px);
   text-align: left;
+}
+
+.community-premium-group .community-premium-card {
+  width: min(100%, 300px);
+  padding: 16px 16px 14px;
   pointer-events: auto;
 }
 

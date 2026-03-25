@@ -9,6 +9,11 @@ const COMMUNITY_REFRESH_TTL_MS = 2 * 60 * 1000;
 let userId;
 let isPremiumMember = false;
 
+function getCachedPremiumState() {
+  const profile = readProfileCache(userId);
+  return String(profile.membershipTier || "").toLowerCase() === "premium";
+}
+
 function getTodayIsoDate() {
   const now = new Date();
   const year = now.getFullYear();
@@ -171,8 +176,82 @@ function getMemberMarkup(member, index, isCurrentUser) {
   `;
 }
 
+function renderCommunityLockedState() {
+  if (!communityBoardListEl) {
+    return;
+  }
+
+  const noteEl = document.querySelector(".community-board-note");
+  const footerEl = document.querySelector(".community-board-fixed-footer");
+  noteEl?.classList.remove("community-board-note-preview");
+  noteEl?.classList.add("hidden");
+  noteEl?.setAttribute("hidden", "hidden");
+  if (noteEl) {
+    noteEl.style.display = "none";
+  }
+  footerEl?.classList.add("hidden");
+  footerEl?.setAttribute("hidden", "hidden");
+
+  const previewMembers = hydrateCachedMembers(readCommunityBoardCache(userId));
+  const previewMarkup = (previewMembers.length ? previewMembers : [
+    { id: "preview-1", displayName: "Yoga Member", avatarUrl: "", streak: 7, totalDays: 12, level: "Level 1", practicedToday: true },
+    { id: "preview-2", displayName: "Yoga Member", avatarUrl: "", streak: 5, totalDays: 9, level: "Level 1", practicedToday: false },
+    { id: "preview-3", displayName: "Yoga Member", avatarUrl: "", streak: 3, totalDays: 6, level: "Level 1", practicedToday: true },
+  ]).map((member, index) => getMemberMarkup(member, index, false)).join("");
+
+  communityBoardListEl.innerHTML = `
+    <div class="premium-preview-shell">
+      <div class="premium-page-preview premium-page-preview-community">
+        ${previewMarkup}
+      </div>
+      <div class="premium-page-lock-overlay">
+        <section class="premium-hero-card premium-inline-lock-card">
+          <span class="premium-hero-badge">Premium</span>
+          <h2 class="premium-inline-title">Unlock the community</h2>
+          <p class="subtitle premium-inline-subtitle">See the community board, member journeys, and shared progress with premium access.</p>
+
+          <div class="premium-benefits premium-inline-benefits">
+            <div class="premium-benefit">
+              <span class="premium-benefit-icon" aria-hidden="true">&#10003;</span>
+              <span>See the full community board</span>
+            </div>
+            <div class="premium-benefit">
+              <span class="premium-benefit-icon" aria-hidden="true">&#10003;</span>
+              <span>Open member journeys</span>
+            </div>
+            <div class="premium-benefit">
+              <span class="premium-benefit-icon" aria-hidden="true">&#10003;</span>
+              <span>Feel part of the wider practice space</span>
+            </div>
+          </div>
+
+          <button type="button" class="primary-btn premium-unlock-btn" id="communityPremiumBtn">Unlock Premium</button>
+        </section>
+      </div>
+    </div>
+  `;
+}
+
 function renderBoard(members) {
   if (!communityBoardListEl) {
+    return;
+  }
+
+  const noteEl = document.querySelector(".community-board-note");
+  const footerEl = document.querySelector(".community-board-fixed-footer");
+  noteEl?.classList.toggle("hidden", !isPremiumMember);
+  footerEl?.classList.toggle("hidden", !isPremiumMember);
+  if (isPremiumMember) {
+    noteEl?.classList.remove("community-board-note-preview");
+    noteEl?.removeAttribute("hidden");
+    if (noteEl) {
+      noteEl.style.display = "";
+    }
+    footerEl?.removeAttribute("hidden");
+  }
+
+  if (!isPremiumMember) {
+    renderCommunityLockedState();
     return;
   }
 
@@ -196,10 +275,9 @@ function renderBoard(members) {
 }
 
 function renderCommunityPremiumMask() {
-  document.body.classList.toggle("community-premium-preview", !isPremiumMember);
   if (communityPremiumMaskEl) {
-    communityPremiumMaskEl.classList.toggle("hidden", isPremiumMember);
-    communityPremiumMaskEl.setAttribute("aria-hidden", isPremiumMember ? "true" : "false");
+    communityPremiumMaskEl.classList.add("hidden");
+    communityPremiumMaskEl.setAttribute("aria-hidden", "true");
   }
 }
 
@@ -269,10 +347,22 @@ async function buildCommunityMembers() {
 async function initApp() {
   await initUser();
   window.appAnalytics?.identify(userId);
-  const premiumState = await window.premiumAccess?.refresh?.();
-  isPremiumMember = Boolean(premiumState?.isPremium);
+  isPremiumMember = getCachedPremiumState();
   renderCommunityPremiumMask();
   renderBoard(hydrateCachedMembers(readCommunityBoardCache(userId)));
+
+  window.premiumAccess?.refresh?.()
+    .then((premiumState) => {
+      const nextPremiumState = Boolean(premiumState?.isPremium);
+      if (nextPremiumState !== isPremiumMember) {
+        isPremiumMember = nextPremiumState;
+        renderCommunityPremiumMask();
+        renderBoard(hydrateCachedMembers(readCommunityBoardCache(userId)));
+      }
+    })
+    .catch((error) => {
+      console.error("Community premium refresh error:", error);
+    });
 
   try {
     if (

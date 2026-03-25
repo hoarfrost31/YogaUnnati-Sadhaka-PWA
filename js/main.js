@@ -41,6 +41,7 @@ let taglineIndex = 0;
 let taglineTimer = null;
 let hasHydratedHomeMilestoneBar = false;
 let homeCommunitySnapshot = null;
+let isPremiumMember = false;
 
 const BRAND_TAGLINES = [
   "Hatha Yoga in its purest form",
@@ -564,6 +565,8 @@ function applyHomeProfile(profile) {
   if (communityProfileNameEl) {
     communityProfileNameEl.textContent = displayName;
   }
+  
+  isPremiumMember = String(activeProfile.membershipTier || "").toLowerCase() === "premium";
 }
 
 async function loadHomeProfile() {
@@ -576,6 +579,7 @@ async function loadHomeProfile() {
   try {
     const profile = await refreshCurrentUserProfile(userId);
     applyHomeProfile(profile);
+    syncHomeUI();
   } catch (error) {
     console.error("Profile refresh error:", error);
   }
@@ -708,10 +712,19 @@ function setHomeMilestoneBarWidth(progressPercent) {
 
 function renderHomeMilestoneProgress() {
   const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
-  const state = getCurrentMilestoneState(userId, milestoneProgressCount);
+  const displayProgressCount = isPremiumMember
+    ? milestoneProgressCount
+    : Math.min(milestoneProgressCount, APP_MILESTONES[0].days);
+  const state = getCurrentMilestoneState(userId, displayProgressCount);
   const total = state.totalWithinMilestone;
   const completed = Math.min(state.completedWithinMilestone, total);
   const remaining = Math.max(0, state.remainingDays);
+  const isCompleted = remaining === 0;
+  const homeMilestoneCardEl = document.querySelector(".program-card.program-card-with-promo");
+
+  homeMilestoneCardEl?.classList.toggle("program-card-completed", isCompleted);
+  homeMilestoneBarFillEl?.classList.toggle("is-completed", isCompleted);
+  homeMilestoneRemainingEl?.classList.toggle("is-completed", isCompleted);
 
   if (homeMilestoneTitleEl) {
     homeMilestoneTitleEl.textContent = state.milestone.title;
@@ -781,12 +794,15 @@ async function markToday() {
 
     const { error } = await supabaseClient
       .from("practice_logs")
-      .insert([
+      .upsert([
         {
           user_id: userId,
           date: today,
         },
-      ]);
+      ], {
+        onConflict: "user_id,date",
+        ignoreDuplicates: true,
+      });
 
     if (error) {
       throw error;

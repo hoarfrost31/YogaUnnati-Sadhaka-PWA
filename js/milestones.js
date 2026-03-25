@@ -22,6 +22,11 @@ async function initUser() {
 const milestones = APP_MILESTONES;
 const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
 
+function getCachedPremiumState() {
+  const profile = readProfileCache(userId);
+  return String(profile.membershipTier || "").toLowerCase() === "premium";
+}
+
 function scrollCurrentMilestoneIntoView() {
   const currentCard = document.querySelector(".milestone-card.current");
 
@@ -55,28 +60,118 @@ async function refreshMilestones() {
   }
 }
 
+function renderMilestonesLockedState(practiceDates = []) {
+  const container = document.getElementById("milestoneList");
+  if (!container) {
+    return;
+  }
+
+  const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
+  const currentState = getCurrentMilestoneState(userId, Math.min(milestoneProgressCount, APP_MILESTONES[0].days));
+  const previewMarkup = milestones.map((milestone, index) => {
+    const isCompleted = index < currentState.index;
+    const isCurrent = index === currentState.index;
+    const status = isCompleted ? "completed" : isCurrent ? "current" : "locked";
+    const progress = isCompleted ? 100 : isCurrent ? (Math.min(milestoneProgressCount, milestone.days) / milestone.days) * 100 : 0;
+    const remaining = Math.max(0, milestone.days - Math.min(milestoneProgressCount, milestone.days));
+
+    return `
+      <div class="milestone-card ${status}">
+        <div class="milestone-promo ${isCurrent ? "is-current" : ""} ${milestone.imageClass || ""}" aria-hidden="true">
+          <img src="${milestone.image}" alt="" class="milestone-promo-img" />
+        </div>
+        <div class="milestone-top">
+          <div>
+            <div class="milestone-title-row">
+              <div class="milestone-title-icon">${getMilestoneIconSvg(milestone.icon)}</div>
+              <h3>${milestone.title}</h3>
+            </div>
+            <p>${milestone.level}</p>
+            <span>${milestone.desc}</span>
+          </div>
+          <span class="badge-text">
+            ${isCompleted
+              ? `${getUiIconSvg("check-circle-2")}<span>Completed</span>`
+              : isCurrent
+                ? `${getUiIconSvg("activity")}<span>In Progress</span>`
+                : `${getUiIconSvg("lock")}<span>Locked</span>`}
+          </span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${progress}%"></div>
+        </div>
+        <div class="progress-text">
+          ${isCurrent ? `${Math.min(milestoneProgressCount, milestone.days)} / ${milestone.days} days` : ""}
+        </div>
+        <div class="remaining">
+          ${status === "locked" ? "" : !isCompleted ? `${remaining} days to go` : "Completed"}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  container.innerHTML = `
+    <div class="premium-preview-shell">
+      <div class="premium-page-preview premium-page-preview-milestones">
+        ${previewMarkup}
+      </div>
+      <div class="premium-page-lock-overlay">
+        <section class="premium-hero-card premium-inline-lock-card">
+          <span class="premium-hero-badge">Premium</span>
+          <h2 class="premium-inline-title">Unlock the milestone journey</h2>
+          <p class="subtitle premium-inline-subtitle">Milestones beyond Sankalpa open with premium access.</p>
+
+          <div class="premium-benefits premium-inline-benefits">
+            <div class="premium-benefit">
+              <span class="premium-benefit-icon" aria-hidden="true">&#10003;</span>
+              <span>See all milestone stages</span>
+            </div>
+            <div class="premium-benefit">
+              <span class="premium-benefit-icon" aria-hidden="true">&#10003;</span>
+              <span>Track your deeper journey</span>
+            </div>
+            <div class="premium-benefit">
+              <span class="premium-benefit-icon" aria-hidden="true">&#10003;</span>
+              <span>Unlock the full path ahead</span>
+            </div>
+          </div>
+
+          <button type="button" class="primary-btn premium-unlock-btn" data-feature="milestones">Unlock Premium</button>
+        </section>
+      </div>
+    </div>
+  `;
+
+  container.querySelector('[data-feature="milestones"]')?.addEventListener("click", () => {
+    window.appAnalytics?.track("open_premium_paywall", {
+      source: "milestones_page_lock",
+      feature: "milestones",
+    });
+    window.premiumAccess?.handleLockedFeature?.("milestones", "milestones_page_lock");
+  });
+}
+
 function renderMilestones(practiceDates = []) {
   const container = document.getElementById("milestoneList");
-  const premiumNoteEl = document.getElementById("milestonePremiumNote");
+  if (!isPremiumMember) {
+    renderMilestonesLockedState(practiceDates);
+    return;
+  }
+
   container.innerHTML = "";
 
   const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
   const currentState = getCurrentMilestoneState(userId, milestoneProgressCount);
-  const hasPremiumMask = !isPremiumMember;
+  const renderedCards = [];
 
   milestones.forEach((milestone, index) => {
     const isCompleted = index < currentState.index;
     const isCurrent = index === currentState.index;
-    const isPremiumLocked = hasPremiumMask && index >= 1;
 
     let status = "";
     if (isCompleted) status = "completed";
     else if (isCurrent) status = "current";
     else status = "locked";
-
-    if (isPremiumLocked) {
-      status = "premium-locked";
-    }
 
     let progress = 0;
     if (isCompleted) {
@@ -86,7 +181,7 @@ function renderMilestones(practiceDates = []) {
     }
 
     const remaining = Math.max(0, milestone.days - milestoneProgressCount);
-    container.innerHTML += `
+    const cardMarkup = `
       <div class="milestone-card ${status}">
         <div class="milestone-promo ${isCurrent ? "is-current" : ""} ${milestone.imageClass || ""}" aria-hidden="true">
           <img src="${milestone.image}" alt="" class="milestone-promo-img" />
@@ -102,13 +197,11 @@ function renderMilestones(practiceDates = []) {
             <span>${milestone.desc}</span>
           </div>
           <span class="badge-text">
-            ${isPremiumLocked
-              ? `${getUiIconSvg("lock")}<span>Premium</span>`
-              : isCompleted
-                ? `${getUiIconSvg("check-circle-2")}<span>Completed</span>`
-                : isCurrent
-                  ? `${getUiIconSvg("activity")}<span>In Progress</span>`
-                  : `${getUiIconSvg("lock")}<span>Locked</span>`}
+            ${isCompleted
+              ? `${getUiIconSvg("check-circle-2")}<span>Completed</span>`
+              : isCurrent
+                ? `${getUiIconSvg("activity")}<span>In Progress</span>`
+                : `${getUiIconSvg("lock")}<span>Locked</span>`}
           </span>
         </div>
 
@@ -121,56 +214,36 @@ function renderMilestones(practiceDates = []) {
         </div>
 
         <div class="remaining">
-          ${isPremiumLocked ? "Unlock premium to continue beyond Sankalpa" : status === "locked" ? "" : !isCompleted ? `${remaining} days to go` : "Completed"}
-        </div>
-
-        ${isPremiumLocked ? `
-          <div class="milestone-premium-overlay">
-            <p>Keep going with premium to unlock the next stages of your journey.</p>
-            <button type="button" class="milestone-premium-btn" data-feature="milestones">Unlock Premium</button>
-          </div>
-        ` : ""}
-      </div>
-    `;
-  });
-
-  if (hasPremiumMask) {
-    container.innerHTML += `
-      <div class="milestone-tail-note">
-        <div class="milestone-tail-icon">${getUiIconSvg("sparkles")}</div>
-        <div class="milestone-tail-copy">
-          <h3>Many more milestones ahead</h3>
-          <p>Stay curious. Your journey opens into deeper stages with premium access.</p>
+          ${status === "locked" ? "" : !isCompleted ? `${remaining} days to go` : "Completed"}
         </div>
       </div>
     `;
-  }
 
-  if (premiumNoteEl) {
-    premiumNoteEl.classList.toggle("hidden", !hasPremiumMask);
-    premiumNoteEl.innerHTML = hasPremiumMask
-      ? `<span>${getUiIconSvg("lock")}</span><p>Sankalpa stays open. Deeper milestones unlock with premium.</p>`
-      : "";
-  }
-
-  container.querySelectorAll(".milestone-premium-btn").forEach((buttonEl) => {
-    buttonEl.addEventListener("click", () => {
-      window.appAnalytics?.track("open_premium_paywall", {
-        source: "milestones_card",
-        feature: "milestones",
-      });
-      window.premiumAccess?.handleLockedFeature?.("milestones", "milestones_card");
-    });
+    renderedCards.push(cardMarkup);
   });
+
+  container.innerHTML = renderedCards.join("");
   scrollCurrentMilestoneIntoView();
 }
 
 async function initApp() {
   await initUser();
   window.appAnalytics?.identify(userId);
-  const premiumState = await window.premiumAccess?.refresh?.();
-  isPremiumMember = Boolean(premiumState?.isPremium);
+  isPremiumMember = getCachedPremiumState();
   renderMilestones(readPracticeCache(userId));
+
+  window.premiumAccess?.refresh?.()
+    .then((premiumState) => {
+      const nextPremiumState = Boolean(premiumState?.isPremium);
+      if (nextPremiumState !== isPremiumMember) {
+        isPremiumMember = nextPremiumState;
+        renderMilestones(readPracticeCache(userId));
+      }
+    })
+    .catch((error) => {
+      console.error("Milestone premium refresh error:", error);
+    });
+
   if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
     refreshMilestones();
   }

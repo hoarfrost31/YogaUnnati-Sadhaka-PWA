@@ -89,6 +89,20 @@ function openGoogleReview() {
   window.open(GOOGLE_REVIEW_URL, "_blank", "noopener,noreferrer");
 }
 
+async function resetPremiumForTesting() {
+  if (!currentUserId) {
+    return;
+  }
+  
+  await setCurrentUserMembershipTier(currentUserId, "free");
+  if (window.premiumAccess?.refresh) {
+    await window.premiumAccess.refresh();
+  }
+
+  showToast("Premium reset for testing");
+  window.location.href = "index.html";
+}
+
 async function logout() {
   window.appAnalytics?.track("logout", {
     source: "member_profile",
@@ -131,6 +145,17 @@ function renderOwnProfileActions(isOwnProfile) {
         </span>
         ${getUiIconSvg("chevron-right", "profile-action-arrow")}
       </button>
+
+      <button type="button" class="profile-action-card" id="resetPremiumBtn">
+        <span class="profile-action-icon" aria-hidden="true">
+          ${getUiIconSvg("settings-2")}
+        </span>
+        <span class="profile-action-copy">
+          <span class="profile-action-title">Reset Premium for Testing</span>
+          <span class="profile-action-text">Switch this test account back to free.</span>
+        </span>
+        ${getUiIconSvg("chevron-right", "profile-action-arrow")}
+      </button>
     </section>
   `;
 
@@ -140,6 +165,15 @@ function renderOwnProfileActions(isOwnProfile) {
 
   memberProfileActionsMountEl.querySelector("#reviewGoogleBtn")?.addEventListener("click", () => {
     openGoogleReview();
+  });
+
+  memberProfileActionsMountEl.querySelector("#resetPremiumBtn")?.addEventListener("click", async () => {
+    try {
+      await resetPremiumForTesting();
+    } catch (error) {
+      console.error("Premium reset error:", error);
+      showToast("Could not reset premium right now");
+    }
   });
 }
 

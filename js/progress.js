@@ -15,6 +15,12 @@ const progressStatusTextEl = document.getElementById("progressStatusText");
 let progressStatusTimer = null;
 const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
 let wasProgressMarkedToday = false;
+let isPremiumMember = false;
+
+function getCachedPremiumState() {
+  const profile = readProfileCache(userId);
+  return String(profile.membershipTier || "").toLowerCase() === "premium";
+}
 
 function getTodayIsoDate() {
   const now = new Date();
@@ -275,14 +281,22 @@ function syncProgressUI(animateMilestone = false) {
 
 function renderProgressMilestone(animate = false) {
   const milestoneProgressCount = getMilestoneProgressCount(practiceDates);
-  const state = getCurrentMilestoneState(userId, milestoneProgressCount);
+  const displayProgressCount = isPremiumMember
+    ? milestoneProgressCount
+    : Math.min(milestoneProgressCount, APP_MILESTONES[0].days);
+  const state = getCurrentMilestoneState(userId, displayProgressCount);
   const total = state.totalWithinMilestone;
   const completed = Math.min(state.completedWithinMilestone, total);
+  const isCompleted = state.remainingDays === 0;
   const radius = 16;
   const circumference = 2 * Math.PI * radius;
   const progressRatio = total === 0 ? 0 : Math.max(0, Math.min(completed / total, 1));
   const offset = circumference * (1 - progressRatio);
+  const progressMilestoneCardEl = document.querySelector(".program-card.small");
+  const progressMilestoneCompletedTagEl = document.getElementById("progressMilestoneCompletedTag");
 
+  progressMilestoneCardEl?.classList.toggle("program-card-completed", isCompleted);
+  progressMilestoneCompletedTagEl?.classList.toggle("hidden", !isCompleted);
   if (progressMilestoneTitleEl) {
     progressMilestoneTitleEl.textContent = state.milestone.title;
   }
@@ -301,6 +315,7 @@ function renderProgressMilestone(animate = false) {
 
   if (progressMilestoneRadialEl) {
     progressMilestoneRadialEl.classList.toggle("radial-progress-animate", animate);
+    progressMilestoneRadialEl.classList.toggle("is-completed", isCompleted);
     progressMilestoneRadialEl.setAttribute("aria-label", `${completed} / ${total} days completed`);
     const valueCircle = progressMilestoneRadialEl.querySelector(".radial-progress-value");
     if (valueCircle) {
@@ -402,7 +417,10 @@ async function toggleTodayPractice() {
 
         const { error } = await supabaseClient
           .from("practice_logs")
-          .insert([{ user_id: userId, date: today }]);
+          .upsert([{ user_id: userId, date: today }], {
+            onConflict: "user_id,date",
+            ignoreDuplicates: true,
+          });
 
         if (error) {
           throw error;
@@ -541,7 +559,10 @@ function openSheet(date, isActive) {
 
           const { error } = await supabaseClient
             .from("practice_logs")
-            .insert([{ user_id: userId, date: selectedDate }]);
+            .upsert([{ user_id: userId, date: selectedDate }], {
+              onConflict: "user_id,date",
+              ignoreDuplicates: true,
+            });
 
           if (error) {
             throw error;
@@ -630,8 +651,20 @@ if (progressTodayBtn) {
 async function initApp() {
   await initUser();
   window.appAnalytics?.identify(userId);
+  isPremiumMember = getCachedPremiumState();
   practiceDates = readPracticeCache(userId);
   syncProgressUI(false);
+  window.premiumAccess?.refresh?.()
+    .then((premiumState) => {
+      const nextPremiumState = Boolean(premiumState?.isPremium);
+      if (nextPremiumState !== isPremiumMember) {
+        isPremiumMember = nextPremiumState;
+        syncProgressUI(false);
+      }
+    })
+    .catch((error) => {
+      console.error("Progress premium refresh error:", error);
+    });
   if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
     refreshPracticeDates();
   }

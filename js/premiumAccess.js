@@ -112,7 +112,7 @@ async function resolvePremiumState(forceRefresh = false) {
     }
   }
 
-  premiumAccessTier = profile.membershipTier || "free";
+  premiumAccessTier = readProfileMembershipOverride(premiumAccessUserId) || profile.membershipTier || "free";
   premiumAccessResolved = true;
   return {
     userId: premiumAccessUserId,

@@ -1,4 +1,5 @@
 const PROFILE_CACHE_PREFIX = "profile_cache_v1:";
+const PROFILE_MEMBERSHIP_OVERRIDE_PREFIX = "profile_membership_override_v1:";
 const DEFAULT_PROFILE_NAME = "Your Profile";
 const DEFAULT_PROFILE_AVATAR = "images/profile-placeholder.svg";
 const LEGACY_DEFAULT_AVATAR_PATHS = new Set([
@@ -8,6 +9,39 @@ const LEGACY_DEFAULT_AVATAR_PATHS = new Set([
 
 function getProfileCacheKey(userId) {
   return `${PROFILE_CACHE_PREFIX}${userId}`;
+}
+
+function getProfileMembershipOverrideKey(userId) {
+  return `${PROFILE_MEMBERSHIP_OVERRIDE_PREFIX}${userId}`;
+}
+
+function readProfileMembershipOverride(userId) {
+  if (!userId) {
+    return "";
+  }
+
+  try {
+    const raw = localStorage.getItem(getProfileMembershipOverrideKey(userId));
+    return raw === "premium" || raw === "free" ? raw : "";
+  } catch (error) {
+    console.error("Profile membership override read error:", error);
+    return "";
+  }
+}
+
+function writeProfileMembershipOverride(userId, membershipTier) {
+  if (!userId) {
+    return;
+  }
+
+  try {
+    localStorage.setItem(
+      getProfileMembershipOverrideKey(userId),
+      String(membershipTier || "").toLowerCase() === "premium" ? "premium" : "free",
+    );
+  } catch (error) {
+    console.error("Profile membership override write error:", error);
+  }
 }
 
 function normalizeFallbackName(name = "") {
@@ -78,7 +112,12 @@ function readProfileCache(userId) {
       return normalizeProfileData();
     }
 
-    return normalizeProfileData(JSON.parse(raw));
+    const profile = normalizeProfileData(JSON.parse(raw));
+    const membershipOverride = readProfileMembershipOverride(userId);
+    return normalizeProfileData({
+      ...profile,
+      membershipTier: membershipOverride || profile.membershipTier,
+    });
   } catch (error) {
     console.error("Profile cache read error:", error);
     return normalizeProfileData();
@@ -357,6 +396,106 @@ async function saveReminderPreference(userId, enabled) {
     ...savedProfile,
     membershipTier: currentProfile.membershipTier,
   });
+}
+
+async function setCurrentUserMembershipTier(userId, membershipTier) {
+  const nextTier = String(membershipTier || "").toLowerCase() === "premium" ? "premium" : "free";
+  const currentProfile = readProfileCache(userId);
+  const nextProfile = normalizeProfileData({
+    ...currentProfile,
+    membershipTier: nextTier,
+  });
+
+  writeProfileMembershipOverride(userId, nextTier);
+  writeProfileCache(userId, nextProfile);
+  markRemoteRefresh("profile", userId);
+
+  let data = null;
+  try {
+    const result = await window.supabaseClient.auth.updateUser({
+      data: {
+        display_name: nextProfile.displayName,
+        avatar_data_url: nextProfile.avatarUrl,
+        class_reminder_enabled: nextProfile.classReminderEnabled,
+        membership_tier: nextTier,
+      },
+    });
+
+    if (result.error) {
+      console.error("Membership auth update error:", result.error);
+      return nextProfile;
+    }
+
+    data = result.data;
+  } catch (error) {
+    console.error("Membership auth update error:", error);
+    return nextProfile;
+  }
+
+  let savedProfile = getProfileFromUser(data.user);
+  savedProfile = normalizeProfileData({
+    ...savedProfile,
+    displayName: nextProfile.displayName || savedProfile.displayName,
+    avatarUrl: nextProfile.avatarUrl || savedProfile.avatarUrl,
+    classReminderEnabled: nextProfile.classReminderEnabled,
+    membershipTier: nextTier,
+  });
+
+  try {
+    const { error: profileError } = await window.supabaseClient
+      .from("profiles")
+      .upsert(
+        {
+          id: userId,
+          display_name: nextProfile.displayName || DEFAULT_PROFILE_NAME,
+          avatar_url: nextProfile.avatarUrl || null,
+          membership_tier: nextTier,
+        },
+        { onConflict: "id" }
+      );
+
+    if (profileError && !isProfilesTableMissing(profileError)) {
+      if (isMembershipTierColumnMissing(profileError)) {
+        const fallbackUpsert = await window.supabaseClient
+          .from("profiles")
+          .upsert(
+            {
+              id: userId,
+              display_name: nextProfile.displayName || DEFAULT_PROFILE_NAME,
+              avatar_url: nextProfile.avatarUrl || null,
+            },
+            { onConflict: "id" }
+          );
+
+        if (fallbackUpsert.error) {
+          throw fallbackUpsert.error;
+        }
+      } else {
+        console.error("Membership profile upsert error:", profileError);
+        writeProfileCache(userId, savedProfile);
+        markRemoteRefresh("profile", userId);
+        return savedProfile;
+      }
+    }
+
+    if (!profileError || isMembershipTierColumnMissing(profileError)) {
+      const row = await fetchProfileRow(userId);
+      if (row) {
+        savedProfile = getProfileFromRow(row, data.user);
+      }
+    }
+  } catch (profilesError) {
+    if (!isProfilesTableMissing(profilesError)) {
+      console.error("Membership profile sync error:", profilesError);
+      writeProfileCache(userId, savedProfile);
+      markRemoteRefresh("profile", userId);
+      return savedProfile;
+    }
+  }
+
+  writeProfileCache(userId, savedProfile);
+  markRemoteRefresh("profile", userId);
+  return savedProfile;
 }
 
 async function fetchAllProfiles() {

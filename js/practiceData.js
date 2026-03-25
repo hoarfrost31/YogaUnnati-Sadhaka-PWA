@@ -405,7 +405,7 @@ function getInitialMilestoneIndex(totalDays) {
   let index = 0;
 
   for (let i = 1; i < APP_MILESTONES.length; i++) {
-    if (totalDays >= APP_MILESTONES[i - 1].days) {
+    if (totalDays > APP_MILESTONES[i - 1].days) {
       index = i;
     }
   }
@@ -452,11 +452,11 @@ function getCurrentMilestoneState(userId, totalDays) {
     index = getInitialMilestoneIndex(uniqueTotalDays);
   }
 
-  while (index < APP_MILESTONES.length - 1 && uniqueTotalDays >= APP_MILESTONES[index].days) {
+  while (index < APP_MILESTONES.length - 1 && uniqueTotalDays > APP_MILESTONES[index].days) {
     index += 1;
   }
 
-  while (index > 0 && uniqueTotalDays < APP_MILESTONES[index - 1].days) {
+  while (index > 0 && uniqueTotalDays <= APP_MILESTONES[index - 1].days) {
     index -= 1;
   }
 
