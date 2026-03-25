@@ -9,6 +9,7 @@ const entriesToCopy = [
   "milestones.html",
   "community.html",
   "profile.html",
+  "member.html",
   "auth.html",
   "manifest.webmanifest",
   "sw.js",
