@@ -407,6 +407,10 @@ function initTomorrowRsvp() {
     }
 
     applyTomorrowRsvp(finalValue);
+    window.appAnalytics?.track("set_tomorrow_rsvp", {
+      source: "home",
+      response: finalValue || "cleared",
+    });
   });
 }
 
@@ -433,6 +437,9 @@ function initTodayPracticeCardLink() {
       return;
     }
 
+    window.appAnalytics?.track("open_community", {
+      source: "home_today_card",
+    });
     goToCommunityPage();
   });
 
@@ -446,6 +453,9 @@ function initTodayPracticeCardLink() {
     }
 
     event.preventDefault();
+    window.appAnalytics?.track("open_community", {
+      source: "home_today_card",
+    });
     goToCommunityPage();
   });
 }
@@ -770,6 +780,13 @@ async function markToday() {
   if (!practiceDates.includes(today)) {
     practiceDates.push(today);
   }
+  const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
+  window.appAnalytics?.track("mark_practice", {
+    source: "home",
+    date: today,
+    total_days: practiceDates.length,
+    milestone: milestoneState.milestone.title,
+  });
   syncHomeUI();
   syncHomeCommunitySnapshotForTodayPractice(true);
   await maybeSendProgressNotification();
@@ -793,6 +810,13 @@ async function unmarkToday() {
   removePracticeDateFromCache(userId, today);
   markRemoteRefresh("practice_dates", userId);
   practiceDates = practiceDates.filter((date) => date !== today);
+  const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
+  window.appAnalytics?.track("unmark_practice", {
+    source: "home",
+    date: today,
+    total_days: practiceDates.length,
+    milestone: milestoneState.milestone.title,
+  });
   syncHomeUI();
   syncHomeCommunitySnapshotForTodayPractice(false);
 }
@@ -916,12 +940,18 @@ if (logoutBtn) {
 
 if (weekCardLinkEl) {
   weekCardLinkEl.addEventListener("click", () => {
+    window.appAnalytics?.track("open_progress", {
+      source: "home_week_card",
+    });
     window.location.href = "progress.html";
   });
 
   weekCardLinkEl.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
+      window.appAnalytics?.track("open_progress", {
+        source: "home_week_card",
+      });
       window.location.href = "progress.html";
     }
   });
@@ -934,8 +964,16 @@ if (weekCardLinkEl) {
 
 async function initApp() {
   await initUser();   // 🔥 must complete first
+  window.appAnalytics?.identify(userId);
   if (homeAvatarLinkEl && userId) {
     homeAvatarLinkEl.href = `member.html?uid=${encodeURIComponent(userId)}`;
+    homeAvatarLinkEl.addEventListener("click", () => {
+      window.appAnalytics?.track("open_member_profile", {
+        source: "home_avatar",
+        member_id: userId,
+        is_own_profile: true,
+      });
+    }, { once: true });
   }
   applyHomeProfile(readProfileCache(userId));
   if (shouldRefreshRemote("profile", userId, PROFILE_REFRESH_TTL_MS)) {

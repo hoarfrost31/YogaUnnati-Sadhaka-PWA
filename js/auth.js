@@ -34,6 +34,9 @@ document.getElementById("signupBtn").onclick = async () => {
   if (error) {
     msg.textContent = error.message;
   } else {
+    window.appAnalytics?.track("sign_up", {
+      has_display_name: Boolean(displayName),
+    });
     msg.textContent = "Account created! Now login.";
   }
 };
@@ -51,6 +54,9 @@ document.getElementById("loginBtn").onclick = async () => {
   if (error) {
     msg.textContent = error.message;
   } else {
+    window.appAnalytics?.track("login", {
+      method: "password",
+    });
     msg.textContent = "Login successful!";
     window.location.href = "index.html";
   }

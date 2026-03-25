@@ -1,4 +1,4 @@
-const CACHE_NAME = "yogaunnati-pwa-v12";
+const CACHE_NAME = "yogaunnati-pwa-v13";
 const APP_SHELL_PATHS = [
   "",
   "index.html",
@@ -11,6 +11,7 @@ const APP_SHELL_PATHS = [
   "manifest.webmanifest",
   "css/styles.css",
   "js/supabaseClient.js",
+  "js/analytics.js",
   "js/pwaConfig.js",
   "js/practiceData.js",
   "js/profileData.js",

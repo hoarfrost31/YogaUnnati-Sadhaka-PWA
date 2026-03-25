@@ -257,6 +257,7 @@ async function buildCommunityMembers() {
 
 async function initApp() {
   await initUser();
+  window.appAnalytics?.identify(userId);
   renderBoard(hydrateCachedMembers(readCommunityBoardCache(userId)));
 
   try {
@@ -274,6 +275,20 @@ async function initApp() {
     console.error(error);
   }
 }
+
+document.addEventListener("click", (event) => {
+  const link = event.target.closest(".community-board-entry-link");
+  if (!link) {
+    return;
+  }
+
+  const memberId = new URL(link.href).searchParams.get("uid") || "";
+  window.appAnalytics?.track("open_member_profile", {
+    source: "community_board",
+    member_id: memberId,
+    is_own_profile: memberId === userId,
+  });
+});
 
 document.addEventListener("visibilitychange", async () => {
   if (document.visibilityState !== "visible" || !userId) {

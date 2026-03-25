@@ -354,6 +354,13 @@ async function toggleTodayPractice() {
       removePracticeDateFromCache(userId, today);
       markRemoteRefresh("practice_dates", userId);
       showToast("Practice removed");
+      const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
+      window.appAnalytics?.track("unmark_practice", {
+        source: "progress_today_button",
+        date: today,
+        total_days: practiceDates.length,
+        milestone: milestoneState.milestone.title,
+      });
     } else {
       await supabaseClient
         .from("practice_logs")
@@ -365,6 +372,13 @@ async function toggleTodayPractice() {
       addPracticeDateToCache(userId, today);
       markRemoteRefresh("practice_dates", userId);
       showToast("Practice marked");
+      const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
+      window.appAnalytics?.track("mark_practice", {
+        source: "progress_today_button",
+        date: today,
+        total_days: practiceDates.length,
+        milestone: milestoneState.milestone.title,
+      });
       await maybeSendProgressNotification();
     }
 
@@ -453,6 +467,13 @@ function openSheet(date, isActive) {
         markRemoteRefresh("practice_dates", userId);
         selectedIsActive = false;
         showToast("Practice removed");
+        const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
+        window.appAnalytics?.track("unmark_practice", {
+          source: "progress_calendar_sheet",
+          date: selectedDate,
+          total_days: practiceDates.length,
+          milestone: milestoneState.milestone.title,
+        });
       } else {
         await supabaseClient
           .from("practice_logs")
@@ -465,6 +486,13 @@ function openSheet(date, isActive) {
         markRemoteRefresh("practice_dates", userId);
         selectedIsActive = true;
         showToast("Practice marked");
+        const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
+        window.appAnalytics?.track("mark_practice", {
+          source: "progress_calendar_sheet",
+          date: selectedDate,
+          total_days: practiceDates.length,
+          milestone: milestoneState.milestone.title,
+        });
         await maybeSendProgressNotification();
       }
 
@@ -517,6 +545,7 @@ if (progressTodayBtn) {
 
 async function initApp() {
   await initUser();
+  window.appAnalytics?.identify(userId);
   practiceDates = readPracticeCache(userId);
   syncProgressUI(false);
   if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {

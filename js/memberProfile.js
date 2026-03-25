@@ -55,11 +55,19 @@ async function invitePeople() {
   try {
     if (navigator.share) {
       await navigator.share(shareData);
+      window.appAnalytics?.track("invite_friend", {
+        source: "member_profile",
+        method: "share_sheet",
+      });
       return;
     }
 
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(`${shareMessage} ${shareUrl}`);
+      window.appAnalytics?.track("invite_friend", {
+        source: "member_profile",
+        method: "clipboard",
+      });
       showToast("Invite link copied");
       return;
     }
@@ -75,10 +83,17 @@ async function invitePeople() {
 }
 
 function openGoogleReview() {
+  window.appAnalytics?.track("review_google_click", {
+    source: "member_profile",
+  });
   window.open(GOOGLE_REVIEW_URL, "_blank", "noopener,noreferrer");
 }
 
 async function logout() {
+  window.appAnalytics?.track("logout", {
+    source: "member_profile",
+  });
+  await window.appAnalytics?.flush?.();
   await window.supabaseClient.auth.signOut();
   window.location.href = "auth.html";
 }
@@ -348,6 +363,12 @@ async function initMemberProfile() {
   }
 
   setOwnProfileActionsVisible(memberId === currentUserId);
+  window.appAnalytics?.identify(currentUserId);
+  window.appAnalytics?.track("open_member_profile", {
+    source: "member_page",
+    member_id: memberId,
+    is_own_profile: memberId === currentUserId,
+  });
 
   if (memberId === currentUserId) {
     const selfSnapshot = buildCachedSelfSnapshot(memberId);

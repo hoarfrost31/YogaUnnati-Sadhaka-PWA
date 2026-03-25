@@ -117,6 +117,7 @@ function renderMilestones(practiceDates = []) {
 
 async function initApp() {
   await initUser();
+  window.appAnalytics?.identify(userId);
   renderMilestones(readPracticeCache(userId));
   if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
     refreshMilestones();

@@ -238,6 +238,9 @@ if (enableNotificationsToggle) {
 
     if (!enableNotificationsToggle.checked) {
       writeClassReminderPreference(userId, false);
+      window.appAnalytics?.track("notifications_disabled", {
+        source: "profile_settings",
+      });
       try {
         await saveReminderPreference(userId, false);
       } catch (error) {
@@ -267,6 +270,9 @@ if (enableNotificationsToggle) {
 
     if (permission === "granted") {
       writeClassReminderPreference(userId, true);
+      window.appAnalytics?.track("notifications_enabled", {
+        source: "profile_settings",
+      });
       try {
         await saveReminderPreference(userId, true);
       } catch (error) {
@@ -324,6 +330,10 @@ saveProfileBtn.addEventListener("click", async () => {
     });
 
     renderProfile(profile);
+    window.appAnalytics?.track("save_profile", {
+      has_avatar: Boolean(profile.avatarUrl),
+      display_name_length: profile.displayName?.length || 0,
+    });
     showToast("Profile updated");
   } catch (error) {
     console.error(error);
@@ -336,6 +346,7 @@ saveProfileBtn.addEventListener("click", async () => {
 
 async function initApp() {
   await initUser();
+  window.appAnalytics?.identify(userId);
   initProfileBackLink();
   renderProfile(readProfileCache(userId));
   renderReminderSettings();
