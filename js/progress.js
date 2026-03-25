@@ -14,6 +14,7 @@ const progressStatusIconEl = document.getElementById("progressStatusIcon");
 const progressStatusTextEl = document.getElementById("progressStatusText");
 let progressStatusTimer = null;
 const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
+let wasProgressMarkedToday = false;
 
 function getTodayIsoDate() {
   const now = new Date();
@@ -201,6 +202,15 @@ function loadStats() {
     });
   }
 
+  if (totalDays > 0 && !practiceDates.includes(yesterdayIso)) {
+    statusMessages.push({
+      tone: "encouragement",
+      icon: "â„¹ï¸",
+      text: "2 missed days can reduce your total by 1.",
+      shine: false,
+    });
+  }
+
   if (streak > 0 && diffDays === 1) {
     statusMessages.push({ tone: "warning", icon: "⚠️", text: "You haven't practiced today - your streak is at risk!" });
   } else if (streak > 0 && diffDays > 1) {
@@ -308,6 +318,13 @@ function updateProgressTodayButton() {
   const today = getTodayIsoDate();
   const isMarkedToday = practiceDates.includes(today);
   progressTodayBtn.classList.toggle("is-done", isMarkedToday);
+  if (isMarkedToday && !wasProgressMarkedToday) {
+    progressTodayBtn.classList.remove("state-flash");
+    void progressTodayBtn.offsetWidth;
+    progressTodayBtn.classList.add("state-flash");
+  } else if (!isMarkedToday) {
+    progressTodayBtn.classList.remove("state-flash");
+  }
 
   if (isMarkedToday) {
     progressTodayBtn.textContent = "Done for Today";
@@ -316,6 +333,8 @@ function updateProgressTodayButton() {
     progressTodayBtn.textContent = "Mark Today";
     progressTodayBtn.setAttribute("aria-label", "Mark today");
   }
+
+  wasProgressMarkedToday = isMarkedToday;
 }
 
 async function maybeSendProgressNotification() {
@@ -344,15 +363,29 @@ async function toggleTodayPractice() {
 
   try {
     if (isMarkedToday) {
-      await supabaseClient
-        .from("practice_logs")
-        .delete()
-        .eq("user_id", userId)
-        .eq("date", today);
+      try {
+        if (!navigator.onLine) {
+          throw new Error("offline");
+        }
 
-      practiceDates = practiceDates.filter((dateItem) => dateItem !== today);
-      removePracticeDateFromCache(userId, today);
-      markRemoteRefresh("practice_dates", userId);
+        const { error } = await supabaseClient
+          .from("practice_logs")
+          .delete()
+          .eq("user_id", userId)
+          .eq("date", today);
+
+        if (error) {
+          throw error;
+        }
+      } catch (error) {
+        if (!isRetryablePracticeSyncError(error)) {
+          throw error;
+        }
+
+        enqueuePracticeMutation(userId, "unmark", today);
+      }
+
+      practiceDates = applyPracticeMutationLocally(userId, practiceDates, "unmark", today);
       showToast("Practice removed");
       const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
       window.appAnalytics?.track("unmark_practice", {
@@ -362,15 +395,27 @@ async function toggleTodayPractice() {
         milestone: milestoneState.milestone.title,
       });
     } else {
-      await supabaseClient
-        .from("practice_logs")
-        .insert([{ user_id: userId, date: today }]);
+      try {
+        if (!navigator.onLine) {
+          throw new Error("offline");
+        }
 
-      if (!practiceDates.includes(today)) {
-        practiceDates.push(today);
+        const { error } = await supabaseClient
+          .from("practice_logs")
+          .insert([{ user_id: userId, date: today }]);
+
+        if (error) {
+          throw error;
+        }
+      } catch (error) {
+        if (!isRetryablePracticeSyncError(error)) {
+          throw error;
+        }
+
+        enqueuePracticeMutation(userId, "mark", today);
       }
-      addPracticeDateToCache(userId, today);
-      markRemoteRefresh("practice_dates", userId);
+
+      practiceDates = applyPracticeMutationLocally(userId, practiceDates, "mark", today);
       showToast("Practice marked");
       const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
       window.appAnalytics?.track("mark_practice", {
@@ -456,15 +501,29 @@ function openSheet(date, isActive) {
   btn.onclick = async () => {
     try {
       if (selectedIsActive) {
-        await supabaseClient
-          .from("practice_logs")
-          .delete()
-          .eq("user_id", userId)
-          .eq("date", selectedDate);
+        try {
+          if (!navigator.onLine) {
+            throw new Error("offline");
+          }
 
-        practiceDates = practiceDates.filter((dateItem) => dateItem !== selectedDate);
-        removePracticeDateFromCache(userId, selectedDate);
-        markRemoteRefresh("practice_dates", userId);
+          const { error } = await supabaseClient
+            .from("practice_logs")
+            .delete()
+            .eq("user_id", userId)
+            .eq("date", selectedDate);
+
+          if (error) {
+            throw error;
+          }
+        } catch (error) {
+          if (!isRetryablePracticeSyncError(error)) {
+            throw error;
+          }
+
+          enqueuePracticeMutation(userId, "unmark", selectedDate);
+        }
+
+        practiceDates = applyPracticeMutationLocally(userId, practiceDates, "unmark", selectedDate);
         selectedIsActive = false;
         showToast("Practice removed");
         const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
@@ -475,15 +534,27 @@ function openSheet(date, isActive) {
           milestone: milestoneState.milestone.title,
         });
       } else {
-        await supabaseClient
-          .from("practice_logs")
-          .insert([{ user_id: userId, date: selectedDate }]);
+        try {
+          if (!navigator.onLine) {
+            throw new Error("offline");
+          }
 
-        if (!practiceDates.includes(selectedDate)) {
-          practiceDates.push(selectedDate);
+          const { error } = await supabaseClient
+            .from("practice_logs")
+            .insert([{ user_id: userId, date: selectedDate }]);
+
+          if (error) {
+            throw error;
+          }
+        } catch (error) {
+          if (!isRetryablePracticeSyncError(error)) {
+            throw error;
+          }
+
+          enqueuePracticeMutation(userId, "mark", selectedDate);
         }
-        addPracticeDateToCache(userId, selectedDate);
-        markRemoteRefresh("practice_dates", userId);
+
+        practiceDates = applyPracticeMutationLocally(userId, practiceDates, "mark", selectedDate);
         selectedIsActive = true;
         showToast("Practice marked");
         const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
@@ -538,6 +609,19 @@ document.getElementById("nextMonth").onclick = () => {
   currentDate.setMonth(currentDate.getMonth() + 1);
   loadCalendar();
 };
+
+window.addEventListener("online", async () => {
+  if (!userId || !hasQueuedPracticeMutations(userId)) {
+    return;
+  }
+
+  try {
+    await syncQueuedPracticeMutations(userId);
+    await refreshPracticeDates();
+  } catch (error) {
+    console.error("Progress queued practice sync error:", error);
+  }
+});
 
 if (progressTodayBtn) {
   progressTodayBtn.addEventListener("click", toggleTodayPractice);

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#f7f3ed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="YogaUnnati" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+  <title>Unlock Premium</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body class="page-shell premium-page">
+  <div class="app-container">
+    <div class="page-content">
+      <button class="back-link premium-back-btn" id="premiumBackBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
+        <span>Back</span>
+      </button>
+
+      <section class="premium-hero-card">
+        <span class="premium-hero-badge">Premium</span>
+        <h1 class="page-title" id="premiumTitle">Unlock Premium</h1>
+        <p class="subtitle" id="premiumSubtitle">Go deeper with full access to your milestone journey and the YogaUnnati community.</p>
+
+        <div class="premium-benefits">
+          <div class="premium-benefit">
+            <span class="premium-benefit-icon" aria-hidden="true">&#10003;</span>
+            <span>Track all milestone stages</span>
+          </div>
+          <div class="premium-benefit">
+            <span class="premium-benefit-icon" aria-hidden="true">&#10003;</span>
+            <span>See the community board</span>
+          </div>
+          <div class="premium-benefit">
+            <span class="premium-benefit-icon" aria-hidden="true">&#10003;</span>
+            <span>View member profiles and shared journeys</span>
+          </div>
+        </div>
+
+        <button class="primary-btn premium-unlock-btn" id="premiumUnlockBtn" type="button">Unlock Premium</button>
+        <a href="index.html" class="premium-secondary-link">Continue with free practice tools</a>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/practiceData.js"></script>
+  <script src="js/profileData.js"></script>
+  <script src="js/pwa.js"></script>
+  <script src="js/pageTransition.js"></script>
+  <script src="js/premiumPage.js"></script>
+</body>
+</html>

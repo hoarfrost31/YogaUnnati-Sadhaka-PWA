@@ -1,4 +1,5 @@
 const PRACTICE_CACHE_PREFIX = "practice_logs_cache_v1:";
+const PRACTICE_MUTATION_QUEUE_PREFIX = "practice_mutations_v1:";
 const MILESTONE_STATE_CACHE_PREFIX = "milestone_state_v1:";
 const REMOTE_REFRESH_PREFIX = "remote_refresh_v1:";
 const APP_MILESTONES = [
@@ -101,6 +102,10 @@ function getMilestoneStateCacheKey(userId) {
   return `${MILESTONE_STATE_CACHE_PREFIX}${userId}`;
 }
 
+function getPracticeMutationQueueKey(userId) {
+  return `${PRACTICE_MUTATION_QUEUE_PREFIX}${userId}`;
+}
+
 function getRemoteRefreshKey(scope, userId = "") {
   return `${REMOTE_REFRESH_PREFIX}${scope}:${userId || "global"}`;
 }
@@ -151,6 +156,44 @@ function readPracticeCache(userId) {
   }
 }
 
+function readPracticeMutationQueue(userId) {
+  if (!userId) {
+    return [];
+  }
+
+  try {
+    const raw = localStorage.getItem(getPracticeMutationQueueKey(userId));
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error("Practice mutation queue read error:", error);
+    return [];
+  }
+}
+
+function writePracticeMutationQueue(userId, queue) {
+  if (!userId) {
+    return;
+  }
+
+  try {
+    localStorage.setItem(
+      getPracticeMutationQueueKey(userId),
+      JSON.stringify(Array.isArray(queue) ? queue : []),
+    );
+  } catch (error) {
+    console.error("Practice mutation queue write error:", error);
+  }
+}
+
+function hasQueuedPracticeMutations(userId) {
+  return readPracticeMutationQueue(userId).length > 0;
+}
+
 function writePracticeCache(userId, dates) {
   if (!userId) {
     return;
@@ -183,7 +226,104 @@ function removePracticeDateFromCache(userId, date) {
   writePracticeCache(userId, dates);
 }
 
+function applyPracticeMutationLocally(userId, practiceDates, mutationType, date) {
+  const nextDates = [...new Set(practiceDates)];
+
+  if (mutationType === "mark") {
+    if (!nextDates.includes(date)) {
+      nextDates.push(date);
+    }
+  } else {
+    const index = nextDates.indexOf(date);
+    if (index >= 0) {
+      nextDates.splice(index, 1);
+    }
+  }
+
+  const normalizedDates = [...new Set(nextDates)].sort();
+  writePracticeCache(userId, normalizedDates);
+  markRemoteRefresh("practice_dates", userId);
+  return normalizedDates;
+}
+
+function enqueuePracticeMutation(userId, mutationType, date) {
+  const queue = readPracticeMutationQueue(userId)
+    .filter((item) => item.date !== date);
+
+  queue.push({
+    type: mutationType,
+    date,
+    queuedAt: Date.now(),
+  });
+
+  writePracticeMutationQueue(userId, queue);
+}
+
+function isRetryablePracticeSyncError(error) {
+  if (!navigator.onLine) {
+    return true;
+  }
+
+  const message = String(error?.message || error?.details || error || "");
+  return /failed to fetch|networkerror|load failed|fetch/i.test(message);
+}
+
+async function syncQueuedPracticeMutations(userId) {
+  if (!userId || !navigator.onLine) {
+    return { applied: 0, pending: readPracticeMutationQueue(userId).length };
+  }
+
+  const queue = [...readPracticeMutationQueue(userId)];
+  let applied = 0;
+
+  while (queue.length) {
+    const mutation = queue[0];
+
+    try {
+      if (mutation.type === "mark") {
+        const { error } = await window.supabaseClient
+          .from("practice_logs")
+          .insert([{ user_id: userId, date: mutation.date }]);
+
+        if (error) {
+          throw error;
+        }
+      } else {
+        const { error } = await window.supabaseClient
+          .from("practice_logs")
+          .delete()
+          .eq("user_id", userId)
+          .eq("date", mutation.date);
+
+        if (error) {
+          throw error;
+        }
+      }
+
+      queue.shift();
+      applied += 1;
+      writePracticeMutationQueue(userId, queue);
+    } catch (error) {
+      if (!isRetryablePracticeSyncError(error)) {
+        console.error("Dropping non-retryable practice sync mutation:", error);
+        queue.shift();
+        writePracticeMutationQueue(userId, queue);
+        continue;
+      }
+
+      break;
+    }
+  }
+
+  return {
+    applied,
+    pending: queue.length,
+  };
+}
+
 async function fetchPracticeDates(userId) {
+  await syncQueuedPracticeMutations(userId);
+
   const { data, error } = await window.supabaseClient
     .from("practice_logs")
     .select("date")
@@ -203,6 +343,13 @@ function normalizePracticeDates(practiceDates) {
   return [...new Set(practiceDates)].sort();
 }
 
+function formatPracticeIsoDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function getMilestoneProgressCount(practiceDates, referenceDate = new Date()) {
   const uniqueDates = normalizePracticeDates(practiceDates);
 
@@ -219,6 +366,16 @@ function getMilestoneProgressCount(practiceDates, referenceDate = new Date()) {
   }
 
   const practicedSet = new Set(uniqueDates);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (reference >= today) {
+    const todayIso = formatPracticeIsoDate(today);
+    if (!practicedSet.has(todayIso)) {
+      reference.setDate(today.getDate() - 1);
+    }
+  }
+
   let consecutiveMisses = 0;
   let maxPenalty = 0;
 

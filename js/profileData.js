@@ -55,10 +55,15 @@ function normalizeAvatarUrl(avatarUrl = "") {
 }
 
 function normalizeProfileData(profile = {}) {
+  const membershipTier = String(profile.membershipTier || "").toLowerCase() === "premium"
+    ? "premium"
+    : "free";
+
   return {
     displayName: (profile.displayName || "").trim(),
     avatarUrl: normalizeAvatarUrl(profile.avatarUrl),
     classReminderEnabled: Boolean(profile.classReminderEnabled),
+    membershipTier,
   };
 }
 
@@ -101,6 +106,7 @@ function getProfileFromUser(user) {
     displayName: displayName || emailPrefix || DEFAULT_PROFILE_NAME,
     avatarUrl: metadata.avatar_data_url || metadata.avatar_url || "",
     classReminderEnabled: Boolean(metadata.class_reminder_enabled),
+    membershipTier: metadata.membership_tier || "free",
   });
 }
 
@@ -110,6 +116,7 @@ function getProfileFromRow(row, fallbackUser = null) {
   return normalizeProfileData({
     displayName: row?.display_name || fallback.displayName,
     avatarUrl: row?.avatar_url || fallback.avatarUrl,
+    membershipTier: row?.membership_tier || fallback.membershipTier,
   });
 }
 
@@ -117,14 +124,35 @@ function isProfilesTableMissing(error) {
   return error?.code === "42P01";
 }
 
+function isMembershipTierColumnMissing(error) {
+  return error?.code === "42703";
+}
+
 async function fetchProfileRow(userId) {
-  const { data, error } = await window.supabaseClient
+  const query = window.supabaseClient
     .from("profiles")
-    .select("id, display_name, avatar_url")
-    .eq("id", userId)
-    .maybeSingle();
+    .select("id, display_name, avatar_url, membership_tier")
+    .eq("id", userId);
+
+  const { data, error } = await query.maybeSingle();
 
   if (error) {
+    if (isMembershipTierColumnMissing(error)) {
+      const fallbackResult = await window.supabaseClient
+        .from("profiles")
+        .select("id, display_name, avatar_url")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (fallbackResult.error) {
+        throw fallbackResult.error;
+      }
+
+      return fallbackResult.data
+        ? { ...fallbackResult.data, membership_tier: "free" }
+        : null;
+    }
+
     throw error;
   }
 
@@ -157,12 +185,30 @@ async function ensureCurrentUserProfile(userId) {
           id: userId,
           display_name: fallbackProfile.displayName || DEFAULT_PROFILE_NAME,
           avatar_url: fallbackProfile.avatarUrl || null,
+          membership_tier: fallbackProfile.membershipTier || "free",
         },
         { onConflict: "id" }
       );
 
     if (upsertError) {
-      throw upsertError;
+      if (isMembershipTierColumnMissing(upsertError)) {
+        const fallbackUpsert = await window.supabaseClient
+          .from("profiles")
+          .upsert(
+            {
+              id: userId,
+              display_name: fallbackProfile.displayName || DEFAULT_PROFILE_NAME,
+              avatar_url: fallbackProfile.avatarUrl || null,
+            },
+            { onConflict: "id" }
+          );
+
+        if (fallbackUpsert.error) {
+          throw fallbackUpsert.error;
+        }
+      } else {
+        throw upsertError;
+      }
     }
 
     const createdRow = await fetchProfileRow(userId);
@@ -225,6 +271,11 @@ async function saveCurrentUserProfile(userId, profile) {
   }
 
   let savedProfile = getProfileFromUser(data.user);
+  const currentProfile = readProfileCache(userId);
+  savedProfile = normalizeProfileData({
+    ...savedProfile,
+    membershipTier: currentProfile.membershipTier,
+  });
 
   try {
     const { error: profileError } = await window.supabaseClient
@@ -234,15 +285,33 @@ async function saveCurrentUserProfile(userId, profile) {
           id: userId,
           display_name: cleanProfile.displayName || DEFAULT_PROFILE_NAME,
           avatar_url: cleanProfile.avatarUrl || null,
+          membership_tier: currentProfile.membershipTier || "free",
         },
         { onConflict: "id" }
       );
 
     if (profileError && !isProfilesTableMissing(profileError)) {
-      throw profileError;
+      if (isMembershipTierColumnMissing(profileError)) {
+        const fallbackUpsert = await window.supabaseClient
+          .from("profiles")
+          .upsert(
+            {
+              id: userId,
+              display_name: cleanProfile.displayName || DEFAULT_PROFILE_NAME,
+              avatar_url: cleanProfile.avatarUrl || null,
+            },
+            { onConflict: "id" }
+          );
+
+        if (fallbackUpsert.error) {
+          throw fallbackUpsert.error;
+        }
+      } else {
+        throw profileError;
+      }
     }
 
-    if (!profileError) {
+    if (!profileError || isMembershipTierColumnMissing(profileError)) {
       const row = await fetchProfileRow(userId);
       if (row) {
         savedProfile = getProfileFromRow(row, data.user);
@@ -279,17 +348,39 @@ async function saveReminderPreference(userId, enabled) {
   }
 
   const savedProfile = getProfileFromUser(data.user);
-  writeProfileCache(userId, savedProfile);
+  writeProfileCache(userId, {
+    ...savedProfile,
+    membershipTier: currentProfile.membershipTier,
+  });
   markRemoteRefresh("profile", userId);
-  return savedProfile;
+  return normalizeProfileData({
+    ...savedProfile,
+    membershipTier: currentProfile.membershipTier,
+  });
 }
 
 async function fetchAllProfiles() {
   const { data, error } = await window.supabaseClient
     .from("profiles")
-    .select("id, display_name, avatar_url");
+    .select("id, display_name, avatar_url, membership_tier");
 
   if (error) {
+    if (isMembershipTierColumnMissing(error)) {
+      const fallbackResult = await window.supabaseClient
+        .from("profiles")
+        .select("id, display_name, avatar_url");
+
+      if (fallbackResult.error) {
+        throw fallbackResult.error;
+      }
+
+      markRemoteRefresh("profiles_public", "");
+      return (fallbackResult.data || []).map((row) => ({
+        ...row,
+        membership_tier: "free",
+      }));
+    }
+
     if (isProfilesTableMissing(error)) {
       return [];
     }

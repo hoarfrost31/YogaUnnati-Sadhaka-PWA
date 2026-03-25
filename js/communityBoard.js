@@ -2,9 +2,12 @@ const supabaseClient = window.supabaseClient;
 const COMMUNITY_BOARD_CACHE_PREFIX = "community_board_cache_v1:";
 
 const communityBoardListEl = document.getElementById("communityBoardList");
+const communityPremiumMaskEl = document.getElementById("communityPremiumMask");
+const communityPremiumBtnEl = document.getElementById("communityPremiumBtn");
 const COMMUNITY_REFRESH_TTL_MS = 2 * 60 * 1000;
 
 let userId;
+let isPremiumMember = false;
 
 function getTodayIsoDate() {
   const now = new Date();
@@ -192,6 +195,14 @@ function renderBoard(members) {
     .join("");
 }
 
+function renderCommunityPremiumMask() {
+  document.body.classList.toggle("community-premium-preview", !isPremiumMember);
+  if (communityPremiumMaskEl) {
+    communityPremiumMaskEl.classList.toggle("hidden", isPremiumMember);
+    communityPremiumMaskEl.setAttribute("aria-hidden", isPremiumMember ? "true" : "false");
+  }
+}
+
 async function buildCommunityMembers() {
   const today = getTodayIsoDate();
   const [profiles, practiceLogsResult] = await Promise.all([
@@ -258,6 +269,9 @@ async function buildCommunityMembers() {
 async function initApp() {
   await initUser();
   window.appAnalytics?.identify(userId);
+  const premiumState = await window.premiumAccess?.refresh?.();
+  isPremiumMember = Boolean(premiumState?.isPremium);
+  renderCommunityPremiumMask();
   renderBoard(hydrateCachedMembers(readCommunityBoardCache(userId)));
 
   try {
@@ -277,8 +291,27 @@ async function initApp() {
 }
 
 document.addEventListener("click", (event) => {
+  if (event.target.closest("#communityPremiumBtn")) {
+    window.appAnalytics?.track("open_premium_paywall", {
+      source: "community_preview",
+      feature: "community",
+    });
+    window.premiumAccess?.handleLockedFeature?.("community", "community_preview");
+    return;
+  }
+
   const link = event.target.closest(".community-board-entry-link");
   if (!link) {
+    return;
+  }
+
+  if (!isPremiumMember) {
+    event.preventDefault();
+    window.appAnalytics?.track("open_premium_paywall", {
+      source: "community_member_preview",
+      feature: "community",
+    });
+    window.premiumAccess?.handleLockedFeature?.("community", "community_member_preview");
     return;
   }
 

@@ -31,6 +31,7 @@ const HOME_COMMUNITY_CACHE_PREFIX = "home_community_today_v1:";
 const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
 const PROFILE_REFRESH_TTL_MS = 5 * 60 * 1000;
 const COMMUNITY_HOME_REFRESH_TTL_MS = 2 * 60 * 1000;
+let wasMarkedToday = false;
 
 // 👤 Temporary user (replace later with auth)
 // const userId = "user_1";
@@ -638,6 +639,14 @@ let isMarked = false;
 function updateProgramButtonState() {
   button.classList.toggle("is-done", isMarked);
 
+  if (isMarked && !wasMarkedToday) {
+    button.classList.remove("state-flash");
+    void button.offsetWidth;
+    button.classList.add("state-flash");
+  } else if (!isMarked) {
+    button.classList.remove("state-flash");
+  }
+
   if (isMarked) {
     button.textContent = "Done for Today";
     button.setAttribute("aria-label", "Done for today");
@@ -645,6 +654,8 @@ function updateProgramButtonState() {
     button.textContent = "Mark Today";
     button.setAttribute("aria-label", "Mark today");
   }
+
+  wasMarkedToday = isMarked;
 }
 
 function syncHomeUI() {
@@ -756,30 +767,41 @@ async function maybeSendProgressNotification() {
 async function markToday() {
   const today = getTodayIsoDate();
 
-    if (!userId) {
+  if (!userId) {
     console.error("User not loaded");
     return;
   }
 
-  const { error } = await supabaseClient
-    .from("practice_logs")
-    .insert([
-      {
-        user_id: userId,
-        date: today,
-      },
-    ]);
+  let usedOfflineQueue = false;
 
-  if (error) {
-    console.error("Insert error:", error);
-    return;
+  try {
+    if (!navigator.onLine) {
+      throw new Error("offline");
+    }
+
+    const { error } = await supabaseClient
+      .from("practice_logs")
+      .insert([
+        {
+          user_id: userId,
+          date: today,
+        },
+      ]);
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    if (!isRetryablePracticeSyncError(error)) {
+      console.error("Insert error:", error);
+      return;
+    }
+
+    usedOfflineQueue = true;
+    enqueuePracticeMutation(userId, "mark", today);
   }
 
-  addPracticeDateToCache(userId, today);
-  markRemoteRefresh("practice_dates", userId);
-  if (!practiceDates.includes(today)) {
-    practiceDates.push(today);
-  }
+  practiceDates = applyPracticeMutationLocally(userId, practiceDates, "mark", today);
   const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
   window.appAnalytics?.track("mark_practice", {
     source: "home",
@@ -789,6 +811,9 @@ async function markToday() {
   });
   syncHomeUI();
   syncHomeCommunitySnapshotForTodayPractice(true);
+  if (usedOfflineQueue) {
+    console.info("Practice mark queued for later sync:", today);
+  }
   await maybeSendProgressNotification();
 }
 
@@ -796,20 +821,33 @@ async function markToday() {
 // ❌ Remove today's practice
 async function unmarkToday() {
   const today = getTodayIsoDate();
-  const { error } = await supabaseClient
-    .from("practice_logs")
-    .delete()
-    .eq("user_id", userId)
-    .eq("date", today);
+  let usedOfflineQueue = false;
 
-  if (error) {
-    console.error("Delete error:", error);
-    return;
+  try {
+    if (!navigator.onLine) {
+      throw new Error("offline");
+    }
+
+    const { error } = await supabaseClient
+      .from("practice_logs")
+      .delete()
+      .eq("user_id", userId)
+      .eq("date", today);
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    if (!isRetryablePracticeSyncError(error)) {
+      console.error("Delete error:", error);
+      return;
+    }
+
+    usedOfflineQueue = true;
+    enqueuePracticeMutation(userId, "unmark", today);
   }
 
-  removePracticeDateFromCache(userId, today);
-  markRemoteRefresh("practice_dates", userId);
-  practiceDates = practiceDates.filter((date) => date !== today);
+  practiceDates = applyPracticeMutationLocally(userId, practiceDates, "unmark", today);
   const milestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
   window.appAnalytics?.track("unmark_practice", {
     source: "home",
@@ -819,6 +857,9 @@ async function unmarkToday() {
   });
   syncHomeUI();
   syncHomeCommunitySnapshotForTodayPractice(false);
+  if (usedOfflineQueue) {
+    console.info("Practice unmark queued for later sync:", today);
+  }
 }
 
 function renderWeek(practiceDates) {
@@ -919,6 +960,20 @@ document.addEventListener("visibilitychange", async () => {
   }
 });
 
+window.addEventListener("online", async () => {
+  if (!userId || !hasQueuedPracticeMutations(userId)) {
+    return;
+  }
+
+  try {
+    await syncQueuedPracticeMutations(userId);
+    await refreshPracticeDates();
+    syncHomeCommunitySnapshotForTodayPractice(practiceDates.includes(getTodayIsoDate()));
+  } catch (error) {
+    console.error("Home queued practice sync error:", error);
+  }
+});
+
 // 🔁 Button toggle
 button.addEventListener("click", async () => {
   if (isMarked) {
@@ -967,6 +1022,7 @@ async function initApp() {
   window.appAnalytics?.identify(userId);
   if (homeAvatarLinkEl && userId) {
     homeAvatarLinkEl.href = `member.html?uid=${encodeURIComponent(userId)}`;
+    homeAvatarLinkEl.dataset.premiumBypass = "self-profile";
     homeAvatarLinkEl.addEventListener("click", () => {
       window.appAnalytics?.track("open_member_profile", {
         source: "home_avatar",
