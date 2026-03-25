@@ -114,6 +114,15 @@ if ("serviceWorker" in navigator) {
         window.location.reload();
       });
 
+      navigator.serviceWorker.addEventListener("message", (event) => {
+        if (event.data?.type !== "SW_ACTIVATED" || hasRefreshedForUpdate) {
+          return;
+        }
+
+        hasRefreshedForUpdate = true;
+        window.location.reload();
+      });
+
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState !== "visible") {
           return;
