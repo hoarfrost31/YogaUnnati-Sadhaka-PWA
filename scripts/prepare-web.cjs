@@ -8,6 +8,7 @@ const entriesToCopy = [
   "progress.html",
   "milestones.html",
   "community.html",
+  "premium.html",
   "profile.html",
   "member.html",
   "auth.html",
