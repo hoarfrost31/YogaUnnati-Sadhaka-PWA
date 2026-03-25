@@ -266,7 +266,7 @@ input {
 
 .program-card {
   border-radius: 30px;
-  padding: 22px 20px 20px;
+  padding: 19px 18px 17px;
 }
 
 .program-card-with-promo {
@@ -285,10 +285,10 @@ input {
 
 .program-promo {
   position: absolute;
-  top: 16px;
+  top: 14px;
   right: 0;
   width: 128px;
-  height: calc(100% - 32px);
+  height: calc(100% - 28px);
   border-radius: 26px 0 0 26px;
   overflow: hidden;
   opacity: 1;
@@ -446,7 +446,7 @@ input {
 .home-milestone-bar {
   width: 100%;
   height: 8px;
-  margin: 12px 0 14px;
+  margin: 9px 0 10px;
   overflow: hidden;
   border-radius: 999px;
   background: rgba(127, 151, 128, 0.14);
@@ -540,7 +540,7 @@ input {
 
 .week-card {
   margin-top: 18px;
-  padding: 20px;
+  padding: 16px 16px 14px;
   border-radius: 20px;
   background: var(--surface);
   backdrop-filter: blur(14px);
@@ -561,12 +561,12 @@ input {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 9px;
 }
 
 .week-card-header h3 {
   margin: 4px 0 0;
-  font-size: 1.02rem;
+  font-size: 0.98rem;
   font-weight: 800;
 }
 
@@ -580,14 +580,14 @@ input {
 .week-strip {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .target-date-note {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 9px;
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-soft);
@@ -722,26 +722,26 @@ input {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 0;
   background: transparent;
   border: none;
 }
 
 .week-day-label {
-  font-size: 0.72rem;
+  font-size: 0.69rem;
   font-weight: 700;
   color: var(--text-faint);
   letter-spacing: 0.03em;
 }
 
 .week-day-date {
-  width: 40px;
-  height: 40px;
+  width: 37px;
+  height: 37px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
-  font-size: 0.86rem;
+  border-radius: 14px;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--text);
   background: rgba(127, 151, 128, 0.08);
@@ -846,7 +846,7 @@ input {
 }
 
 .page-title {
-  font-size: 1.92rem;
+  font-size: 1.82rem;
 }
 
 .profile-page-header {
