@@ -4,6 +4,7 @@ const path = require("path");
 const rootDir = path.resolve(__dirname, "..");
 const outDir = path.join(rootDir, "www");
 const entriesToCopy = [
+  "install.html",
   "index.html",
   "progress.html",
   "milestones.html",

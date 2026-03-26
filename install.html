@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f3ed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="YogaUnnati" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+  <title>Install YogaUnnati</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="install-page page-shell">
+  <div class="install-shell">
+    <section class="install-hero-card">
+      <span class="install-badge">YogaUnnati</span>
+
+      <div class="install-hero-top">
+        <img src="images/logo.png" alt="YogaUnnati" class="install-logo" />
+        <div class="install-hero-copy">
+          <h1>Install the YogaUnnati app.</h1>
+          <p class="install-subtitle">Track your practice, follow your milestones, and open YogaUnnati like an app on your phone.</p>
+        </div>
+      </div>
+
+      <div class="install-mini-preview" aria-hidden="true">
+        <div class="install-mini-card">
+          <span class="install-mini-label">This Week</span>
+          <div class="install-mini-days">
+            <span class="install-mini-day active">M</span>
+            <span class="install-mini-day active">T</span>
+            <span class="install-mini-day active">W</span>
+            <span class="install-mini-day">T</span>
+            <span class="install-mini-day">F</span>
+          </div>
+        </div>
+        <div class="install-mini-card install-mini-card-accent">
+          <span class="install-mini-label">Current Milestone</span>
+          <strong>Sankalpa</strong>
+          <span>One day at a time.</span>
+        </div>
+      </div>
+
+      <div class="install-actions">
+        <button type="button" class="primary-btn install-primary-btn" id="installAppBtn">Install App</button>
+        <a href="auth.html" class="secondary-btn install-secondary-btn">Open App</a>
+      </div>
+
+      <p class="install-support-copy" id="installSupportCopy">Best experienced as an installed app on your phone.</p>
+    </section>
+
+    <section class="install-points-card">
+      <div class="install-point">
+        <strong>Track daily</strong>
+        <span>Mark practice and stay regular.</span>
+      </div>
+      <div class="install-point">
+        <strong>See milestones</strong>
+        <span>Follow your journey clearly.</span>
+      </div>
+      <div class="install-point">
+        <strong>Open instantly</strong>
+        <span>Use it like a real app.</span>
+      </div>
+    </section>
+
+    <section class="install-help-card hidden" id="installHelpCard">
+      <div class="install-help-head">
+        <span class="install-badge install-badge-soft">Install Help</span>
+        <button type="button" class="install-help-close" id="installHelpClose" aria-label="Close install help">Close</button>
+      </div>
+      <h2 id="installHelpTitle">Add YogaUnnati to your Home Screen</h2>
+      <p id="installHelpText">Open this page in your phone browser and choose Add to Home Screen from the browser menu.</p>
+    </section>
+  </div>
+
+  <script src="js/pwa.js"></script>
+  <script src="js/installPage.js"></script>
+</body>
+</html>
