@@ -1,12 +1,16 @@
 (function installPageSetup() {
   const installButton = document.getElementById("installAppBtn");
-  const supportCopy = document.getElementById("installSupportCopy");
+  const helpButton = document.getElementById("installHelpBtn");
   const helpCard = document.getElementById("installHelpCard");
-  const helpTitle = document.getElementById("installHelpTitle");
-  const helpText = document.getElementById("installHelpText");
   const helpClose = document.getElementById("installHelpClose");
+  const guideVisual = document.getElementById("installGuideVisual");
+  const pathName = window.location.pathname || "";
+  const searchParams = new URLSearchParams(window.location.search || "");
+  const previewMode = (searchParams.get("preview") || "").toLowerCase();
+  const isIosPage = /install-ios\.html$/i.test(pathName);
+  const isDefaultInstallPage = /install\.html$/i.test(pathName) || /\/install$/i.test(pathName);
 
-  if (!installButton || !supportCopy || !helpCard || !helpTitle || !helpText || !helpClose) {
+  if (!installButton) {
     return;
   }
 
@@ -16,48 +20,35 @@
     return /iphone|ipad|ipod/i.test(window.navigator.userAgent || "");
   }
 
-  function isAndroid() {
-    return /android/i.test(window.navigator.userAgent || "");
-  }
-
   function isStandalone() {
     return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true;
   }
 
-  function showHelp(title, text) {
-    helpTitle.textContent = title;
-    helpText.textContent = text;
-    helpCard.classList.remove("hidden");
-  }
+  function routeByPlatform() {
+    if (isStandalone() || previewMode === "ios" || previewMode === "android") {
+      return;
+    }
 
-  function hideHelp() {
-    helpCard.classList.add("hidden");
+    if (isIos() && isDefaultInstallPage) {
+      window.location.replace("install-ios.html");
+      return;
+    }
+
+    if (!isIos() && isIosPage) {
+      window.location.replace("install.html");
+    }
   }
 
   function setInstalledState() {
-    installButton.textContent = "Open YogaUnnati";
-    supportCopy.textContent = "YogaUnnati is already available like an app on this device.";
+    installButton.textContent = "App";
   }
 
-  function setPromptReadyState() {
-    installButton.textContent = "Install App";
-    supportCopy.textContent = "Install YogaUnnati for a smoother daily practice experience.";
-  }
-
-  function setFallbackState() {
+  function setIosState() {
     installButton.textContent = "How to Install";
+  }
 
-    if (isIos()) {
-      supportCopy.textContent = "On iPhone, use Share and then Add to Home Screen.";
-      return;
-    }
-
-    if (isAndroid()) {
-      supportCopy.textContent = "On Android, open the browser menu and choose Install app or Add to Home screen.";
-      return;
-    }
-
-    supportCopy.textContent = "Open this page in a supported browser to install YogaUnnati like an app.";
+  function setInstallState() {
+    installButton.textContent = "Install YogaUnnati";
   }
 
   function refreshButtonState() {
@@ -66,30 +57,42 @@
       return;
     }
 
-    if (deferredInstallPrompt) {
-      setPromptReadyState();
+    if (isIosPage || isIos()) {
+      setIosState();
       return;
     }
 
-    setFallbackState();
+    setInstallState();
+  }
+
+  function hideHelp() {
+    helpCard?.classList.add("hidden");
+  }
+
+  function showHelp() {
+    helpCard?.classList.remove("hidden");
   }
 
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;
-    hideHelp();
     refreshButtonState();
   });
 
   window.addEventListener("appinstalled", () => {
     deferredInstallPrompt = null;
-    hideHelp();
     setInstalledState();
+    hideHelp();
   });
 
   installButton.addEventListener("click", async () => {
     if (isStandalone()) {
       window.location.href = "auth.html";
+      return;
+    }
+
+    if (isIosPage || isIos()) {
+      guideVisual?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
 
@@ -99,7 +102,7 @@
       try {
         await deferredInstallPrompt.userChoice;
       } catch (_error) {
-        // Ignore dismissal errors and fall back to the instruction state.
+        // Ignore dismissal errors.
       }
 
       deferredInstallPrompt = null;
@@ -107,29 +110,12 @@
       return;
     }
 
-    if (isIos()) {
-      showHelp(
-        "Install on iPhone",
-        "Tap Share in Safari, then choose Add to Home Screen to install YogaUnnati."
-      );
-      return;
-    }
-
-    if (isAndroid()) {
-      showHelp(
-        "Install on Android",
-        "Open the browser menu, then choose Install app or Add to Home screen."
-      );
-      return;
-    }
-
-    showHelp(
-      "Install YogaUnnati",
-      "Open this page in Chrome, Safari, or another supported mobile browser to install the app."
-    );
+    showHelp();
   });
 
-  helpClose.addEventListener("click", hideHelp);
+  helpButton?.addEventListener("click", showHelp);
+  helpClose?.addEventListener("click", hideHelp);
 
+  routeByPlatform();
   refreshButtonState();
 })();

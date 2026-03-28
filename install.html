@@ -15,65 +15,31 @@
 </head>
 <body class="install-page page-shell">
   <div class="install-shell">
-    <section class="install-hero-card">
-      <span class="install-badge">YogaUnnati</span>
+    <section class="install-card">
+      <span class="install-chip">YogaUnnati</span>
 
-      <div class="install-hero-top">
-        <img src="images/logo.png" alt="YogaUnnati" class="install-logo" />
+      <div class="install-hero">
+        <img src="images/logo.png" alt="YogaUnnati logo" class="install-icon-mark" />
         <div class="install-hero-copy">
           <h1>Install the YogaUnnati app.</h1>
-          <p class="install-subtitle">Track your practice, follow your milestones, and open YogaUnnati like an app on your phone.</p>
+          <p>Track your practice, follow your milestones, and open YogaUnnati like an app on your phone.</p>
         </div>
       </div>
 
-      <div class="install-mini-preview" aria-hidden="true">
-        <div class="install-mini-card">
-          <span class="install-mini-label">This Week</span>
-          <div class="install-mini-days">
-            <span class="install-mini-day active">M</span>
-            <span class="install-mini-day active">T</span>
-            <span class="install-mini-day active">W</span>
-            <span class="install-mini-day">T</span>
-            <span class="install-mini-day">F</span>
-          </div>
-        </div>
-        <div class="install-mini-card install-mini-card-accent">
-          <span class="install-mini-label">Current Milestone</span>
-          <strong>Sankalpa</strong>
-          <span>One day at a time.</span>
-        </div>
-      </div>
+      <div class="install-features-head">App Features</div>
+      <figure class="install-shot-card" id="installGuideVisual">
+        <img src="images/install-android.webp" alt="Android install preview for YogaUnnati" class="install-shot-image" />
+      </figure>
 
       <div class="install-actions">
-        <button type="button" class="primary-btn install-primary-btn" id="installAppBtn">Install App</button>
-        <a href="auth.html" class="secondary-btn install-secondary-btn">Open App</a>
+        <button type="button" class="primary-btn install-primary-btn" id="installAppBtn">Install YogaUnnati</button>
+        <button type="button" class="install-helper-btn" id="installHelpBtn">Need Help Installing?</button>
       </div>
 
-      <p class="install-support-copy" id="installSupportCopy">Best experienced as an installed app on your phone.</p>
-    </section>
-
-    <section class="install-points-card">
-      <div class="install-point">
-        <strong>Track daily</strong>
-        <span>Mark practice and stay regular.</span>
-      </div>
-      <div class="install-point">
-        <strong>See milestones</strong>
-        <span>Follow your journey clearly.</span>
-      </div>
-      <div class="install-point">
-        <strong>Open instantly</strong>
-        <span>Use it like a real app.</span>
-      </div>
-    </section>
-
-    <section class="install-help-card hidden" id="installHelpCard">
-      <div class="install-help-head">
-        <span class="install-badge install-badge-soft">Install Help</span>
-        <button type="button" class="install-help-close" id="installHelpClose" aria-label="Close install help">Close</button>
-      </div>
-      <h2 id="installHelpTitle">Add YogaUnnati to your Home Screen</h2>
-      <p id="installHelpText">Open this page in your phone browser and choose Add to Home Screen from the browser menu.</p>
+      <section class="install-help-card hidden" id="installHelpCard">
+        <p>On Android, open the browser menu and choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</p>
+        <button type="button" class="install-help-close" id="installHelpClose">Close</button>
+      </section>
     </section>
   </div>
 
@@ -81,3 +47,4 @@
   <script src="js/installPage.js"></script>
 </body>
 </html>
+

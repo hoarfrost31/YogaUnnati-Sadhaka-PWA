@@ -417,6 +417,7 @@ async function toggleTodayPractice() {
 
   const today = getTodayIsoDate();
   const isMarkedToday = practiceDates.includes(today);
+  const previousMilestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
 
   try {
     if (isMarkedToday) {
@@ -457,6 +458,7 @@ async function toggleTodayPractice() {
         total_days: practiceDates.length,
         milestone: milestoneState.milestone.title,
       });
+      showMilestoneUnlockToast(previousMilestoneState, milestoneState);
       await maybeSendProgressNotification();
     }
 
@@ -533,6 +535,7 @@ function openSheet(date, isActive) {
 
   btn.onclick = async () => {
     try {
+      const previousMilestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
       if (selectedIsActive) {
         await supabaseClient
           .from("practice_logs")
@@ -577,6 +580,7 @@ function openSheet(date, isActive) {
           total_days: practiceDates.length,
           milestone: milestoneState.milestone.title,
         });
+        showMilestoneUnlockToast(previousMilestoneState, milestoneState);
         await maybeSendProgressNotification();
       }
 
@@ -613,6 +617,14 @@ function showToast(message) {
   }, 2000);
 }
 
+function showMilestoneUnlockToast(previousState, nextState) {
+  if (!previousState || !nextState || nextState.index <= previousState.index) {
+    return;
+  }
+
+  showToast(`New level unlocked: ${nextState.milestone.title}`);
+}
+
 document.getElementById("prevMonth").onclick = () => {
   currentDate.setMonth(currentDate.getMonth() - 1);
   loadCalendar();
@@ -638,3 +650,5 @@ async function initApp() {
 }
 
 initApp();
+
+

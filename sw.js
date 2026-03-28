@@ -1,7 +1,8 @@
-const CACHE_NAME = "yogaunnati-pwa-v18";
+const CACHE_NAME = "yogaunnati-pwa-v21";
 const APP_SHELL_PATHS = [
   "",
   "install.html",
+  "install-ios.html",
   "index.html",
   "progress.html",
   "milestones.html",
@@ -9,6 +10,7 @@ const APP_SHELL_PATHS = [
   "member.html",
   "profile.html",
   "auth.html",
+  "auth2.html",
   "manifest.webmanifest",
   "css/styles.css",
   "js/supabaseClient.js",
@@ -27,6 +29,11 @@ const APP_SHELL_PATHS = [
   "js/memberProfile.js",
   "js/auth.js",
   "images/logo.png",
+  "images/sankalpa.webp",
+  "images/sthirata.webp",
+  "images/calm.webp",
+  "images/install-android.webp",
+  "images/install-ios.webp",
   "images/pwa-192.png",
   "images/pwa-512.png",
   "images/apple-touch-icon.png"
@@ -226,3 +233,7 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
+
+
+

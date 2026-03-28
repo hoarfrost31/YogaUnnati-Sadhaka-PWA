@@ -736,6 +736,47 @@ function renderHomeMilestoneProgress() {
   }
 }
 
+function getOrCreateHomeToast() {
+  let toast = document.getElementById("toast");
+
+  if (toast) {
+    return toast;
+  }
+
+  toast = document.createElement("div");
+  toast.id = "toast";
+  toast.className = "toast hidden";
+  document.body.appendChild(toast);
+  return toast;
+}
+
+function showToast(message) {
+  const toast = getOrCreateHomeToast();
+
+  toast.textContent = message;
+  toast.classList.remove("hidden", "show");
+
+  window.setTimeout(() => {
+    toast.classList.add("show");
+  }, 10);
+
+  window.setTimeout(() => {
+    toast.classList.remove("show");
+
+    window.setTimeout(() => {
+      toast.classList.add("hidden");
+    }, 300);
+  }, 2200);
+}
+
+function showMilestoneUnlockToast(previousState, nextState) {
+  if (!previousState || !nextState || nextState.index <= previousState.index) {
+    return;
+  }
+
+  showToast(`New level unlocked: ${nextState.milestone.title}`);
+}
+
 async function maybeSendProgressNotification() {
   const notificationsApi = window.pwaNotifications;
   if (!notificationsApi?.isSupported?.() || notificationsApi.getPermission?.() !== "granted") {
@@ -756,10 +797,12 @@ async function maybeSendProgressNotification() {
 async function markToday() {
   const today = getTodayIsoDate();
 
-    if (!userId) {
+  if (!userId) {
     console.error("User not loaded");
     return;
   }
+
+  const previousMilestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
 
   const { error } = await supabaseClient
     .from("practice_logs")
@@ -789,6 +832,7 @@ async function markToday() {
   });
   syncHomeUI();
   syncHomeCommunitySnapshotForTodayPractice(true);
+  showMilestoneUnlockToast(previousMilestoneState, milestoneState);
   await maybeSendProgressNotification();
 }
 
@@ -1002,3 +1046,5 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
+
