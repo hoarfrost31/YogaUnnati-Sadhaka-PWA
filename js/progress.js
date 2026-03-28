@@ -458,7 +458,7 @@ async function toggleTodayPractice() {
         total_days: practiceDates.length,
         milestone: milestoneState.milestone.title,
       });
-      showMilestoneUnlockToast(previousMilestoneState, milestoneState);
+      await maybeHandleMilestoneUnlock(previousMilestoneState, milestoneState);
       await maybeSendProgressNotification();
     }
 
@@ -580,7 +580,7 @@ function openSheet(date, isActive) {
           total_days: practiceDates.length,
           milestone: milestoneState.milestone.title,
         });
-        showMilestoneUnlockToast(previousMilestoneState, milestoneState);
+        await maybeHandleMilestoneUnlock(previousMilestoneState, milestoneState);
         await maybeSendProgressNotification();
       }
 
@@ -617,12 +617,69 @@ function showToast(message) {
   }, 2000);
 }
 
-function showMilestoneUnlockToast(previousState, nextState) {
+function getOrCreateMilestoneUnlockBanner() {
+  let banner = document.getElementById("milestoneUnlockBanner");
+
+  if (banner) {
+    return banner;
+  }
+
+  banner = document.createElement("div");
+  banner.id = "milestoneUnlockBanner";
+  banner.className = "milestone-unlock-banner hidden";
+  banner.innerHTML = `
+    <p class="milestone-unlock-banner-title">Congratulations!</p>
+    <p class="milestone-unlock-banner-text"></p>
+  `;
+  document.body.appendChild(banner);
+  return banner;
+}
+
+function showMilestoneUnlockBanner(nextState) {
+  const banner = getOrCreateMilestoneUnlockBanner();
+  const textEl = banner.querySelector(".milestone-unlock-banner-text");
+
+  if (textEl) {
+    textEl.textContent = `You unlocked ${nextState.milestone.level}: ${nextState.milestone.title}.`;
+  }
+
+  banner.classList.remove("hidden", "show");
+
+  setTimeout(() => {
+    banner.classList.add("show");
+  }, 10);
+
+  setTimeout(() => {
+    banner.classList.remove("show");
+
+    setTimeout(() => {
+      banner.classList.add("hidden");
+    }, 260);
+  }, 3200);
+}
+async function maybeSendMilestoneUnlockNotification(nextState) {
+  const notificationsApi = window.pwaNotifications;
+  if (!notificationsApi?.isSupported?.() || notificationsApi.getPermission?.() !== "granted") {
+    return;
+  }
+
+  try {
+    await notificationsApi.sendNotification(
+      "YogaUnnati",
+      `Congratulations! You unlocked ${nextState.milestone.title}.`,
+    );
+  } catch (error) {
+    console.error("Milestone unlock notification error:", error);
+  }
+}
+
+async function maybeHandleMilestoneUnlock(previousState, nextState) {
   if (!previousState || !nextState || nextState.index <= previousState.index) {
     return;
   }
 
-  showToast(`New level unlocked: ${nextState.milestone.title}`);
+  showMilestoneUnlockBanner(nextState);
+  await maybeSendMilestoneUnlockNotification(nextState);
 }
 
 document.getElementById("prevMonth").onclick = () => {
@@ -650,5 +707,10 @@ async function initApp() {
 }
 
 initApp();
+
+
+
+
+
 
 

@@ -769,12 +769,70 @@ function showToast(message) {
   }, 2200);
 }
 
-function showMilestoneUnlockToast(previousState, nextState) {
+function getOrCreateMilestoneUnlockBanner() {
+  let banner = document.getElementById("milestoneUnlockBanner");
+
+  if (banner) {
+    return banner;
+  }
+
+  banner = document.createElement("div");
+  banner.id = "milestoneUnlockBanner";
+  banner.className = "milestone-unlock-banner hidden";
+  banner.innerHTML = `
+    <p class="milestone-unlock-banner-title">Congratulations!</p>
+    <p class="milestone-unlock-banner-text"></p>
+  `;
+  document.body.appendChild(banner);
+  return banner;
+}
+
+function showMilestoneUnlockBanner(nextState) {
+  const banner = getOrCreateMilestoneUnlockBanner();
+  const textEl = banner.querySelector(".milestone-unlock-banner-text");
+
+  if (textEl) {
+    textEl.textContent = `You unlocked ${nextState.milestone.level}: ${nextState.milestone.title}.`;
+  }
+
+  banner.classList.remove("hidden", "show");
+
+  window.setTimeout(() => {
+    banner.classList.add("show");
+  }, 10);
+
+  window.setTimeout(() => {
+    banner.classList.remove("show");
+
+    window.setTimeout(() => {
+      banner.classList.add("hidden");
+    }, 260);
+  }, 3200);
+}
+
+async function maybeSendMilestoneUnlockNotification(nextState) {
+  const notificationsApi = window.pwaNotifications;
+  if (!notificationsApi?.isSupported?.() || notificationsApi.getPermission?.() !== "granted") {
+    return;
+  }
+
+  try {
+    await notificationsApi.sendNotification(
+      "YogaUnnati",
+      `Congratulations! You unlocked ${nextState.milestone.title}.`,
+    );
+  } catch (error) {
+    console.error("Milestone unlock notification error:", error);
+  }
+}
+
+async function maybeHandleMilestoneUnlock(previousState, nextState) {
   if (!previousState || !nextState || nextState.index <= previousState.index) {
     return;
   }
 
-  showToast(`New level unlocked: ${nextState.milestone.title}`);
+  showMilestoneUnlockBanner(nextState);
+  await maybeSendMilestoneUnlockNotification(nextState);
 }
 
 async function maybeSendProgressNotification() {
@@ -832,7 +890,7 @@ async function markToday() {
   });
   syncHomeUI();
   syncHomeCommunitySnapshotForTodayPractice(true);
-  showMilestoneUnlockToast(previousMilestoneState, milestoneState);
+  await maybeHandleMilestoneUnlock(previousMilestoneState, milestoneState);
   await maybeSendProgressNotification();
 }
 
@@ -1046,5 +1104,9 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
+
+
+
 
 

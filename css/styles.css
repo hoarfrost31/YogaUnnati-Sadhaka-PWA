@@ -505,15 +505,15 @@ input {
 
 .milestone-image-energy .program-promo-img,
 .milestone-image-energy .milestone-promo-img {
-  object-position: 36% 26%;
-  transform: scale(1.15);
+  object-position: 46% 24%;
+  transform: scale(1.24);
   filter: contrast(1.03) brightness(1.01);
 }
 
 .milestone-image-calm .program-promo-img,
 .milestone-image-calm .milestone-promo-img {
-  object-position: center 16%;
-  transform: scale(1.11);
+  object-position: center 12%;
+  transform: scale(1.2);
   filter: contrast(1.03) brightness(1.01);
 }
 
@@ -847,6 +847,41 @@ input {
 .notifications-popup-btn.primary {
   background: rgba(209, 134, 74, 0.16);
   color: #b1682d;
+}
+.milestone-unlock-banner {
+  position: fixed;
+  top: calc(18px + var(--safe-top));
+  left: 50%;
+  width: min(calc(100% - 28px), 420px);
+  transform: translateX(-50%) translateY(-10px);
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: rgba(255, 250, 243, 0.97);
+  border: 1px solid rgba(209, 134, 74, 0.18);
+  box-shadow: 0 18px 40px rgba(62, 45, 28, 0.18);
+  z-index: 1200;
+  opacity: 0;
+  transition: opacity 0.26s ease, transform 0.26s ease;
+}
+
+.milestone-unlock-banner.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.milestone-unlock-banner-title {
+  margin: 0;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: var(--accent-deep);
+}
+
+.milestone-unlock-banner-text {
+  margin: 6px 0 0;
+  color: var(--text-soft);
+  font-size: 0.86rem;
+  line-height: 1.45;
 }
 
 .week-card-arrow {
@@ -3195,6 +3230,10 @@ input {
     font-size: 0.72rem;
   }
 }
+
+
+
+
 
 
 

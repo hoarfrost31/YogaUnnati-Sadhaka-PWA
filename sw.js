@@ -1,4 +1,4 @@
-const CACHE_NAME = "yogaunnati-pwa-v21";
+const CACHE_NAME = "yogaunnati-pwa-v22";
 const APP_SHELL_PATHS = [
   "",
   "install.html",
@@ -32,6 +32,7 @@ const APP_SHELL_PATHS = [
   "images/sankalpa.webp",
   "images/sthirata.webp",
   "images/calm.webp",
+  "images/ananda.webp",
   "images/install-android.webp",
   "images/install-ios.webp",
   "images/pwa-192.png",
@@ -233,6 +234,7 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
 
 
 
