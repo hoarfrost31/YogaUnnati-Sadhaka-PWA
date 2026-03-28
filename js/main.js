@@ -780,7 +780,7 @@ function getOrCreateMilestoneUnlockBanner() {
   banner.id = "milestoneUnlockBanner";
   banner.className = "milestone-unlock-banner hidden";
   banner.innerHTML = `
-    <p class="milestone-unlock-banner-title">Congratulations!</p>
+    <p class="milestone-unlock-banner-title">Congratulations! &#127881;</p>
     <p class="milestone-unlock-banner-text"></p>
   `;
   document.body.appendChild(banner);
@@ -1104,6 +1104,8 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
+
 
 
 
