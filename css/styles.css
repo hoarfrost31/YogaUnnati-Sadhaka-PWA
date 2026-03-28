@@ -2192,8 +2192,8 @@ input {
 }
 
 .milestone-card.current {
-  padding-top: 26px;
-  padding-bottom: 24px;
+  padding-top: 22px;
+  padding-bottom: 20px;
 }
 
 .milestone-journey .milestone-card:not(:last-child)::after {
@@ -2367,7 +2367,7 @@ input {
 }
 
 .milestone-card.current .progress-bar {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .milestone-card.locked .progress-bar {
@@ -2420,7 +2420,7 @@ input {
 }
 
 .milestone-card.current .progress-text {
-  margin-top: 9px;
+  margin-top: 8px;
 }
 
 .badge-text {
@@ -3230,6 +3230,7 @@ input {
     font-size: 0.72rem;
   }
 }
+
 
 
 
