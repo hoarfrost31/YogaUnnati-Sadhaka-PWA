@@ -2186,35 +2186,35 @@ input {
 
 .milestone-card {
   position: relative;
-  margin-top: 14px;
-  border-radius: 24px;
-  padding: 30px 26px;
+  margin-top: 12px;
+  border-radius: 22px;
+  padding: 24px 22px 22px;
 }
 
 .milestone-card.current {
-  padding-top: 22px;
-  padding-bottom: 20px;
+  padding-top: 19px;
+  padding-bottom: 17px;
 }
 
 .milestone-journey .milestone-card:not(:last-child)::after {
   content: "";
   position: absolute;
-  left: 46px;
-  top: calc(100% + 2px);
+  left: 42px;
+  top: calc(100% + 1px);
   width: 3px;
-  height: 18px;
+  height: 14px;
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(209, 134, 74, 0.78) 0%, rgba(222, 161, 107, 0.42) 100%);
 }
 
 .milestone-promo {
   position: absolute;
-  top: 18px;
+  top: 14px;
   right: 0;
-  width: 132px;
-  height: calc(100% - 36px);
+  width: 126px;
+  height: calc(100% - 28px);
   overflow: hidden;
-  border-radius: 28px 0 0 28px;
+  border-radius: 24px 0 0 24px;
   opacity: 0.98;
   box-shadow: none;
 }
@@ -2246,7 +2246,7 @@ input {
 .milestone-top {
   display: flex;
   justify-content: space-between;
-  gap: 22px;
+  gap: 16px;
 }
 
 .current .milestone-top,
@@ -2282,8 +2282,8 @@ input {
 .milestone-title-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 4px;
+  gap: 9px;
+  margin-bottom: 3px;
 }
 
 .milestone-card.current .milestone-title-row {
@@ -2291,8 +2291,8 @@ input {
 }
 
 .milestone-title-icon {
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
@@ -2315,7 +2315,7 @@ input {
 }
 
 .milestone-top p {
-  margin: 6px 0 4px;
+  margin: 4px 0 3px;
   font-size: 0.84rem;
   font-weight: 400;
   color: #567056;
@@ -2359,15 +2359,15 @@ input {
 }
 
 .progress-bar {
-  height: 10px;
-  margin-top: 20px;
+  height: 9px;
+  margin-top: 16px;
   overflow: hidden;
   border-radius: 999px;
   background: rgba(127, 151, 128, 0.12);
 }
 
 .milestone-card.current .progress-bar {
-  margin-top: 14px;
+  margin-top: 12px;
 }
 
 .milestone-card.locked .progress-bar {
@@ -2415,12 +2415,12 @@ input {
 }
 
 .progress-text {
-  margin-top: 12px;
+  margin-top: 10px;
   color: var(--text-soft);
 }
 
 .milestone-card.current .progress-text {
-  margin-top: 8px;
+  margin-top: 7px;
 }
 
 .badge-text {
@@ -2475,12 +2475,12 @@ input {
 }
 
 .remaining {
-  margin-top: 10px;
+  margin-top: 8px;
   color: var(--text-faint);
 }
 
 .milestone-card.current .remaining {
-  margin-top: 8px;
+  margin-top: 7px;
 }
 
 .auth-body {
@@ -3230,6 +3230,7 @@ input {
     font-size: 0.72rem;
   }
 }
+
 
 
 
