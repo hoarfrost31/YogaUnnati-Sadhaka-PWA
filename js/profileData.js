@@ -119,6 +119,7 @@ function getProfileFromRow(row, fallbackUser = null) {
   return normalizeProfileData({
     displayName: row?.display_name || fallback.displayName,
     avatarUrl: row?.avatar_url || fallback.avatarUrl,
+    phone: row?.phone || fallback.phone,
   });
 }
 
