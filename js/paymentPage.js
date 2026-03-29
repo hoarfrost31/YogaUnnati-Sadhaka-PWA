@@ -196,15 +196,9 @@ async function openCashfreeCheckout(orderPayload) {
 async function initPaymentPage() {
   const planCode = getSelectedPaymentPlan();
   const plan = PAYMENT_PLANS[planCode];
-
-  setText('paymentPlanEyebrow', plan.eyebrow);
-  setText('paymentPlanName', plan.name);
-  setText('paymentPlanCopy', plan.copy);
-  setText('paymentPlanAmount', plan.amountDisplay);
   setText('paymentInfoPlan', plan.name);
   setText('paymentInfoAmount', plan.amountDisplay);
   setText('paymentHeroCopy', plan.hero);
-  renderPaymentBenefits(planCode);
 
   const user = await window.appAuth?.getCurrentUser?.();
   if (!user?.id) {
