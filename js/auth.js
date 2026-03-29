@@ -6,7 +6,7 @@ const passwordInput = document.getElementById("password");
 const msg = document.getElementById("msg");
 const loginBtn = document.getElementById("loginBtn");
 const signupBtn = document.getElementById("signupBtn");
-const isAdminAuthPage = /(^|\/)admin-login\.html$/i.test(window.location.pathname) || window.location.href.toLowerCase().includes("admin-login.html");
+const currentPath = window.location.pathname.toLowerCase().replace(/\/+$/, "");`r`nconst isAdminAuthPage = /(^|\/)admin-login(?:\.html)?$/i.test(currentPath) || window.location.href.toLowerCase().includes("admin-login.html");
 
 function setMessage(text) {
   msg.textContent = text;
@@ -127,3 +127,4 @@ loginBtn.onclick = async () => {
     }, 220);
   }
 };
+
