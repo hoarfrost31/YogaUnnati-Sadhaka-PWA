@@ -2,8 +2,8 @@ const PAYMENT_PLANS = {
   app: {
     eyebrow: 'App Only',
     name: 'YogaUnnati App',
-    amountDisplay: "\u20B91",
-    amountValue: 1,
+    amountDisplay: "\u20B9199",
+    amountValue: 199,
     copy: 'The digital-only membership for members who want tracking, milestones, and app continuity.',
     hero: 'Your app-only membership will continue through secure Cashfree checkout.',
     benefits: [
@@ -15,8 +15,8 @@ const PAYMENT_PLANS = {
   online: {
     eyebrow: 'Online Guided + App',
     name: 'YogaUnnati Online',
-    amountDisplay: "\u20B91",
-    amountValue: 1,
+    amountDisplay: "\u20B9499",
+    amountValue: 499,
     copy: 'The remote guided membership with app support for members who practice from anywhere.',
     hero: 'Your online guided membership will continue through secure monthly Cashfree checkout.',
     benefits: [
@@ -28,8 +28,8 @@ const PAYMENT_PLANS = {
   studio: {
     eyebrow: 'Studio + App',
     name: 'YogaUnnati Studio',
-    amountDisplay: "\u20B91",
-    amountValue: 1,
+    amountDisplay: "\u20B91099",
+    amountValue: 1099,
     copy: 'The complete studio membership with guided group practice, teacher corrections, and app support.',
     hero: 'Your full studio membership will continue through secure monthly Cashfree checkout.',
     benefits: [
