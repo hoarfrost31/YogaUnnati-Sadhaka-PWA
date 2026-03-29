@@ -110,17 +110,6 @@ function renderOwnProfileActions(isOwnProfile) {
 
   memberProfileActionsMountEl.innerHTML = `
     <section class="profile-actions-grid" aria-label="Profile actions">
-      <a href="membership.html" class="profile-action-card">
-        <span class="profile-action-icon" aria-hidden="true">
-          ${getUiIconSvg("sparkles")}
-        </span>
-        <span class="profile-action-copy">
-          <span class="profile-action-title">Membership</span>
-          <span class="profile-action-text">View plans and choose the option that fits your practice.</span>
-        </span>
-        ${getUiIconSvg("chevron-right", "profile-action-arrow")}
-      </a>
-
       <button type="button" class="profile-action-card" id="invitePeopleBtn">
         <span class="profile-action-icon" aria-hidden="true">
           ${getUiIconSvg("user-plus")}
@@ -456,6 +445,7 @@ if (memberLogoutBtn) {
     await logout();
   });
 }
+
 
 
 
