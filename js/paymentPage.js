@@ -93,6 +93,58 @@ function getHostedLink(planCode) {
   return String(links[planCode] || '').trim();
 }
 
+function getHostedLinkCode(planCode) {
+  const checkoutUrl = getHostedLink(planCode);
+  if (!checkoutUrl) {
+    return '';
+  }
+
+  try {
+    return new URL(checkoutUrl).searchParams.get('code') || '';
+  } catch (_error) {
+    return '';
+  }
+}
+
+function normalizeIndianPhone(input) {
+  const digits = String(input || '').replace(/\D/g, '');
+  if (digits.length === 10) {
+    return digits;
+  }
+  if (digits.length === 12 && digits.startsWith('91')) {
+    return digits.slice(2);
+  }
+  return '';
+}
+
+async function createPendingPaymentIntent(planCode, user) {
+  const phone = normalizeIndianPhone(
+    user?.phone
+    || user?.user_metadata?.phone
+    || user?.user_metadata?.phone_number
+    || user?.user_metadata?.mobile
+    || user?.raw_user_meta_data?.phone
+    || user?.raw_user_meta_data?.phone_number
+    || user?.raw_user_meta_data?.mobile
+    || ''
+  );
+
+  const payload = {
+    user_id: user.id,
+    user_email: String(user.email || '').trim().toLowerCase() || null,
+    user_phone: phone || null,
+    plan_code: planCode,
+    provider: 'cashfree_link',
+    status: 'pending',
+    provider_link_code: getHostedLinkCode(planCode) || null,
+  };
+
+  const { error } = await window.supabaseClient.from('payment_intents').insert(payload);
+  if (error) {
+    throw new Error(error.message || 'Could not start payment confirmation.');
+  }
+}
+
 function openHostedCheckout(planCode) {
   const checkoutUrl = getHostedLink(planCode);
   if (!checkoutUrl) {
@@ -129,6 +181,7 @@ async function initPaymentPage() {
       setPaymentMessage('Redirecting to Cashfree checkout...', false);
 
       try {
+        await createPendingPaymentIntent(planCode, user);
         window.appAnalytics?.track?.('membership_checkout_started', { provider: 'cashfree-hosted', plan_code: planCode });
         openHostedCheckout(planCode);
       } catch (error) {
