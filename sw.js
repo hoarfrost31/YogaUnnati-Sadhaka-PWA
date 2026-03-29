@@ -1,4 +1,4 @@
-const CACHE_NAME = "yogaunnati-pwa-v64";
+const CACHE_NAME = "yogaunnati-pwa-v65";
 const APP_SHELL_PATHS = [
   "",
   "install.html",
