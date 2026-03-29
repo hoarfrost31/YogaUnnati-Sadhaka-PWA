@@ -23,6 +23,8 @@ const homeMilestoneProgressEl = document.getElementById("homeMilestoneProgress")
 const homeMilestoneRemainingEl = document.getElementById("homeMilestoneRemaining");
 const homeMilestoneBarFillEl = document.getElementById("homeMilestoneBarFill");
 const brandTaglineEl = document.getElementById("brandTagline");
+const homeMembershipReminderCardEl = document.getElementById("homeMembershipReminderCard");
+const homeMembershipReminderTextEl = document.getElementById("homeMembershipReminderText");
 const todayPracticeActionsEl = document.getElementById("todayPracticeActions");
 const HOME_MILESTONE_BAR_ANIMATED_KEY = "home_milestone_bar_animated_v1";
 const TOMORROW_RSVP_KEY = "yogaunnati_tomorrow_rsvp";
@@ -31,6 +33,8 @@ const HOME_COMMUNITY_CACHE_PREFIX = "home_community_today_v1:";
 const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
 const PROFILE_REFRESH_TTL_MS = 5 * 60 * 1000;
 const COMMUNITY_HOME_REFRESH_TTL_MS = 2 * 60 * 1000;
+const MEMBERSHIP_REFRESH_TTL_MS = 5 * 60 * 1000;
+const MEMBERSHIP_REMINDER_NOTIFICATION_KEY = "membership_payment_reminder_v1";
 
 // 👤 Temporary user (replace later with auth)
 // const userId = "user_1";
@@ -104,6 +108,18 @@ function calculateCurrentStreak(practiceDates) {
 function getHomeCommunityCacheKey(userId) {
   return `${HOME_COMMUNITY_CACHE_PREFIX}${userId}`;
 }
+
+function getMembershipReminderNotificationKey(userIdValue, suffix = "") {
+  return `${MEMBERSHIP_REMINDER_NOTIFICATION_KEY}:${userIdValue || "guest"}:${suffix}`;
+}
+
+function membershipReminderPlanLabel(planCode) {
+  if (planCode === "studio") return "YogaUnnati Studio";
+  if (planCode === "online") return "YogaUnnati Online";
+  if (planCode === "app") return "YogaUnnati App";
+  return "Your membership";
+}
+
 
 function getReminderStorageKey(userIdValue) {
   return `${CLASS_REMINDER_KEY}:${userIdValue || "guest"}`;
@@ -563,6 +579,109 @@ function applyHomeProfile(profile) {
   }
 }
 
+function getMembershipReminderState(membership) {
+  if (!membership || membership.planCode === "none" || !membership.currentPeriodEnd) {
+    return null;
+  }
+
+  const dueDate = new Date(membership.currentPeriodEnd);
+  if (Number.isNaN(dueDate.getTime())) {
+    return null;
+  }
+
+  const now = new Date();
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / msPerDay);
+  const formattedDate = dueDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+
+  if (membership.status === "past_due" || diffDays < 0) {
+    return {
+      tone: "warning",
+      message: `Payment overdue for ${membershipReminderPlanLabel(membership.planCode)}. Open Membership to renew now.`,
+      notification: `${membershipReminderPlanLabel(membership.planCode)} payment is overdue. Please renew now.`,
+      key: `overdue:${formatIsoDate(dueDate)}`,
+    };
+  }
+
+  if (diffDays <= 3) {
+    const dayLabel = diffDays === 1 ? "day" : "days";
+    return {
+      tone: diffDays === 0 ? "warning" : "encouragement",
+      message: diffDays === 0
+        ? `${membershipReminderPlanLabel(membership.planCode)} payment is due today.`
+        : `${membershipReminderPlanLabel(membership.planCode)} payment due in ${diffDays} ${dayLabel} on ${formattedDate}.`,
+      notification: diffDays === 0
+        ? `${membershipReminderPlanLabel(membership.planCode)} payment is due today.`
+        : `${membershipReminderPlanLabel(membership.planCode)} payment is due in ${diffDays} ${dayLabel}.`,
+      key: `due:${formatIsoDate(dueDate)}:${diffDays}`,
+    };
+  }
+
+  return null;
+}
+
+function renderHomeMembershipReminder(reminder) {
+  if (!homeMembershipReminderCardEl || !homeMembershipReminderTextEl) {
+    return;
+  }
+
+  if (!reminder) {
+    homeMembershipReminderCardEl.classList.add("hidden");
+    homeMembershipReminderCardEl.classList.remove("is-warning", "is-encouragement");
+    homeMembershipReminderTextEl.textContent = "";
+    return;
+  }
+
+  homeMembershipReminderCardEl.classList.remove("hidden");
+  homeMembershipReminderCardEl.classList.toggle("is-warning", reminder.tone === "warning");
+  homeMembershipReminderCardEl.classList.toggle("is-encouragement", reminder.tone !== "warning");
+  homeMembershipReminderTextEl.textContent = reminder.message;
+}
+
+async function maybeSendMembershipReminderNotification(reminder) {
+  const notificationsApi = window.pwaNotifications;
+  if (!reminder || !userId || !notificationsApi?.isSupported?.() || notificationsApi.getPermission?.() !== "granted") {
+    return;
+  }
+
+  const storageKey = getMembershipReminderNotificationKey(userId, reminder.key);
+  try {
+    if (localStorage.getItem(storageKey) === "sent") {
+      return;
+    }
+  } catch (error) {
+    console.error("Membership reminder notification cache read error:", error);
+  }
+
+  try {
+    const sent = await notificationsApi.sendNotification("YogaUnnati", reminder.notification);
+    if (sent) {
+      localStorage.setItem(storageKey, "sent");
+    }
+  } catch (error) {
+    console.error("Membership reminder notification error:", error);
+  }
+}
+
+async function loadHomeMembershipReminder() {
+  if (!userId || !window.membershipData) {
+    return;
+  }
+
+  const cachedMembership = window.membershipData.readMembershipCache(userId);
+  let reminder = getMembershipReminderState(cachedMembership);
+  renderHomeMembershipReminder(reminder);
+
+  try {
+    const membership = await window.membershipData.refreshCurrentUserMembership(userId);
+    reminder = getMembershipReminderState(membership);
+    renderHomeMembershipReminder(reminder);
+    await maybeSendMembershipReminderNotification(reminder);
+  } catch (error) {
+    console.error("Membership reminder load error:", error);
+  }
+}
+
 async function loadHomeProfile() {
   if (!userId) {
     return;
@@ -979,6 +1098,10 @@ document.addEventListener("visibilitychange", async () => {
       refreshTasks.push(refreshHomeCommunitySnapshot());
     }
 
+    if (shouldRefreshRemote("membership", userId, MEMBERSHIP_REFRESH_TTL_MS)) {
+      refreshTasks.push(loadHomeMembershipReminder());
+    }
+
     if (refreshTasks.length) {
       await Promise.all(refreshTasks);
     }
@@ -1047,6 +1170,18 @@ async function initApp() {
   if (shouldRefreshRemote("profile", userId, PROFILE_REFRESH_TTL_MS)) {
     loadHomeProfile();
   }
+  if (homeMembershipReminderCardEl) {
+    homeMembershipReminderCardEl.addEventListener("click", () => {
+      window.location.href = "membership.html";
+    });
+    homeMembershipReminderCardEl.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        window.location.href = "membership.html";
+      }
+    });
+  }
+  loadHomeMembershipReminder();
   practiceDates = readPracticeCache(userId);
   syncHomeUI();
   renderHomeCommunitySnapshot(readHomeCommunityCache(userId));
@@ -1070,17 +1205,6 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
-
-
-
-
-
-
-
-
-
-
-
 
 
 

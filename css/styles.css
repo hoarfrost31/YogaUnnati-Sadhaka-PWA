@@ -4516,4 +4516,19 @@ input {
   font-weight: 600;
   color: var(--text-soft);
 }
+#homeMembershipReminderCard {
+  margin-top: 14px;
+  cursor: pointer;
+}
+
+#homeMembershipReminderCard .progress-status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  font-weight: 700;
+}
 

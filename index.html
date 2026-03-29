@@ -71,6 +71,11 @@
 
   </section>
 
+  <section class="progress-status-card hidden" id="homeMembershipReminderCard" role="button" tabindex="0" aria-label="Open membership page">
+    <span class="progress-status-icon" aria-hidden="true">&#8377;</span>
+    <span class="progress-status-text" id="homeMembershipReminderText"></span>
+  </section>
+
   <!-- Weekly Calendar -->
   <section class="week-card week-card-link" id="weekCardLink" role="link" tabindex="0" aria-label="Open progress page">
     <div class="week-card-header">
@@ -204,6 +209,7 @@
 <script src="js/analytics.js"></script>
 <script src="js/practiceData.js"></script>
 <script src="js/profileData.js"></script>
+<script src="js/membershipData.js"></script>
 <script src="js/pwa.js"></script>
 <script src="js/pageTransition.js"></script>
     <script>
@@ -219,9 +225,5 @@ window.appAuth.getCurrentUser().then((user) => {
 
 </body>
 </html>
-
-
-
-
 
 
