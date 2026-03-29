@@ -1,8 +1,3 @@
 {
-  "version": 2,
-  "functions": {
-    "api/create-cashfree-payment-link.js": {
-      "runtime": "nodejs"
-    }
-  }
+  "version": 2
 }
