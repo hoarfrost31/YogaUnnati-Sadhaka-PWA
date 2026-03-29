@@ -14,6 +14,8 @@
 
 
   <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/styles.css"/>
@@ -26,14 +28,14 @@
   <!-- Header -->
   <header class="header">
     <div class="logo">
-      <img src="images/logo.png" class="logo-img" />
+      <img src="images/logo.png" class="logo-img" alt="YogaUnnati logo" width="512" height="512" decoding="async" />
       <div class="logo-text">
         <h1>YogaUnnati</h1>
         <p class="tagline" id="brandTagline">Mastering body and mind</p>
       </div>
     </div>
-    <a href="profile.html" class="avatar-link" id="homeAvatarLink" aria-label="Open your profile">
-      <img src="images/profile-placeholder.svg" class="avatar" id="homeAvatar" alt="Profile photo"/>
+    <a href="profile-settings.html" class="avatar-link" id="homeAvatarLink" aria-label="Open your profile">
+      <img src="images/profile-placeholder.svg" class="avatar" id="homeAvatar" alt="Profile photo" width="46" height="46" decoding="async"/>
       <span class="avatar avatar-initial-badge hidden" id="homeAvatarInitial">Y</span>
     </a>
   </header>
@@ -42,7 +44,7 @@
   <section class="program-card program-card-with-promo">
 
     <div class="program-promo milestone-image-stiffness" id="homeMilestonePromo" aria-hidden="true">
-      <img src="images/sankalpa.webp" alt="" class="program-promo-img" id="homeMilestoneImage" />
+      <img src="images/sankalpa.webp" alt="" class="program-promo-img" id="homeMilestoneImage" decoding="async" fetchpriority="high" />
     </div>
 
     <div class="program-left">
@@ -100,7 +102,7 @@
 
   <section class="quote-card index-quote-card">
     <div class="quote-photo-wrap" aria-hidden="true">
-      <img src="images/Sadhguru-1.jfif" alt="" class="quote-photo" />
+      <img src="images/Sadhguru-1.jfif" alt="" class="quote-photo" width="201" height="251" loading="lazy" decoding="async" />
     </div>
     <div class="quote-copy">
       <p class="quote-text">
@@ -137,7 +139,7 @@
 
       <div class="community-item">
         <div class="avatar-circle community-profile-avatar">
-          <img src="images/profile-placeholder.svg" alt="" class="community-avatar-img hidden" id="communityAvatarImg" />
+          <img src="images/profile-placeholder.svg" alt="" class="community-avatar-img hidden" id="communityAvatarImg" width="44" height="44" loading="lazy" decoding="async" />
           <span class="community-avatar-initial" id="communityAvatarInitial">Y</span>
         </div>
         <div class="community-profile-copy">
@@ -205,26 +207,21 @@
 <script src="js/pwa.js"></script>
 <script src="js/pageTransition.js"></script>
     <script>
-    async function checkAuth() {
-    const { data: sessionData } = await window.supabaseClient.auth.getSession();
-
-    if (sessionData?.session?.user) {
-        return;
-    }
-
-    const { data } = await window.supabaseClient.auth.getUser();
-
-    if (!data.user) {
-        window.location.href = "auth.html";
-    }
-    }
-
-    checkAuth();
-    </script>
+window.appAuth.getCurrentUser().then((user) => {
+  if (!user?.id) {
+    window.location.href = "auth.html";
+  }
+});
+</script>
 
 
 <script src="js/main.js"></script>
 
 </body>
 </html>
+
+
+
+
+
 

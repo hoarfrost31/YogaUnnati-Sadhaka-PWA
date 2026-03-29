@@ -12,6 +12,8 @@
 
   <title>Progress</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css"/>
 </head>
@@ -102,7 +104,7 @@
     </div>
 
     <div class="stat-card">
-      <img src="images/flame_icon.svg" alt="" aria-hidden="true">
+      <img src="images/flame_icon.svg" alt="" aria-hidden="true" width="24" height="24" loading="lazy" decoding="async">
       <h2 id="streak">0</h2>
       <p>Day Streak</p>
     </div>
@@ -156,21 +158,11 @@
 <script src="js/pwa.js"></script>
 <script src="js/pageTransition.js"></script>
 <script>
-async function checkAuth() {
-  const { data: sessionData } = await window.supabaseClient.auth.getSession();
-
-  if (sessionData?.session?.user) {
-    return;
-  }
-
-  const { data } = await window.supabaseClient.auth.getUser();
-
-  if (!data.user) {
+window.appAuth.getCurrentUser().then((user) => {
+  if (!user?.id) {
     window.location.href = "auth.html";
   }
-}
-
-checkAuth();
+});
 </script>
 
 <script src="js/progress.js"></script>
@@ -201,3 +193,7 @@ checkAuth();
 
 </body>
 </html>
+
+
+
+

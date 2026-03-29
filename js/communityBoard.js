@@ -93,21 +93,14 @@ function hydrateCachedMembers(members) {
 }
 
 async function initUser() {
-  const { data: sessionData } = await supabaseClient.auth.getSession();
-  if (sessionData?.session?.user) {
-    userId = sessionData.session.user.id;
-    return;
-  }
-
-  const { data } = await supabaseClient.auth.getUser();
-  if (!data.user) {
+  const currentUser = await window.appAuth.getCurrentUser();
+  if (!currentUser?.id) {
     window.location.href = "auth.html";
     return;
   }
 
-  userId = data.user.id;
+  userId = currentUser.id;
 }
-
 function calculateStreak(practiceDates) {
   const dates = [...practiceDates].sort().reverse();
   let streak = 0;
@@ -139,7 +132,7 @@ function getMemberMarkup(member, index, isCurrentUser) {
     : "";
 
   return `
-    <a href="member.html?uid=${encodeURIComponent(member.id)}" class="community-board-entry-link" aria-label="Open ${member.displayName}'s profile">
+    <a href="memberprofile.html?uid=${encodeURIComponent(member.id)}" class="community-board-entry-link" aria-label="Open ${member.displayName}'s profile">
     <article class="community-board-entry">
       <div class="community-board-rank">
         ${getUiIconSvg(index === 0 ? "medal" : "sparkles")}
@@ -194,22 +187,13 @@ function renderBoard(members) {
 
 async function buildCommunityMembers() {
   const today = getTodayIsoDate();
-  const [profiles, practiceLogsResult] = await Promise.all([
-    fetchAllProfiles(),
-    window.supabaseClient.from("practice_logs").select("user_id, date"),
-  ]);
+  const practiceLogsResult = await window.supabaseClient.from("practice_logs").select("user_id, date");
 
   if (practiceLogsResult.error) {
     throw practiceLogsResult.error;
   }
 
   const practiceData = practiceLogsResult.data || [];
-  const profileMap = new Map(
-    profiles.map((profileRow) => [
-      profileRow.id,
-      getProfileFromRow(profileRow),
-    ])
-  );
   const practiceMap = new Map();
 
   practiceData.forEach((row) => {
@@ -219,7 +203,14 @@ async function buildCommunityMembers() {
     practiceMap.get(row.user_id).push(row.date);
   });
 
-  const memberIds = new Set([...profileMap.keys(), ...practiceMap.keys(), userId]);
+  const memberIds = [...new Set([...practiceMap.keys(), userId].filter(Boolean))];
+  const profiles = await fetchProfilesByIds(memberIds);
+  const profileMap = new Map(
+    profiles.map((profileRow) => [
+      profileRow.id,
+      getProfileFromRow(profileRow),
+    ])
+  );
   const members = [];
 
   memberIds.forEach((memberId) => {
@@ -254,7 +245,6 @@ async function buildCommunityMembers() {
 
   return members;
 }
-
 async function initApp() {
   await initUser();
   window.appAnalytics?.identify(userId);
@@ -312,3 +302,9 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 initApp();
+
+
+
+
+
+

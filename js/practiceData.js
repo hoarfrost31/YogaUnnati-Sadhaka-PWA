@@ -348,4 +348,138 @@ function getPracticeProgressNotificationMessage(userId, practiceDates) {
   return `Going good. Your next milestone in ${state.remainingDays} ${dayLabel}.`;
 }
 
+const MILESTONE_UNLOCK_BANNER_STORAGE_KEY = "milestone_unlock_banner_v1";
+const MILESTONE_UNLOCK_BANNER_DURATION_MS = 12000;
+let milestoneUnlockBannerTimer = null;
 
+function getOrCreateSharedMilestoneUnlockBanner() {
+  let banner = document.getElementById("milestoneUnlockBanner");
+
+  if (banner) {
+    return banner;
+  }
+
+  if (!document.body) {
+    return null;
+  }
+
+  banner = document.createElement("div");
+  banner.id = "milestoneUnlockBanner";
+  banner.className = "milestone-unlock-banner hidden";
+  banner.innerHTML = `
+    <p class="milestone-unlock-banner-title">Congratulations! &#127881;</p>
+    <p class="milestone-unlock-banner-text"></p>
+  `;
+  document.body.appendChild(banner);
+  return banner;
+}
+
+function readPendingMilestoneUnlockBanner() {
+  try {
+    const raw = sessionStorage.getItem(MILESTONE_UNLOCK_BANNER_STORAGE_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      sessionStorage.removeItem(MILESTONE_UNLOCK_BANNER_STORAGE_KEY);
+      return null;
+    }
+
+    if (!parsed.expiresAt || parsed.expiresAt <= Date.now()) {
+      sessionStorage.removeItem(MILESTONE_UNLOCK_BANNER_STORAGE_KEY);
+      return null;
+    }
+
+    return parsed;
+  } catch (error) {
+    console.error("Milestone banner read error:", error);
+    return null;
+  }
+}
+
+function writePendingMilestoneUnlockBanner(payload) {
+  try {
+    sessionStorage.setItem(MILESTONE_UNLOCK_BANNER_STORAGE_KEY, JSON.stringify(payload));
+  } catch (error) {
+    console.error("Milestone banner write error:", error);
+  }
+}
+
+function clearPendingMilestoneUnlockBanner() {
+  try {
+    sessionStorage.removeItem(MILESTONE_UNLOCK_BANNER_STORAGE_KEY);
+  } catch (error) {
+    console.error("Milestone banner clear error:", error);
+  }
+}
+
+function renderPersistentMilestoneUnlockBanner(payload) {
+  const banner = getOrCreateSharedMilestoneUnlockBanner();
+  if (!banner) {
+    return;
+  }
+
+  const textEl = banner.querySelector(".milestone-unlock-banner-text");
+  if (textEl) {
+    textEl.textContent = payload.text || "";
+  }
+
+  if (milestoneUnlockBannerTimer) {
+    window.clearTimeout(milestoneUnlockBannerTimer);
+    milestoneUnlockBannerTimer = null;
+  }
+
+  banner.classList.remove("hidden", "show");
+
+  window.setTimeout(() => {
+    banner.classList.add("show");
+  }, 10);
+
+  const remainingMs = Math.max(3000, Number(payload.expiresAt || 0) - Date.now());
+  milestoneUnlockBannerTimer = window.setTimeout(() => {
+    banner.classList.remove("show");
+
+    window.setTimeout(() => {
+      banner.classList.add("hidden");
+    }, 260);
+
+    clearPendingMilestoneUnlockBanner();
+  }, remainingMs);
+}
+
+window.milestoneUnlockBanner = {
+  showFromMilestoneState(nextState) {
+    if (!nextState?.milestone) {
+      return;
+    }
+
+    const payload = {
+      text: `You unlocked ${nextState.milestone.level}: ${nextState.milestone.title}.`,
+      expiresAt: Date.now() + MILESTONE_UNLOCK_BANNER_DURATION_MS,
+    };
+
+    writePendingMilestoneUnlockBanner(payload);
+    renderPersistentMilestoneUnlockBanner(payload);
+  },
+  restorePending() {
+    const payload = readPendingMilestoneUnlockBanner();
+    if (!payload) {
+      return;
+    }
+
+    renderPersistentMilestoneUnlockBanner(payload);
+  },
+  clearPending() {
+    clearPendingMilestoneUnlockBanner();
+  },
+};
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    window.milestoneUnlockBanner.restorePending();
+  }, { once: true });
+} else {
+  window.milestoneUnlockBanner.restorePending();
+}

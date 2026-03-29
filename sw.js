@@ -1,4 +1,4 @@
-const CACHE_NAME = "yogaunnati-pwa-v22";
+const CACHE_NAME = "yogaunnati-pwa-v43";
 const APP_SHELL_PATHS = [
   "",
   "install.html",
@@ -7,17 +7,29 @@ const APP_SHELL_PATHS = [
   "progress.html",
   "milestones.html",
   "community.html",
-  "member.html",
-  "profile.html",
+  "memberprofile.html",
+  "profile-settings.html",
+  "membership.html",
   "auth.html",
-  "auth2.html",
+  "admin-login.html",
+  "admin.html",
+  "admin-members.html",
+  "admin-member.html",
+  "admin-create-member.html",
   "manifest.webmanifest",
   "css/styles.css",
   "js/supabaseClient.js",
+  "js/adminShared.js",
+  "js/adminDashboard.js",
+  "js/adminMembers.js",
+  "js/adminMember.js",
+  "js/adminCreateMember.js",
   "js/analytics.js",
   "js/pwaConfig.js",
   "js/practiceData.js",
   "js/profileData.js",
+  "js/membershipData.js",
+  "js/membershipPage.js",
   "js/pushSubscriptionData.js",
   "js/pageTransition.js",
   "js/pwa.js",
@@ -150,7 +162,7 @@ self.addEventListener("fetch", (event) => {
 
   if (event.request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request, { cache: "no-store" })
+      fetch(event.request)
         .then((networkResponse) => {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -205,7 +217,7 @@ self.addEventListener("fetch", (event) => {
 
   if (isCoreAsset) {
     event.respondWith(
-      fetch(event.request, { cache: "no-store" })
+      fetch(event.request)
         .then((networkResponse) => {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -234,6 +246,32 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

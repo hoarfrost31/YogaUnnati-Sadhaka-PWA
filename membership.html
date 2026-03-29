@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f3ed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="YogaUnnati" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+  <title>YogaUnnati Membership</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="page-shell pricing-page">
+  <div class="app-container pricing-shell">
+    <div class="page-content">
+      <a href="index.html" class="back-link" id="membershipBackLink">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
+        <span>Back</span>
+      </a>
+
+      <section class="pricing-hero-card">
+        <div class="pricing-badge">YogaUnnati Membership</div>
+        <h1 class="page-title pricing-title">Choose your membership.</h1>
+        <p class="subtitle pricing-subtitle">Your membership page brings all available YogaUnnati options into one place, from app-only access to online guidance and the full studio experience.</p>
+      </section>
+
+      <section class="membership-status-card">
+        <div class="membership-status-head">
+          <div>
+            <p class="eyebrow-label">Current Membership</p>
+            <h2 id="membershipCurrentPlan">No active plan</h2>
+            <p class="membership-status-copy" id="membershipStatusCopy">Choose a plan below to begin your membership journey.</p>
+          </div>
+          <span class="membership-status-pill is-inactive" id="membershipStatusPill">Inactive</span>
+        </div>
+
+        <div class="membership-status-grid">
+          <div class="membership-status-item">
+            <span>Current Plan</span>
+            <strong id="membershipCurrentPlanLabel">None</strong>
+          </div>
+          <div class="membership-status-item">
+            <span>Billing</span>
+            <strong id="membershipBillingLabel">Not started</strong>
+          </div>
+          <div class="membership-status-item">
+            <span>Start Date</span>
+            <strong id="membershipStartDateLabel">Not started</strong>
+          </div>
+          <div class="membership-status-item">
+            <span>Next Renewal</span>
+            <strong id="membershipRenewalLabel">Choose a plan</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="pricing-card-grid pricing-plan-grid">
+        <article class="pricing-plan-card pricing-plan-card-primary" data-membership-plan="studio">
+          <div class="pricing-badge pricing-plan-highlight">Most Complete</div>
+          <div class="pricing-plan-head">
+            <div>
+              <p class="eyebrow-label">Studio + App</p>
+              <h2>YogaUnnati Studio</h2>
+            </div>
+            <div class="pricing-plan-price">
+              <strong>&#8377;1099</strong>
+              <span>per month</span>
+            </div>
+          </div>
+
+          <div class="pricing-plan-copy">
+            <p>The full membership with studio access and app support together.</p>
+          </div>
+
+          <div class="pricing-feature-list">
+            <div class="pricing-feature-item">
+              <span class="pricing-feature-icon">1</span>
+              <div>
+                <strong>Daily guided group practice</strong>
+                <span>Join regular teacher-led sessions in the studio as part of your membership rhythm.</span>
+              </div>
+            </div>
+            <div class="pricing-feature-item">
+              <span class="pricing-feature-icon">2</span>
+              <div>
+                <strong>Teacher corrections</strong>
+                <span>Receive live guidance and corrections so your practice stays aligned, safe, and effective.</span>
+              </div>
+            </div>
+            <div class="pricing-feature-item">
+              <span class="pricing-feature-icon">3</span>
+              <div>
+                <strong>Powerful hatha yoga learning</strong>
+                <span>Learn strong foundational practices in a serene studio environment, while the app tracks your progress.</span>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="secondary-btn pricing-cta-btn" data-membership-plan-button data-default-label="Choose Studio Plan" data-default-variant="secondary" disabled>Choose Studio Plan</button>
+        </article>
+
+        <article class="pricing-plan-card pricing-plan-card-online" data-membership-plan="online">
+          <div class="pricing-plan-head">
+            <div>
+              <p class="eyebrow-label">Online Guided + App</p>
+              <h2>YogaUnnati Online</h2>
+            </div>
+            <div class="pricing-plan-price">
+              <strong>&#8377;499</strong>
+              <span>per month</span>
+            </div>
+          </div>
+
+          <div class="pricing-plan-copy">
+            <p>For members who want guided practice remotely along with the full app journey.</p>
+          </div>
+
+          <div class="pricing-feature-list">
+            <div class="pricing-feature-item">
+              <span class="pricing-feature-icon">1</span>
+              <div>
+                <strong>Online guided sessions</strong>
+                <span>Practice with structured remote guidance instead of in-studio attendance.</span>
+              </div>
+            </div>
+            <div class="pricing-feature-item">
+              <span class="pricing-feature-icon">2</span>
+              <div>
+                <strong>App milestones and tracking</strong>
+                <span>Track your days, streaks, and milestone progress inside YogaUnnati.</span>
+              </div>
+            </div>
+            <div class="pricing-feature-item">
+              <span class="pricing-feature-icon">3</span>
+              <div>
+                <strong>Consistent guided rhythm</strong>
+                <span>Stay connected to a steady guided practice structure even from a distance.</span>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="secondary-btn pricing-cta-btn" data-membership-plan-button data-default-label="Choose Online Plan" data-default-variant="secondary" disabled>Choose Online Plan</button>
+        </article>
+
+        <article class="pricing-plan-card pricing-plan-card-secondary" data-membership-plan="app">
+          <div class="pricing-plan-head">
+            <div>
+              <p class="eyebrow-label">App Only</p>
+              <h2>YogaUnnati App</h2>
+            </div>
+            <div class="pricing-plan-price">
+              <strong>&#8377;199</strong>
+              <span>per month</span>
+            </div>
+          </div>
+
+          <div class="pricing-plan-copy">
+            <p>For members who want only the digital journey.</p>
+          </div>
+
+          <div class="pricing-feature-list">
+            <div class="pricing-feature-item">
+              <span class="pricing-feature-icon">1</span>
+              <div>
+                <strong>Daily progress tracking</strong>
+                <span>Mark practice, maintain streaks, and see your rhythm clearly.</span>
+              </div>
+            </div>
+            <div class="pricing-feature-item">
+              <span class="pricing-feature-icon">2</span>
+              <div>
+                <strong>Milestone progression</strong>
+                <span>Unlock and follow the complete YogaUnnati milestone journey.</span>
+              </div>
+            </div>
+            <div class="pricing-feature-item">
+              <span class="pricing-feature-icon">3</span>
+              <div>
+                <strong>Community connection</strong>
+                <span>Stay connected with the app-based practice ecosystem.</span>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="secondary-btn pricing-cta-btn" data-membership-plan-button data-default-label="Choose App Plan" data-default-variant="secondary" disabled>Choose App Plan</button>
+        </article>
+      </section>
+
+      <section class="pricing-card-grid">
+        <article class="pricing-info-card">
+          <p class="eyebrow-label">App Plan</p>
+          <h3>Lower commitment, consistent tracking</h3>
+          <p>Best for members who want structure, reminders, milestones, and accountability only through the app.</p>
+        </article>
+        <article class="pricing-info-card">
+          <p class="eyebrow-label">Online Plan</p>
+          <h3>Guided from anywhere</h3>
+          <p>Best for members who want regular guided practice without coming into the physical studio.</p>
+        </article>
+        <article class="pricing-info-card">
+          <p class="eyebrow-label">Studio Plan</p>
+          <h3>Studio depth plus digital continuity</h3>
+          <p>Best for members who want guided practice, correction, physical studio presence, and app-based progress together.</p>
+        </article>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/membershipData.js"></script>
+  <script src="js/membershipPage.js"></script>
+  <script>
+    (function () {
+      const backLink = document.getElementById("membershipBackLink");
+      if (!backLink) {
+        return;
+      }
+
+      function setBackTarget(userId) {
+        const targetUrl = userId
+          ? `memberprofile.html?uid=${encodeURIComponent(userId)}`
+          : "index.html";
+        backLink.href = targetUrl;
+        backLink.onclick = function (event) {
+          event.preventDefault();
+          window.location.href = targetUrl;
+        };
+      }
+
+      try {
+        const cached = JSON.parse(sessionStorage.getItem("yogaunnati_auth_user_v1") || "null");
+        if (cached?.id) {
+          setBackTarget(cached.id);
+        }
+      } catch (_error) {
+        setBackTarget("");
+      }
+
+      window.appAuth?.getCurrentUser?.().then((user) => {
+        setBackTarget(user?.id || "");
+      });
+    })();
+  </script>
+  <script src="js/analytics.js"></script>
+  <script src="js/pwa.js"></script>
+  <script src="js/pageTransition.js"></script>
+</body>
+</html>
+
+
+
+
+
+

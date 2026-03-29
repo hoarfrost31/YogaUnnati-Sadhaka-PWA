@@ -9,8 +9,8 @@ const entriesToCopy = [
   "progress.html",
   "milestones.html",
   "community.html",
-  "profile.html",
-  "member.html",
+  "profile-settings.html",
+  "memberprofile.html",
   "auth.html",
   "manifest.webmanifest",
   "sw.js",
@@ -27,3 +27,4 @@ for (const entry of entriesToCopy) {
 }
 
 console.log("Prepared web assets in ./www");
+

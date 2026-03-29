@@ -89,9 +89,10 @@ function analyticsPageNameFromPath() {
     "progress.html": "progress",
     "milestones.html": "milestones",
     "community.html": "community",
-    "member.html": "member_profile",
-    "profile.html": "profile_settings",
+    "memberprofile.html": "member_profile",
+    "profile-settings.html": "profile_settings",
     "auth.html": "auth",
+    "membership.html": "membership",
   };
 
   return pageNames[path] || path.replace(".html", "") || "home";
@@ -142,18 +143,13 @@ window.appAnalytics = (() => {
   }
 
   async function resolveCurrentUserId() {
-    if (!window.supabaseClient?.auth) {
+    if (!window.appAuth?.getCurrentUser) {
       return null;
     }
 
     try {
-      const { data: sessionData } = await window.supabaseClient.auth.getSession();
-      if (sessionData?.session?.user?.id) {
-        return sessionData.session.user.id;
-      }
-
-      const { data } = await window.supabaseClient.auth.getUser();
-      return data?.user?.id || null;
+      const user = await window.appAuth.getCurrentUser();
+      return user?.id || null;
     } catch (error) {
       console.error("Analytics user resolve error:", error);
       return null;
@@ -275,3 +271,7 @@ window.appAnalytics = (() => {
     flush,
   };
 })();
+
+
+
+

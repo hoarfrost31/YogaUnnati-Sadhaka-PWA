@@ -9,8 +9,9 @@
   <meta name="apple-mobile-web-app-title" content="YogaUnnati" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
-  <title>Profile</title>
-
+  <title>Profile Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css"/>
 </head>
@@ -20,62 +21,63 @@
 
 <div class="app-container">
   <div class="page-content">
-  <a href="javascript:void(0)" class="back-link" id="profileBackLink">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
-    <span>Back</span>
-  </a>
+    <a href="javascript:void(0)" class="back-link" id="profileBackLink">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
+      <span>Back</span>
+    </a>
 
-  <div class="profile-page-header">
-    <h1 class="page-title">Profile</h1>
-  </div>
-  <p class="subtitle">Set the name and photo people will recognize</p>
-
-  <section class="profile-card">
-    <div class="profile-card-top">
-      <div class="profile-avatar-shell">
-        <img src="images/profile-placeholder.svg" alt="Profile preview" class="profile-avatar-preview hidden" id="profileAvatarPreview" />
-        <span class="profile-avatar-initial" id="profileAvatarInitial">Y</span>
-      </div>
-
-      <div class="profile-card-copy">
-        <p class="eyebrow-label">Your Profile</p>
-        <h2 id="profileNameHeading">Your Profile</h2>
-        <p class="level" id="profileEmailText"></p>
-      </div>
+    <div class="profile-page-header">
+      <h1 class="page-title">Profile Settings</h1>
     </div>
+    <p class="subtitle">Set the name and photo people will recognize</p>
 
-    <div class="profile-form">
-      <label class="field-label" for="profileNameInput">Display Name</label>
-      <input id="profileNameInput" class="input" placeholder="Enter your name" maxlength="40">
+    <section class="profile-card">
+      <div class="profile-card-top">
+        <div class="profile-avatar-shell">
+          <img src="images/profile-placeholder.svg" alt="Profile preview" class="profile-avatar-preview hidden" id="profileAvatarPreview" width="84" height="84" decoding="async" />
+          <span class="profile-avatar-initial" id="profileAvatarInitial">Y</span>
+        </div>
 
-      <label class="field-label" for="profileImageInput">Profile Photo</label>
-      <input id="profileImageInput" class="input file-input" type="file" accept="image/*">
-
-      <div class="profile-form-actions">
-        <button id="removePhotoBtn" class="secondary-btn" type="button">Remove Photo</button>
-        <button id="saveProfileBtn" class="primary-btn" type="button">Save Profile</button>
+        <div class="profile-card-copy">
+          <p class="eyebrow-label">Your Profile</p>
+          <h2 id="profileNameHeading">Your Profile</h2>
+          <p class="level" id="profileEmailText"></p>
+        </div>
       </div>
-    </div>
-  </section>
 
-  <section class="community-note-card reminder-card">
-    <div class="reminder-toggle-row">
-      <div class="reminder-toggle-copy">
-        <h3 class="reminder-title">Keep Notifications On</h3>
-        <p class="reminder-copy">Allow notifications for class updates and practice reminders.</p>
+      <div class="profile-form">
+        <label class="field-label" for="profileNameInput">Display Name</label>
+        <input id="profileNameInput" class="input" placeholder="Enter your name" maxlength="40">
+
+        <label class="field-label" for="profileImageInput">Profile Photo</label>
+        <input id="profileImageInput" class="input file-input" type="file" accept="image/*">
+
+        <div class="profile-form-actions">
+          <button id="removePhotoBtn" class="secondary-btn" type="button">Remove Photo</button>
+          <button id="saveProfileBtn" class="primary-btn" type="button">Save Profile</button>
+        </div>
       </div>
-      <label class="reminder-switch" for="enableNotificationsToggle" aria-label="Enable notifications">
-        <input id="enableNotificationsToggle" type="checkbox">
-        <span class="reminder-switch-slider" aria-hidden="true"></span>
-      </label>
-    </div>
-    <p class="reminder-status" id="classReminderStatus">Notifications are off for now.</p>
-  </section>
+    </section>
 
-  <section class="community-note-card">
-    <p class="eyebrow-label">Profile Settings</p>
-    <p class="community-note-text">You can update these anytime to keep your profile feeling current.</p>
-  </section>
+
+    <section class="community-note-card reminder-card">
+      <div class="reminder-toggle-row">
+        <div class="reminder-toggle-copy">
+          <h3 class="reminder-title">Keep Notifications On</h3>
+          <p class="reminder-copy">Allow notifications for class updates and practice reminders.</p>
+        </div>
+        <label class="reminder-switch" for="enableNotificationsToggle" aria-label="Enable notifications">
+          <input id="enableNotificationsToggle" type="checkbox">
+          <span class="reminder-switch-slider" aria-hidden="true"></span>
+        </label>
+      </div>
+      <p class="reminder-status" id="classReminderStatus">Notifications are off for now.</p>
+    </section>
+
+    <section class="community-note-card">
+      <p class="eyebrow-label">Profile Settings</p>
+      <p class="community-note-text">You can update these anytime to keep your profile feeling current.</p>
+    </section>
   </div>
 </div>
 
@@ -113,5 +115,6 @@
 <script src="js/community.js"></script>
 </body>
 </html>
+
 
 

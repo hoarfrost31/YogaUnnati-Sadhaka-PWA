@@ -3,21 +3,14 @@ const supabaseClient = window.supabaseClient;
 let userId;
 
 async function initUser() {
-  const { data: sessionData } = await supabaseClient.auth.getSession();
-  if (sessionData?.session?.user) {
-    userId = sessionData.session.user.id;
-    return;
-  }
-
-  const { data } = await supabaseClient.auth.getUser();
-  if (!data.user) {
+  const currentUser = await window.appAuth.getCurrentUser();
+  if (!currentUser?.id) {
     window.location.href = "auth.html";
     return;
   }
 
-  userId = data.user.id;
+  userId = currentUser.id;
 }
-
 const milestones = APP_MILESTONES;
 const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
 
@@ -139,3 +132,5 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 initApp();
+
+

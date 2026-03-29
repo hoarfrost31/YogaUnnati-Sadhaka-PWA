@@ -202,6 +202,7 @@ input {
 
 .install-shot-card {
   margin: 12px 0 0;
+  aspect-ratio: 344 / 236;
   padding: 0;
   overflow: hidden;
   border-radius: 22px;
@@ -1859,6 +1860,7 @@ input {
 
 .quote-photo-wrap {
   width: 118px;
+  aspect-ratio: 201 / 251;
   min-height: 116px;
   flex-shrink: 0;
   border-radius: 24px;
@@ -2826,6 +2828,8 @@ input {
   background: rgba(255, 255, 255, 0.72);
   box-shadow: var(--shadow-soft);
   text-align: left;
+  color: var(--text);
+  text-decoration: none;
 }
 
 .profile-action-icon {
@@ -3163,6 +3167,20 @@ input {
   flex-shrink: 0;
 }
 
+@supports (content-visibility: auto) {
+  .week-card,
+  .today-practice-card,
+  .quote-card,
+  .calendar-card,
+  .profile-card,
+  .community-note-card,
+  .member-profile-card,
+  .milestone-card,
+  .community-card {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 260px;
+  }
+}
 @media (max-width: 480px) {
   .app-container {
     padding-left: 16px;
@@ -3231,22 +3249,991 @@ input {
   }
 }
 
+.admin-shell {
+  padding-bottom: calc(72px + var(--safe-bottom));
+}
+
+.admin-page::after {
+  display: none;
+}
+
+.admin-hero-card,
+.admin-card,
+.admin-stat-card {
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow);
+}
+
+.admin-hero-card {
+  display: grid;
+  gap: 18px;
+  padding: 22px 20px;
+  border-radius: 28px;
+}
+
+.admin-subtitle {
+  max-width: 640px;
+}
+
+.admin-hero-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-hero-btn,
+.admin-inline-btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-stat-grid,
+.admin-card-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.admin-stat-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-stat-card,
+.admin-card {
+  padding: 18px 17px;
+  border-radius: 24px;
+}
+
+.admin-stat-card strong {
+  display: block;
+  margin-top: 10px;
+  font-family: 'Sora', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.admin-stat-card span:last-child,
+.admin-card-head p:last-child,
+.admin-link-card span,
+.admin-empty-state,
+.admin-member-row span,
+.admin-progress-block p,
+.admin-reference-block {
+  color: var(--text-soft);
+}
+
+.admin-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.admin-card-head h2 {
+  margin: 4px 0 0;
+  font-family: 'Sora', sans-serif;
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+.admin-link-list,
+.admin-list-wrap,
+.admin-recent-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-link-card,
+.admin-member-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 15px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+  text-decoration: none;
+  color: var(--text);
+}
+
+.admin-link-card strong,
+.admin-member-primary strong,
+.admin-progress-block strong {
+  display: block;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.admin-link-card span,
+.admin-member-row span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.admin-empty-state {
+  padding: 18px 12px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.admin-list-header {
+  align-items: flex-start;
+}
+
+.admin-search-card {
+  margin-top: 18px;
+}
+
+.admin-table-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admin-results-count,
+.admin-member-id,
+.admin-chip {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-member-primary,
+.admin-member-meta {
+  min-width: 0;
+}
+
+.admin-member-meta {
+  text-align: right;
+}
+
+.admin-member-id,
+.admin-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(209, 134, 74, 0.12);
+  color: var(--accent-deep);
+}
+
+.admin-member-hero {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.admin-progress-block,
+.admin-reference-block {
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.admin-reference-block {
+  word-break: break-word;
+}
+
+.admin-recent-list {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.admin-recent-item {
+  padding: 12px 13px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .admin-stat-grid,
+  .admin-card-grid,
+  .admin-member-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-member-row,
+  .admin-link-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-member-meta {
+    text-align: left;
+  }
+}
+
+.admin-page .app-container {
+  width: min(100%, 1180px);
+  padding-left: 28px;
+  padding-right: 28px;
+}
+
+.admin-card-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-member-grid {
+  grid-template-columns: 1.15fr 0.85fr;
+}
+
+.admin-calendar-card {
+  margin-top: 18px;
+}
+
+.admin-calendar-head {
+  align-items: center;
+}
+
+.admin-calendar-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-calendar-btn {
+  width: 40px;
+  min-width: 40px;
+  padding: 10px 0;
+  border-radius: 14px;
+}
+
+.admin-calendar-label {
+  min-width: 140px;
+  text-align: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.admin-calendar-weekdays,
+.admin-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.admin-calendar-weekdays {
+  margin-top: 8px;
+  margin-bottom: 10px;
+}
+
+.admin-calendar-weekdays span {
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-soft);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-calendar-day {
+  min-height: 78px;
+  border-radius: 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+}
+
+.admin-calendar-day-number {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
+.admin-calendar-day.is-active {
+  background: linear-gradient(135deg, rgba(209, 134, 74, 0.14) 0%, rgba(223, 172, 115, 0.22) 100%);
+  box-shadow: inset 0 0 0 1px rgba(209, 134, 74, 0.16), var(--shadow-soft);
+}
+
+.admin-calendar-day.is-active .admin-calendar-day-number {
+  color: var(--accent-deep);
+}
+
+.admin-calendar-day.is-today {
+  box-shadow: inset 0 0 0 2px rgba(127, 151, 128, 0.28), var(--shadow-soft);
+}
+
+.admin-calendar-day-empty {
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 960px) {
+  .admin-page .app-container {
+    width: min(100%, 860px);
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .admin-stat-grid,
+  .admin-card-grid,
+  .admin-member-grid,
+  .admin-member-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-page .app-container {
+    width: min(100%, 460px);
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .admin-calendar-head {
+    align-items: flex-start;
+  }
+
+  .admin-calendar-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .admin-calendar-day {
+    min-height: 62px;
+    border-radius: 14px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-hero-card {
+    gap: 14px;
+    padding: 20px 16px;
+    border-radius: 24px;
+  }
+
+  .admin-card,
+  .admin-stat-card {
+    padding: 16px 14px;
+    border-radius: 20px;
+  }
+
+  .admin-stat-card strong {
+    margin-top: 8px;
+    font-size: 1.55rem;
+  }
+
+  .admin-hero-actions,
+  .admin-form-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-hero-btn,
+  .admin-inline-btn,
+  .admin-form-actions .primary-btn {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .admin-list-header {
+    display: grid;
+    gap: 12px;
+  }
+
+  .admin-list-header .admin-inline-btn {
+    width: 100%;
+  }
+
+  .admin-table-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .admin-card-head {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .admin-member-row,
+  .admin-link-card {
+    gap: 10px;
+    padding: 13px 14px;
+  }
+
+  .admin-member-meta {
+    width: 100%;
+    display: grid;
+    gap: 8px;
+  }
+
+  .admin-member-id,
+  .admin-chip {
+    align-self: flex-start;
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .admin-calendar-weekdays,
+  .admin-calendar-grid {
+    gap: 6px;
+  }
+
+  .admin-calendar-weekdays span {
+    font-size: 0.68rem;
+    letter-spacing: 0.02em;
+  }
+
+  .admin-calendar-label {
+    min-width: 0;
+    font-size: 0.88rem;
+  }
+
+  .admin-calendar-btn {
+    min-height: 44px;
+  }
+
+  .admin-recent-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .admin-recent-item {
+    padding: 10px 8px;
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .admin-page .app-container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .admin-hero-card,
+  .admin-card,
+  .admin-stat-card {
+    border-radius: 18px;
+  }
+
+  .admin-calendar-day {
+    min-height: 56px;
+    padding: 7px;
+  }
+
+  .admin-calendar-day-number {
+    font-size: 0.82rem;
+  }
+
+  .admin-recent-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-logout-btn {
+  width: auto;
+  flex-shrink: 0;
+}
+
+@media (max-width: 720px) {
+  .admin-topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .admin-topbar .back-link,
+  .admin-topbar .admin-logout-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.pricing-page::after {
+  display: none;
+}
+
+.pricing-shell {
+  padding-bottom: calc(72px + var(--safe-bottom));
+}
+
+.pricing-hero-card,
+.pricing-plan-card,
+.pricing-info-card {
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow);
+}
+
+.pricing-hero-card {
+  margin-top: 18px;
+  padding: 24px 22px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(209, 134, 74, 0.16), transparent 34%),
+    rgba(255, 255, 255, 0.88);
+}
+
+.pricing-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(249, 239, 227, 0.92);
+  color: var(--accent-deep);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.pricing-title {
+  margin-top: 16px;
+}
+
+.pricing-subtitle {
+  margin-top: 10px;
+  max-width: 32rem;
+}
+
+.pricing-plan-card {
+  margin-top: 18px;
+  padding: 22px 20px;
+  border-radius: 28px;
+}
+
+.pricing-plan-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.pricing-plan-head h2,
+.pricing-info-card h3 {
+  margin: 4px 0 0;
+  font-family: 'Sora', sans-serif;
+  font-size: 1.16rem;
+  font-weight: 600;
+}
+
+.pricing-plan-price {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.pricing-plan-price strong {
+  display: block;
+  font-family: 'Sora', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pricing-plan-price span,
+.pricing-plan-copy p,
+.pricing-feature-item span,
+.pricing-note,
+.pricing-info-card p:last-child {
+  color: var(--text-soft);
+}
+
+.pricing-plan-copy {
+  margin-top: 14px;
+}
+
+.pricing-plan-copy p,
+.pricing-note,
+.pricing-info-card p:last-child {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.pricing-feature-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.pricing-feature-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+}
+
+.pricing-feature-item strong {
+  display: block;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.96rem;
+  font-weight: 600;
+}
+
+.pricing-feature-item span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.84rem;
+}
+
+.pricing-feature-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(209, 134, 74, 0.12);
+  color: var(--accent-deep);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.pricing-cta-btn {
+  margin-top: 18px;
+}
+
+.pricing-cta-btn[disabled] {
+  opacity: 0.9;
+  cursor: default;
+}
+
+.pricing-note {
+  margin-top: 12px;
+  font-size: 0.84rem;
+}
+
+.pricing-card-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.pricing-info-card {
+  padding: 18px 17px;
+  border-radius: 24px;
+}
+
+@media (min-width: 760px) {
+  .pricing-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .pricing-hero-card,
+  .pricing-plan-card,
+  .pricing-info-card {
+    border-radius: 24px;
+  }
+
+  .pricing-hero-card {
+    padding: 22px 18px;
+  }
+
+  .pricing-plan-card,
+  .pricing-info-card {
+    padding: 18px 16px;
+  }
+
+  .pricing-plan-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pricing-plan-price {
+    text-align: left;
+  }
+
+  .pricing-plan-price strong {
+    font-size: 1.82rem;
+  }
+}
+
+
+.pricing-plan-grid {
+  grid-template-columns: 1fr;
+}
+
+.pricing-plan-card {
+  position: relative;
+}
+
+.pricing-plan-card-primary {
+  border: 1px solid rgba(221, 213, 202, 0.95);
+  box-shadow: var(--shadow-soft);
+}
+
+.pricing-plan-card-secondary {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.pricing-plan-highlight {
+  margin-bottom: 14px;
+}
+
+@media (min-width: 980px) {
+  .pricing-plan-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  .pricing-plan-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .pricing-shell {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .pricing-hero-card {
+    margin-top: 14px;
+    padding: 24px 18px;
+  }
+
+  .pricing-title {
+    margin-top: 14px;
+    line-height: 1.04;
+  }
+
+  .pricing-subtitle {
+    font-size: 0.98rem;
+    line-height: 1.58;
+  }
+
+  .pricing-plan-card {
+    margin-top: 16px;
+    padding: 20px 18px;
+  }
+
+  .pricing-plan-head {
+    gap: 10px;
+  }
+
+  .pricing-plan-head h2 {
+    font-size: 1.34rem;
+    line-height: 1.12;
+  }
+
+  .pricing-plan-price strong {
+    font-size: 2rem;
+  }
+
+  .pricing-plan-price span {
+    font-size: 0.94rem;
+  }
+
+  .pricing-plan-copy {
+    margin-top: 12px;
+  }
+
+  .pricing-plan-copy p {
+    font-size: 0.98rem;
+  }
+
+  .pricing-feature-list {
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .pricing-feature-item {
+    padding: 16px 15px;
+    gap: 14px;
+    border-radius: 18px;
+  }
+
+  .pricing-feature-item strong {
+    font-size: 1rem;
+    line-height: 1.24;
+  }
+
+  .pricing-feature-item span {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .pricing-cta-btn {
+    margin-top: 16px;
+    min-height: 50px;
+  }
+
+  .pricing-info-card {
+    padding: 18px 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .pricing-shell {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .pricing-hero-card,
+  .pricing-plan-card,
+  .pricing-info-card {
+    border-radius: 20px;
+  }
+
+  .pricing-plan-card {
+    padding: 18px 16px;
+  }
+
+  .pricing-plan-head h2 {
+    font-size: 1.24rem;
+  }
+
+  .pricing-plan-price strong {
+    font-size: 1.88rem;
+  }
+}
 
 
 
 
+.membership-status-card {
+  margin-top: 18px;
+  padding: 20px 18px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top right, rgba(127, 151, 128, 0.14), transparent 36%),
+    rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow);
+}
 
+.membership-status-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
 
+.membership-status-head h2 {
+  margin: 4px 0 0;
+  font-family: 'Sora', sans-serif;
+  font-size: 1.22rem;
+  font-weight: 600;
+}
 
+.membership-status-copy {
+  margin: 8px 0 0;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
 
+.membership-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
 
+.membership-status-pill.is-inactive {
+  background: rgba(111, 102, 92, 0.1);
+  color: var(--text-soft);
+}
 
+.membership-status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
 
+.membership-status-item {
+  padding: 14px 13px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+}
 
+.membership-status-item span {
+  display: block;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
 
+.membership-status-item strong {
+  display: block;
+  margin-top: 6px;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
 
+@media (max-width: 720px) {
+  .membership-status-card {
+    padding: 18px 16px;
+    border-radius: 24px;
+  }
 
+  .membership-status-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
+  .membership-status-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
+.membership-status-pill.is-active {
+  background: rgba(104, 165, 117, 0.16);
+  color: #2f7a3c;
+}
+
+.membership-status-pill.is-past_due {
+  background: rgba(217, 141, 64, 0.16);
+  color: #9a5521;
+}
+
+.membership-status-pill.is-cancelled,
+.membership-status-pill.is-expired {
+  background: rgba(144, 112, 89, 0.14);
+  color: #6e5545;
+}
+
+.pricing-plan-card.is-current-plan {
+  border-color: rgba(104, 165, 117, 0.34);
+  box-shadow: 0 18px 38px rgba(83, 136, 95, 0.12);
+}
 
 

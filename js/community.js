@@ -85,21 +85,14 @@ function renderReminderSettings() {
 }
 
 async function initUser() {
-  const { data: sessionData } = await supabaseClient.auth.getSession();
-  if (sessionData?.session?.user) {
-    userId = sessionData.session.user.id;
-    userEmail = sessionData.session.user.email || "";
-    return;
-  }
-
-  const { data } = await supabaseClient.auth.getUser();
-  if (!data.user) {
+  const currentUser = await window.appAuth.getCurrentUser();
+  if (!currentUser?.id) {
     window.location.href = "auth.html";
     return;
   }
 
-  userId = data.user.id;
-  userEmail = data.user.email || "";
+  userId = currentUser.id;
+  userEmail = currentUser.email || "";
 }
 
 function initProfileBackLink() {
@@ -111,7 +104,7 @@ function initProfileBackLink() {
     event.preventDefault();
 
     if (userId) {
-      window.location.href = `member.html?uid=${encodeURIComponent(userId)}`;
+      window.location.href = `memberprofile.html?uid=${encodeURIComponent(userId)}`;
       return;
     }
 
@@ -377,3 +370,5 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 initApp();
+
+

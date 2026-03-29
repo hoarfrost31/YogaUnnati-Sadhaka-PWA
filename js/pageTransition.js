@@ -1,5 +1,5 @@
 const TAB_HISTORY_KEY = "yogaunnati_tab_history";
-const TAB_PAGES = new Set(["index.html", "progress.html", "milestones.html", "community.html", "member.html"]);
+const TAB_PAGES = new Set(["index.html", "progress.html", "milestones.html", "community.html", "memberprofile.html"]);
 const EXIT_PROMPT_KEY = "yogaunnati_exit_prompt_at";
 const EXIT_PROMPT_WINDOW_MS = 1800;
 let lastTouchNavAt = 0;
@@ -285,3 +285,4 @@ document.addEventListener("touchend", (event) => {
   lastTouchNavAt = Date.now();
   navigateToPage(anchor.href);
 }, { passive: false });
+

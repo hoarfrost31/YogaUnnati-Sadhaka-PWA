@@ -284,6 +284,29 @@ async function saveReminderPreference(userId, enabled) {
   return savedProfile;
 }
 
+async function fetchProfilesByIds(userIds = []) {
+  const uniqueIds = [...new Set((userIds || []).filter(Boolean))];
+  if (!uniqueIds.length) {
+    return [];
+  }
+
+  const { data, error } = await window.supabaseClient
+    .from("profiles")
+    .select("id, display_name, avatar_url")
+    .in("id", uniqueIds);
+
+  if (error) {
+    if (isProfilesTableMissing(error)) {
+      return [];
+    }
+
+    throw error;
+  }
+
+  markRemoteRefresh("profiles_public", "");
+  return data || [];
+}
+
 async function fetchAllProfiles() {
   const { data, error } = await window.supabaseClient
     .from("profiles")

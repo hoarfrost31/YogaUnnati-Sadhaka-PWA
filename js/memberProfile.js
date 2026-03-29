@@ -110,6 +110,17 @@ function renderOwnProfileActions(isOwnProfile) {
 
   memberProfileActionsMountEl.innerHTML = `
     <section class="profile-actions-grid" aria-label="Profile actions">
+      <a href="membership.html" class="profile-action-card">
+        <span class="profile-action-icon" aria-hidden="true">
+          ${getUiIconSvg("sparkles")}
+        </span>
+        <span class="profile-action-copy">
+          <span class="profile-action-title">Membership</span>
+          <span class="profile-action-text">View plans and choose the option that fits your practice.</span>
+        </span>
+        ${getUiIconSvg("chevron-right", "profile-action-arrow")}
+      </a>
+
       <button type="button" class="profile-action-card" id="invitePeopleBtn">
         <span class="profile-action-icon" aria-hidden="true">
           ${getUiIconSvg("user-plus")}
@@ -350,19 +361,13 @@ async function initMemberProfile() {
     return;
   }
 
-  const { data: sessionData } = await window.supabaseClient.auth.getSession();
-  if (!sessionData?.session?.user) {
-    const { data } = await window.supabaseClient.auth.getUser();
-    if (!data.user) {
-      window.location.href = "auth.html";
-      return;
-    }
-    currentUserId = data.user.id;
-  } else {
-    currentUserId = sessionData.session.user.id;
+  const currentUser = await window.appAuth.getCurrentUser();
+  if (!currentUser?.id) {
+    window.location.href = "auth.html";
+    return;
   }
 
-  setOwnProfileActionsVisible(memberId === currentUserId);
+  currentUserId = currentUser.id;  setOwnProfileActionsVisible(memberId === currentUserId);
   window.appAnalytics?.identify(currentUserId);
   window.appAnalytics?.track("open_member_profile", {
     source: "member_page",
@@ -451,3 +456,7 @@ if (memberLogoutBtn) {
     await logout();
   });
 }
+
+
+
+

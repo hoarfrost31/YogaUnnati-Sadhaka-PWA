@@ -121,7 +121,10 @@ function canMarkPracticeForDate(dateString) {
   selectedDate.setHours(0, 0, 0, 0);
 
   const today = parseLocalDate(getTodayIsoDate());
-  return selectedDate <= today;
+  const earliestEditableDate = new Date(today);
+  earliestEditableDate.setDate(today.getDate() - 6);
+
+  return selectedDate >= earliestEditableDate && selectedDate <= today;
 }
 
 function getTargetUnlockIsoDate(practiceDates) {
@@ -150,21 +153,14 @@ function formatFriendlyDate(dateString) {
 }
 
 async function initUser() {
-  const { data: sessionData } = await supabaseClient.auth.getSession();
-  if (sessionData?.session?.user) {
-    userId = sessionData.session.user.id;
-    return;
-  }
-
-  const { data } = await supabaseClient.auth.getUser();
-  if (!data.user) {
+  const currentUser = await window.appAuth.getCurrentUser();
+  if (!currentUser?.id) {
     window.location.href = "auth.html";
     return;
   }
 
-  userId = data.user.id;
+  userId = currentUser.id;
 }
-
 function renderProgressStatus(messages) {
   if (!progressStatusCardEl || !progressStatusIconEl || !progressStatusTextEl || !messages.length) {
     return;
@@ -272,7 +268,7 @@ function loadStats() {
     statusMessages.push({
       tone: "encouragement",
       icon: "🗓️",
-      text: "Missed marking yesterday? You can still mark today or yesterday.",
+      text: "You can mark or edit practice for the last 7 days only.",
       shine: false,
     });
   }
@@ -290,8 +286,8 @@ function renderCalendar(practicedDates) {
   const grid = document.getElementById("calendarGrid");
   const label = document.getElementById("monthLabel");
   const targetUnlockDate = getTargetUnlockIsoDate(practicedDates);
-
-  grid.innerHTML = "";
+  const practicedSet = new Set(practicedDates);
+  const calendarMarkup = [];
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -304,7 +300,7 @@ function renderCalendar(practicedDates) {
   });
 
   for (let i = 0; i < firstDay; i++) {
-    grid.innerHTML += "<div></div>";
+    calendarMarkup.push("<div></div>");
   }
 
   const today = new Date();
@@ -312,8 +308,8 @@ function renderCalendar(practicedDates) {
   for (let d = 1; d <= totalDays; d++) {
     const prevFormatted = `${year}-${String(month + 1).padStart(2, "0")}-${String(d - 1).padStart(2, "0")}`;
     const fullDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-    const isPrevActive = practicedDates.includes(prevFormatted);
-    const isActive = practicedDates.includes(fullDate);
+    const isPrevActive = practicedSet.has(prevFormatted);
+    const isActive = practicedSet.has(fullDate);
     const isToday =
       d === today.getDate() &&
       month === today.getMonth() &&
@@ -324,14 +320,15 @@ function renderCalendar(practicedDates) {
     const streakClass = isActive && isPrevActive ? "streak" : "";
     const streakStartClass = isActive && isPrevActive && isWeekStart ? "streak-start" : "";
 
-    grid.innerHTML += `
+    calendarMarkup.push(`
       <div class="day ${isActive ? "active" : ""} ${isToday ? "today" : ""} ${isTargetUnlockDay ? "target-unlock" : ""} ${streakClass} ${streakStartClass}" data-date="${fullDate}">
         ${d}
       </div>
-    `;
+    `);
   }
-}
 
+  grid.innerHTML = calendarMarkup.join("");
+}
 function syncProgressUI(animateMilestone = false) {
   loadCalendar();
   loadStats();
@@ -507,7 +504,7 @@ function openSheet(date, isActive) {
   const dateEl = document.getElementById("sheetDate");
   const statusEl = document.getElementById("sheetStatus");
   const btn = document.getElementById("sheetActionBtn");
-  const canMarkSelectedDate = canMarkPracticeForDate(date);
+  const canEditSelectedDate = canMarkPracticeForDate(date);
 
   selectedDate = date;
   selectedIsActive = isActive;
@@ -515,11 +512,11 @@ function openSheet(date, isActive) {
   btn.disabled = false;
   btn.onclick = null;
 
-  if (isActive) {
+  if (isActive && canEditSelectedDate) {
     statusEl.textContent = "You practiced on this day";
     btn.textContent = "Unmark Practice";
     btn.className = "sheet-btn unmark";
-  } else if (canMarkSelectedDate) {
+  } else if (canEditSelectedDate) {
     statusEl.textContent = "No practice recorded";
     btn.textContent = "Mark Practice";
     btn.className = "sheet-btn mark";
@@ -527,14 +524,18 @@ function openSheet(date, isActive) {
     const todayIso = getTodayIsoDate();
     statusEl.textContent = date > todayIso
       ? "You can only mark today or earlier."
-      : "You can mark any earlier day right now.";
-    btn.textContent = "Mark Unavailable";
+      : "You can only edit practice within the last 7 days.";
+    btn.textContent = "Edit Unavailable";
     btn.className = "sheet-btn disabled";
     btn.disabled = true;
   }
 
   btn.onclick = async () => {
     try {
+      if (!canMarkPracticeForDate(selectedDate)) {
+        return;
+      }
+
       const previousMilestoneState = getCurrentMilestoneState(userId, getMilestoneProgressCount(practiceDates));
       if (selectedIsActive) {
         await supabaseClient
@@ -636,26 +637,7 @@ function getOrCreateMilestoneUnlockBanner() {
 }
 
 function showMilestoneUnlockBanner(nextState) {
-  const banner = getOrCreateMilestoneUnlockBanner();
-  const textEl = banner.querySelector(".milestone-unlock-banner-text");
-
-  if (textEl) {
-    textEl.textContent = `You unlocked ${nextState.milestone.level}: ${nextState.milestone.title}.`;
-  }
-
-  banner.classList.remove("hidden", "show");
-
-  setTimeout(() => {
-    banner.classList.add("show");
-  }, 10);
-
-  setTimeout(() => {
-    banner.classList.remove("show");
-
-    setTimeout(() => {
-      banner.classList.add("hidden");
-    }, 260);
-  }, 3200);
+  window.milestoneUnlockBanner?.showFromMilestoneState(nextState);
 }
 async function maybeSendMilestoneUnlockNotification(nextState) {
   const notificationsApi = window.pwaNotifications;
@@ -707,6 +689,12 @@ async function initApp() {
 }
 
 initApp();
+
+
+
+
+
+
 
 
 

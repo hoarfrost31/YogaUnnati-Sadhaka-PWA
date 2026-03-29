@@ -305,16 +305,14 @@ function syncHomeCommunitySnapshotForTodayPractice(isPracticedToday) {
 
 async function buildHomeCommunitySnapshot() {
   const today = getTodayIsoDate();
-  const [profiles, practiceLogsResult] = await Promise.all([
-    fetchAllProfiles(),
-    supabaseClient.from("practice_logs").select("user_id").eq("date", today),
-  ]);
+  const practiceLogsResult = await supabaseClient.from("practice_logs").select("user_id").eq("date", today);
 
   if (practiceLogsResult.error) {
     throw practiceLogsResult.error;
   }
 
   const uniqueMemberIds = [...new Set((practiceLogsResult.data || []).map((row) => row.user_id).filter(Boolean))];
+  const profiles = await fetchProfilesByIds(uniqueMemberIds);
   const profileMap = new Map(
     profiles.map((profileRow) => [
       profileRow.id,
@@ -520,7 +518,7 @@ function showHomeNotificationsPrompt() {
     popup.remove();
 
     if (action === "turn-on") {
-      window.location.href = "profile.html";
+      window.location.href = "profile-settings.html";
     }
   });
 
@@ -581,21 +579,14 @@ async function loadHomeProfile() {
 }
 
 async function initUser() {
-  const { data: sessionData } = await supabaseClient.auth.getSession();
-  if (sessionData?.session?.user) {
-    userId = sessionData.session.user.id;
-    return;
-  }
-
-  const { data } = await supabaseClient.auth.getUser();
-  if (!data.user) {
+  const currentUser = await window.appAuth.getCurrentUser();
+  if (!currentUser?.id) {
     window.location.href = "auth.html";
     return;
   }
 
-  userId = data.user.id;
+  userId = currentUser.id;
 }
-
 function getTodayIsoDate() {
   const now = new Date();
   const year = now.getFullYear();
@@ -788,26 +779,7 @@ function getOrCreateMilestoneUnlockBanner() {
 }
 
 function showMilestoneUnlockBanner(nextState) {
-  const banner = getOrCreateMilestoneUnlockBanner();
-  const textEl = banner.querySelector(".milestone-unlock-banner-text");
-
-  if (textEl) {
-    textEl.textContent = `You unlocked ${nextState.milestone.level}: ${nextState.milestone.title}.`;
-  }
-
-  banner.classList.remove("hidden", "show");
-
-  window.setTimeout(() => {
-    banner.classList.add("show");
-  }, 10);
-
-  window.setTimeout(() => {
-    banner.classList.remove("show");
-
-    window.setTimeout(() => {
-      banner.classList.add("hidden");
-    }, 260);
-  }, 3200);
+  window.milestoneUnlockBanner?.showFromMilestoneState(nextState);
 }
 
 async function maybeSendMilestoneUnlockNotification(nextState) {
@@ -939,36 +911,32 @@ function renderWeek(practiceDates) {
   endOfWeek.setDate(startOfWeek.getDate() + 6);
 
   const practicedSet = new Set(practiceDates);
-  weekStripEl.innerHTML = "";
+  const weekMarkup = [];
 
   for (let i = 0; i < 7; i++) {
     const date = new Date(startOfWeek);
     date.setDate(startOfWeek.getDate() + i);
 
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
-    const formattedDate = `${yyyy}-${mm}-${dd}`;
-
+    const formattedDate = getTodayIsoDateForDate(date);
     const isToday = formattedDate === today;
     const isDone = practicedSet.has(formattedDate);
     const isTargetUnlockDay = formattedDate === targetUnlockDate;
     const previousDate = new Date(date);
     previousDate.setDate(date.getDate() - 1);
-    const previousFormattedDate = getTodayIsoDateForDate(previousDate);
-    const isPrevDone = practicedSet.has(previousFormattedDate);
+    const isPrevDone = practicedSet.has(getTodayIsoDateForDate(previousDate));
     const streakClass = isDone && isPrevDone ? "streak" : "";
     const streakStartClass = isDone && isPrevDone && i === 0 ? "streak-start" : "";
-
     const dayLabel = date.toLocaleDateString("en-US", { weekday: "short" }).slice(0, 1);
 
-    weekStripEl.innerHTML += `
+    weekMarkup.push(`
       <div class="week-day ${isDone ? "done" : ""} ${isToday ? "today" : ""} ${isTargetUnlockDay ? "target-unlock" : ""} ${streakClass} ${streakStartClass}">
         <span class="week-day-label">${dayLabel}</span>
         <span class="week-day-date">${date.getDate()}</span>
       </div>
-    `;
+    `);
   }
+
+  weekStripEl.innerHTML = weekMarkup.join("");
 
   if (homeTargetDateNoteEl) {
     const shouldShowTargetNote = Boolean(
@@ -978,9 +946,7 @@ function renderWeek(practiceDates) {
     );
     homeTargetDateNoteEl.classList.toggle("hidden", !shouldShowTargetNote);
   }
-
 }
-
 async function refreshPracticeDates() {
   try {
     practiceDates = await fetchPracticeDates(userId);
@@ -1068,7 +1034,7 @@ async function initApp() {
   await initUser();   // 🔥 must complete first
   window.appAnalytics?.identify(userId);
   if (homeAvatarLinkEl && userId) {
-    homeAvatarLinkEl.href = `member.html?uid=${encodeURIComponent(userId)}`;
+    homeAvatarLinkEl.href = `memberprofile.html?uid=${encodeURIComponent(userId)}`;
     homeAvatarLinkEl.addEventListener("click", () => {
       window.appAnalytics?.track("open_member_profile", {
         source: "home_avatar",
@@ -1104,6 +1070,13 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
+
+
+
+
+
+
 
 
 

@@ -10,6 +10,8 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
   <title>Install YogaUnnati</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -19,7 +21,7 @@
       <span class="install-chip">YogaUnnati</span>
 
       <div class="install-hero">
-        <img src="images/logo.png" alt="YogaUnnati logo" class="install-icon-mark" />
+        <img src="images/logo.png" alt="YogaUnnati logo" class="install-icon-mark" width="512" height="512" decoding="async" />
         <div class="install-hero-copy">
           <h1>Install the YogaUnnati app.</h1>
           <p>Track your practice, follow your milestones, and open YogaUnnati like an app on your phone.</p>
@@ -28,7 +30,7 @@
 
       <div class="install-features-head">App Features</div>
       <figure class="install-shot-card" id="installGuideVisual">
-        <img src="images/install-android.webp" alt="Android install preview for YogaUnnati" class="install-shot-image" />
+        <img src="images/install-android.webp" alt="Android install preview for YogaUnnati" class="install-shot-image" loading="eager" decoding="async" fetchpriority="high" />
       </figure>
 
       <div class="install-actions">
@@ -47,4 +49,6 @@
   <script src="js/installPage.js"></script>
 </body>
 </html>
+
+
 
