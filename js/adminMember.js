@@ -22,7 +22,7 @@ const adminMemberMembershipMsgEl = document.getElementById("adminMemberMembershi
 
 let adminMemberPracticeDates = [];
 let adminCalendarDate = new Date();
-let currentAdminMemberId = "";
+let currentAdminMemberId = "";`r`nlet currentAdminMembershipRow = null;
 
 function setAdminMemberMembershipMessage(text) {
   adminMemberMembershipMsgEl.textContent = text;
@@ -143,7 +143,7 @@ async function loadMembershipRow(memberId) {
   return data || null;
 }
 
-function renderMembershipEditor(membershipRow) {
+function renderMembershipEditor(membershipRow) {`r`n  currentAdminMembershipRow = membershipRow || null;
   const planCode = membershipRow?.plan_code || "none";
   const status = membershipRow?.status || (planCode === "none" ? "inactive" : "active");
 
@@ -167,17 +167,24 @@ async function saveMemberMembership() {
   setAdminMemberMembershipMessage("Saving membership...");
 
   try {
+    const resolvedStartAt = planCode === "none"
+      ? null
+      : (startValue
+        ? new Date(`${startValue}T00:00:00`).toISOString()
+        : (currentAdminMembershipRow?.started_at || getCurrentIso()));
+    const resolvedPeriodEnd = planCode === "none"
+      ? null
+      : (renewalValue
+        ? new Date(`${renewalValue}T00:00:00`).toISOString()
+        : (currentAdminMembershipRow?.current_period_end || getNextMonthlyRenewalIso(resolvedStartAt || new Date())));
+
     const payload = {
       user_id: currentAdminMemberId,
       plan_code: planCode,
       status,
       billing_cycle: "monthly",
-      started_at: planCode === "none"
-        ? null
-        : (startValue ? new Date(`${startValue}T00:00:00`).toISOString() : getCurrentIso()),
-      current_period_end: planCode === "none"
-        ? null
-        : (renewalValue ? new Date(`${renewalValue}T00:00:00`).toISOString() : getNextMonthlyRenewalIso()),
+      started_at: resolvedStartAt,
+      current_period_end: resolvedPeriodEnd,
       cancel_at_period_end: false,
     };
 
@@ -310,3 +317,4 @@ loadAdminMember().catch((error) => {
   adminRecentPracticeListEl.innerHTML = '<div class="admin-empty-state">Member detail could not be loaded.</div>';
   setAdminMemberMembershipMessage("Membership editor could not be loaded.");
 });
+
