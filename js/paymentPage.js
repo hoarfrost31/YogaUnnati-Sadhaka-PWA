@@ -138,6 +138,15 @@ async function getAccessToken() {
   return data?.session?.access_token || '';
 }
 
+async function getFreshCurrentUser() {
+  const { data, error } = await window.supabaseClient.auth.getUser();
+  if (error) {
+    throw new Error(error.message || 'Could not refresh your account details.');
+  }
+
+  return data?.user || null;
+}
+
 function getPaymentGatewayBaseUrl() {
   return String(window.paymentGatewayConfig?.createCashfreePaymentLinkUrl || '').trim();
 }
@@ -205,7 +214,12 @@ async function initPaymentPage() {
       setPaymentMessage('Creating your secure Cashfree payment link...', false);
 
       try {
-        const paymentIntentId = await createPendingPaymentIntent(planCode, user);
+        const latestUser = await getFreshCurrentUser();
+        if (!latestUser?.id) {
+          throw new Error('Please log in again before starting payment.');
+        }
+
+        const paymentIntentId = await createPendingPaymentIntent(planCode, latestUser);
         const linkUrl = await createDynamicPaymentLink(planCode, paymentIntentId);
         window.appAnalytics?.track?.('membership_checkout_started', { provider: 'cashfree-dynamic-link', plan_code: planCode });
         window.location.href = linkUrl;
