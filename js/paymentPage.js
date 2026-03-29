@@ -88,32 +88,10 @@ function renderPaymentBenefits(planCode) {
   `).join('');
 }
 
-function getHostedLink(planCode) {
-  const links = window.cashfreeHostedLinks || {};
-  return String(links[planCode] || '').trim();
-}
-
-function getHostedLinkCode(planCode) {
-  const checkoutUrl = getHostedLink(planCode);
-  if (!checkoutUrl) {
-    return '';
-  }
-
-  try {
-    return new URL(checkoutUrl).searchParams.get('code') || '';
-  } catch (_error) {
-    return '';
-  }
-}
-
 function normalizeIndianPhone(input) {
   const digits = String(input || '').replace(/\D/g, '');
-  if (digits.length === 10) {
-    return digits;
-  }
-  if (digits.length === 12 && digits.startsWith('91')) {
-    return digits.slice(2);
-  }
+  if (digits.length === 10) return digits;
+  if (digits.length === 12 && digits.startsWith('91')) return digits.slice(2);
   return '';
 }
 
@@ -136,22 +114,65 @@ async function createPendingPaymentIntent(planCode, user) {
     plan_code: planCode,
     provider: 'cashfree_link',
     status: 'pending',
-    provider_link_code: getHostedLinkCode(planCode) || null,
   };
 
-  const { error } = await window.supabaseClient.from('payment_intents').insert(payload);
-  if (error) {
-    throw new Error(error.message || 'Could not start payment confirmation.');
+  const { data, error } = await window.supabaseClient
+    .from('payment_intents')
+    .insert(payload)
+    .select('id')
+    .single();
+
+  if (error || !data?.id) {
+    throw new Error(error?.message || 'Could not start payment confirmation.');
   }
+
+  return data.id;
 }
 
-function openHostedCheckout(planCode) {
-  const checkoutUrl = getHostedLink(planCode);
-  if (!checkoutUrl) {
-    throw new Error('Cashfree checkout link is not configured for this plan yet.');
+async function getAccessToken() {
+  const { data } = await window.supabaseClient.auth.getSession();
+  return data?.session?.access_token || '';
+}
+
+function getFunctionsBaseUrl() {
+  const projectUrl = String(window.supabaseClient?.supabaseUrl || '').replace(/\/+$/, '');
+  return projectUrl ? `${projectUrl}/functions/v1` : '';
+}
+
+async function createDynamicPaymentLink(planCode, paymentIntentId) {
+  const accessToken = await getAccessToken();
+  if (!accessToken) {
+    throw new Error('Please log in again before starting payment.');
   }
 
-  window.location.href = checkoutUrl;
+  const baseUrl = getFunctionsBaseUrl();
+  if (!baseUrl) {
+    throw new Error('Payment service URL is not configured.');
+  }
+
+  const response = await fetch(`${baseUrl}/create-cashfree-payment-link`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      payment_intent_id: paymentIntentId,
+      return_url: `${window.location.origin}/membership.html?payment=success`,
+      cancel_url: `${window.location.origin}/payment.html?plan=${encodeURIComponent(planCode)}&payment=cancelled`,
+    }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload?.error || 'Could not create secure payment link.');
+  }
+
+  if (!payload?.link_url) {
+    throw new Error('Cashfree did not return a hosted payment link.');
+  }
+
+  return payload.link_url;
 }
 
 async function initPaymentPage() {
@@ -178,14 +199,15 @@ async function initPaymentPage() {
     payBtn.disabled = false;
     payBtn.addEventListener('click', async () => {
       setPaymentBusy(true, 'Opening secure payment...');
-      setPaymentMessage('Redirecting to Cashfree checkout...', false);
+      setPaymentMessage('Creating your secure Cashfree payment link...', false);
 
       try {
-        await createPendingPaymentIntent(planCode, user);
-        window.appAnalytics?.track?.('membership_checkout_started', { provider: 'cashfree-hosted', plan_code: planCode });
-        openHostedCheckout(planCode);
+        const paymentIntentId = await createPendingPaymentIntent(planCode, user);
+        const linkUrl = await createDynamicPaymentLink(planCode, paymentIntentId);
+        window.appAnalytics?.track?.('membership_checkout_started', { provider: 'cashfree-dynamic-link', plan_code: planCode });
+        window.location.href = linkUrl;
       } catch (error) {
-        console.error('Hosted checkout start error:', error);
+        console.error('Dynamic payment link error:', error);
         setPaymentBusy(false, 'Continue to Secure Payment');
         setPaymentMessage(error.message || 'Could not open secure payment.', true);
       }
@@ -200,11 +222,7 @@ async function initPaymentPage() {
     setPaymentMessage('Payment completed. Your membership status will update after confirmation.', false);
   }
 
-  if (!getHostedLink(planCode)) {
-    setPaymentMessage('Cashfree checkout link is not configured for this plan yet.', true);
-  }
-
-  window.appAnalytics?.track?.('payment_page_viewed', { provider: 'cashfree-hosted', plan_code: planCode });
+  window.appAnalytics?.track?.('payment_page_viewed', { provider: 'cashfree-dynamic-link', plan_code: planCode });
 }
 
 initPaymentPage().catch((error) => {

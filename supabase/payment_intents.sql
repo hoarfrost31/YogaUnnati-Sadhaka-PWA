@@ -8,7 +8,7 @@ create table if not exists public.payment_intents (
   plan_code text not null check (plan_code in ('app', 'online', 'studio')),
   provider text not null default 'cashfree_link',
   status text not null default 'pending' check (status in ('pending', 'paid', 'failed', 'cancelled', 'expired')),
-  provider_link_code text,
+  provider_link_id text,
   provider_payment_id text,
   provider_reference text,
   provider_payload jsonb,
@@ -20,16 +20,14 @@ alter table public.payment_intents add column if not exists user_email text;
 alter table public.payment_intents add column if not exists user_phone text;
 alter table public.payment_intents add column if not exists provider text not null default 'cashfree_link';
 alter table public.payment_intents add column if not exists status text not null default 'pending';
-alter table public.payment_intents add column if not exists provider_link_code text;
+alter table public.payment_intents add column if not exists provider_link_id text;
 alter table public.payment_intents add column if not exists provider_payment_id text;
 alter table public.payment_intents add column if not exists provider_reference text;
 alter table public.payment_intents add column if not exists provider_payload jsonb;
 alter table public.payment_intents add column if not exists created_at timestamptz not null default timezone('utc', now());
 alter table public.payment_intents add column if not exists updated_at timestamptz not null default timezone('utc', now());
 
-alter table public.payment_intents
-  drop constraint if exists payment_intents_status_check;
-
+alter table public.payment_intents drop constraint if exists payment_intents_status_check;
 alter table public.payment_intents
   add constraint payment_intents_status_check
   check (status in ('pending', 'paid', 'failed', 'cancelled', 'expired'));
@@ -67,6 +65,13 @@ with check (
   and provider = 'cashfree_link'
   and status = 'pending'
 );
+
+drop policy if exists "Users can update own pending payment intents" on public.payment_intents;
+create policy "Users can update own pending payment intents"
+on public.payment_intents
+for update
+using (auth.uid() = user_id and status = 'pending')
+with check (auth.uid() = user_id);
 
 drop policy if exists "Admin can read all payment intents" on public.payment_intents;
 create policy "Admin can read all payment intents"

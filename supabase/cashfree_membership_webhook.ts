@@ -44,30 +44,23 @@ async function verifySignature(rawBody: string, timestamp: string, signature: st
   return computed === signature;
 }
 
-function normalizeIndianPhone(input: unknown) {
-  const digits = String(input || "").replace(/\D/g, "");
-  if (digits.length === 10) return digits;
-  if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2);
-  return "";
-}
-
 function mapIntentStatus(statusText: string) {
   const status = String(statusText || "").trim().toUpperCase();
   if (["SUCCESS", "PAID", "ACTIVE", "CHARGED"].includes(status)) return "paid";
   if (["FAILED", "FAILURE", "DECLINED"].includes(status)) return "failed";
   if (["USER_DROPPED", "CANCELLED", "CANCELED"].includes(status)) return "cancelled";
-  if (["EXPIRED"].includes(status)) return "expired";
+  if (["EXPIRED", "LINK_EXPIRED"].includes(status)) return "expired";
   return "pending";
 }
 
 function extractPaymentPayload(payload: any) {
   const data = payload?.data || payload || {};
+  const notes = data?.link_notes || data?.payment_link?.link_notes || {};
   return {
+    paymentIntentId: String(notes?.payment_intent_id || data?.link_id || data?.payment_link?.link_id || ""),
     paymentId: String(data?.cf_payment_id || data?.payment_id || data?.payment?.cf_payment_id || data?.payment?.payment_id || ""),
-    referenceId: String(data?.order_id || data?.payment_link_id || data?.payment_link?.link_id || data?.entity_id || ""),
-    email: String(data?.customer_details?.customer_email || data?.customer_email || data?.payment?.customer_details?.customer_email || "").trim().toLowerCase(),
-    phone: normalizeIndianPhone(data?.customer_details?.customer_phone || data?.customer_phone || data?.payment?.customer_details?.customer_phone || ""),
-    statusText: String(data?.payment_status || data?.payment?.payment_status || payload?.type || payload?.event || ""),
+    referenceId: String(data?.order_id || data?.payment_link_id || data?.cf_link_id || data?.payment_link?.link_id || data?.entity_id || ""),
+    statusText: String(data?.payment_status || data?.link_status || data?.payment?.payment_status || payload?.type || payload?.event || ""),
     rawData: data,
   };
 }
@@ -93,23 +86,16 @@ Deno.serve(async (req) => {
   const payment = extractPaymentPayload(payload);
   const intentStatus = mapIntentStatus(payment.statusText);
 
-  let intentQuery = supabase
-    .from("payment_intents")
-    .select("id, user_id, plan_code")
-    .eq("provider", "cashfree_link")
-    .eq("status", "pending")
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  if (payment.email) {
-    intentQuery = intentQuery.eq("user_email", payment.email);
-  } else if (payment.phone) {
-    intentQuery = intentQuery.eq("user_phone", payment.phone);
-  } else {
-    return jsonResponse({ ok: true, skipped: true, reason: "no_customer_identity" });
+  if (!payment.paymentIntentId) {
+    return jsonResponse({ ok: true, skipped: true, reason: "no_payment_intent_id" });
   }
 
-  const { data: intentRow } = await intentQuery.maybeSingle();
+  const { data: intentRow } = await supabase
+    .from("payment_intents")
+    .select("id, user_id, plan_code")
+    .eq("id", payment.paymentIntentId)
+    .maybeSingle();
+
   if (!intentRow?.id) {
     return jsonResponse({ ok: true, skipped: true, reason: "no_matching_intent" });
   }
@@ -135,7 +121,7 @@ Deno.serve(async (req) => {
         started_at: new Date().toISOString(),
         current_period_end: null,
         cancel_at_period_end: false,
-        provider_customer_id: payment.email || payment.phone || null,
+        provider_customer_id: null,
         provider_subscription_id: payment.paymentId || payment.referenceId || null,
         provider_status: payment.statusText || "PAID",
       }, { onConflict: "user_id" });
