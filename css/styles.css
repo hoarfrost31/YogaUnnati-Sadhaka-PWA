@@ -4438,3 +4438,42 @@ input {
   background: rgba(86, 56, 255, 0.1);
   border-color: rgba(86, 56, 255, 0.22);
 }
+.membership-hero-card {
+  padding: 18px 22px;
+}
+
+.membership-hero-card .pricing-title {
+  margin-top: 0;
+}
+
+.membership-status-card-compact {
+  padding: 16px 18px;
+}
+
+.membership-status-head-compact {
+  align-items: center;
+}
+
+.membership-status-head-compact h2 {
+  margin: 0;
+}
+
+.membership-status-grid-compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 12px;
+}
+
+.membership-status-grid-compact .membership-status-item {
+  padding: 12px 13px;
+}
+
+@media (max-width: 640px) {
+  .membership-hero-card {
+    padding: 16px 18px;
+  }
+
+  .membership-status-grid-compact {
+    grid-template-columns: 1fr;
+  }
+}
+
