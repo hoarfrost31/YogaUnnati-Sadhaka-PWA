@@ -1,4 +1,4 @@
-const CACHE_NAME = "yogaunnati-pwa-v62";
+const CACHE_NAME = "yogaunnati-pwa-v63";
 const APP_SHELL_PATHS = [
   "",
   "install.html",
@@ -258,47 +258,4 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -221,12 +221,36 @@ function bindMembershipPlanButtons() {
   });
 }
 
+function bindMembershipPlanToggles() {
+  document.querySelectorAll("[data-membership-plan-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const card = button.closest("[data-membership-plan]");
+      const features = card?.querySelector("[data-membership-plan-features]");
+      if (!features) {
+        return;
+      }
+
+      const nextExpanded = features.hasAttribute("hidden");
+      if (nextExpanded) {
+        features.removeAttribute("hidden");
+      } else {
+        features.setAttribute("hidden", "hidden");
+      }
+
+      card?.classList.toggle("is-expanded", nextExpanded);
+      button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
+      button.textContent = nextExpanded ? "Hide key features" : "View key features";
+    });
+  });
+}
+
 async function initMembershipPage() {
   if (!window.appAuth?.getCurrentUser || !window.membershipData) {
     return;
   }
 
   bindMembershipPlanButtons();
+  bindMembershipPlanToggles();
 
   const user = await window.appAuth.getCurrentUser();
   membershipPageUserId = user?.id || "";

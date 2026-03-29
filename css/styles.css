@@ -4402,3 +4402,39 @@ input {
     grid-template-columns: 1fr;
   }
 }
+
+.pricing-plan-grid .pricing-plan-card {
+  gap: 18px;
+}
+
+.membership-plan-toggle {
+  appearance: none;
+  border: 1px solid rgba(21, 31, 52, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text-primary);
+  border-radius: 999px;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.membership-plan-toggle:hover {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.membership-plan-toggle:focus-visible {
+  outline: 2px solid rgba(86, 56, 255, 0.28);
+  outline-offset: 3px;
+}
+
+.pricing-plan-card [data-membership-plan-features][hidden] {
+  display: none;
+}
+
+.pricing-plan-card.is-expanded .membership-plan-toggle {
+  background: rgba(86, 56, 255, 0.1);
+  border-color: rgba(86, 56, 255, 0.22);
+}
