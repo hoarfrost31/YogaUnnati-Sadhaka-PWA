@@ -1,4 +1,4 @@
-const CACHE_NAME = "yogaunnati-pwa-v52";
+const CACHE_NAME = "yogaunnati-pwa-v54";
 const APP_SHELL_PATHS = [
   "",
   "install.html",
@@ -32,6 +32,7 @@ const APP_SHELL_PATHS = [
   "js/membershipData.js",
   "js/membershipPage.js",
   "js/paymentPage.js",
+  "js/cashfreeHostedLinks.js",
   "js/pushSubscriptionData.js",
   "js/pageTransition.js",
   "js/pwa.js",
@@ -65,9 +66,18 @@ function toScopedUrl(pathname) {
 const APP_SHELL = APP_SHELL_PATHS.map((pathname) => toScopedUrl(pathname));
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await Promise.allSettled(
+      APP_SHELL.map(async (url) => {
+        try {
+          await cache.add(url);
+        } catch (error) {
+          console.warn("SW cache add failed:", url, error);
+        }
+      })
+    );
+  })());
   self.skipWaiting();
 });
 
@@ -248,6 +258,8 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
+
 
 
 
