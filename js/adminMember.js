@@ -22,7 +22,8 @@ const adminMemberMembershipMsgEl = document.getElementById("adminMemberMembershi
 
 let adminMemberPracticeDates = [];
 let adminCalendarDate = new Date();
-let currentAdminMemberId = "";`r`nlet currentAdminMembershipRow = null;
+let currentAdminMemberId = "";
+let currentAdminMembershipRow = null;
 
 function setAdminMemberMembershipMessage(text) {
   adminMemberMembershipMsgEl.textContent = text;
@@ -86,8 +87,8 @@ function getCurrentIso() {
   return new Date().toISOString();
 }
 
-function getNextMonthlyRenewalIso() {
-  const nextDate = new Date();
+function getNextMonthlyRenewalIso(baseDate = new Date()) {
+  const nextDate = new Date(baseDate);
   nextDate.setMonth(nextDate.getMonth() + 1);
   return nextDate.toISOString();
 }
@@ -143,7 +144,8 @@ async function loadMembershipRow(memberId) {
   return data || null;
 }
 
-function renderMembershipEditor(membershipRow) {`r`n  currentAdminMembershipRow = membershipRow || null;
+function renderMembershipEditor(membershipRow) {
+  currentAdminMembershipRow = membershipRow || null;
   const planCode = membershipRow?.plan_code || "none";
   const status = membershipRow?.status || (planCode === "none" ? "inactive" : "active");
 
