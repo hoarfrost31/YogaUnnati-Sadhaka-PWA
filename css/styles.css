@@ -4476,4 +4476,38 @@ input {
     grid-template-columns: 1fr;
   }
 }
+.payment-hero-card-compact {
+  padding: 18px 22px;
+}
+
+.payment-hero-card-compact .pricing-title {
+  margin-top: 0;
+}
+
+.payment-plan-card-compact,
+.payment-method-card-compact {
+  padding: 18px 20px;
+}
+
+.payment-info-grid-compact {
+  margin-top: 14px;
+}
+
+.payment-action-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .payment-hero-card-compact,
+  .payment-plan-card-compact,
+  .payment-method-card-compact {
+    padding: 16px 18px;
+  }
+
+  .payment-action-row {
+    grid-template-columns: 1fr;
+  }
+}
 

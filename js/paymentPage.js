@@ -4,8 +4,8 @@ const PAYMENT_PLANS = {
     name: 'YogaUnnati App',
     amountDisplay: "\u20B9199",
     amountValue: 199,
-    copy: 'The digital-only membership for members who want tracking, milestones, and app continuity.',
-    hero: 'Your app-only membership will continue through secure Cashfree checkout.',
+    copy: 'Monthly membership summary for your selected YogaUnnati plan.',
+    hero: 'Your payment is handled securely through Cashfree payment gateway.',
     benefits: [
       'Daily progress tracking',
       'Milestone progression',
@@ -17,8 +17,8 @@ const PAYMENT_PLANS = {
     name: 'YogaUnnati Online',
     amountDisplay: "\u20B9499",
     amountValue: 499,
-    copy: 'The remote guided membership with app support for members who practice from anywhere.',
-    hero: 'Your online guided membership will continue through secure monthly Cashfree checkout.',
+    copy: 'Monthly membership summary for your selected YogaUnnati plan.',
+    hero: 'Your payment is handled securely through Cashfree payment gateway.',
     benefits: [
       'Online guided sessions',
       'App milestones and tracking',
@@ -30,8 +30,8 @@ const PAYMENT_PLANS = {
     name: 'YogaUnnati Studio',
     amountDisplay: "\u20B91099",
     amountValue: 1099,
-    copy: 'The complete studio membership with guided group practice, teacher corrections, and app support.',
-    hero: 'Your full studio membership will continue through secure monthly Cashfree checkout.',
+    copy: 'Monthly membership summary for your selected YogaUnnati plan.',
+    hero: 'Your payment is handled securely through Cashfree payment gateway.',
     benefits: [
       'Daily guided group practice',
       'Teacher corrections',
@@ -57,7 +57,7 @@ function setPaymentBusy(isBusy, buttonLabel) {
   const pill = document.getElementById('paymentStatusPill');
   if (button) {
     button.disabled = Boolean(isBusy);
-    button.textContent = buttonLabel || 'Continue to Secure Payment';
+    button.textContent = buttonLabel || 'Continue to Payment';
   }
   if (pill) {
     pill.textContent = isBusy ? 'Opening' : 'Ready';
@@ -74,19 +74,7 @@ function setPaymentMessage(text, isError) {
   messageEl.style.color = isError ? 'var(--danger-text)' : 'var(--text-soft)';
 }
 
-function renderPaymentBenefits(planCode) {
-  const wrap = document.getElementById('paymentBenefitList');
-  if (!wrap) {
-    return;
-  }
 
-  wrap.innerHTML = PAYMENT_PLANS[planCode].benefits.map((benefit, index) => `
-    <div class="payment-benefit-item">
-      <span class="pricing-feature-icon">${index + 1}</span>
-      <strong>${benefit}</strong>
-    </div>
-  `).join('');
-}
 
 function normalizeIndianPhone(input) {
   const digits = String(input || '').replace(/\D/g, '');
@@ -228,7 +216,7 @@ async function initPaymentPage() {
   if (payBtn) {
     payBtn.disabled = false;
     payBtn.addEventListener('click', async () => {
-      setPaymentBusy(true, 'Opening secure payment...');
+      setPaymentBusy(true, 'Opening payment...');
       setPaymentMessage('Creating your secure Cashfree checkout...', false);
 
       try {
@@ -241,10 +229,10 @@ async function initPaymentPage() {
         const orderPayload = await createCashfreeOrder(paymentIntentId, planCode);
         window.appAnalytics?.track?.('membership_checkout_started', { provider: 'cashfree-order', plan_code: planCode });
         await openCashfreeCheckout(orderPayload);
-        setPaymentBusy(false, 'Continue to Secure Payment');
+        setPaymentBusy(false, 'Continue to Payment');
       } catch (error) {
         console.error('Cashfree checkout error:', error);
-        setPaymentBusy(false, 'Continue to Secure Payment');
+        setPaymentBusy(false, 'Continue to Payment');
         setPaymentMessage(error.message || 'Could not open secure payment.', true);
       }
     });
@@ -269,3 +257,4 @@ initPaymentPage().catch((error) => {
   console.error('Payment page init error:', error);
   setPaymentMessage('Could not load the payment page.', true);
 });
+
