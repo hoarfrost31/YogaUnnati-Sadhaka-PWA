@@ -93,6 +93,7 @@ function analyticsPageNameFromPath() {
     "profile-settings.html": "profile_settings",
     "auth.html": "auth",
     "membership.html": "membership",
+    "payment.html": "payment",
   };
 
   return pageNames[path] || path.replace(".html", "") || "home";
@@ -271,6 +272,7 @@ window.appAnalytics = (() => {
     flush,
   };
 })();
+
 
 
 

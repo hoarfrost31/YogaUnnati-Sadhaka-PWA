@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f3ed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="YogaUnnati" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+  <title>YogaUnnati Payment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="page-shell pricing-page payment-page">
+  <div class="app-container pricing-shell payment-shell">
+    <div class="page-content">
+      <a href="membership.html" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
+        <span>Back to Membership</span>
+      </a>
+
+      <section class="pricing-hero-card payment-hero-card">
+        <div class="pricing-badge">YogaUnnati Payment</div>
+        <h1 class="page-title pricing-title">Continue with secure checkout.</h1>
+        <p class="subtitle pricing-subtitle" id="paymentHeroCopy">Your selected YogaUnnati membership will continue through a secure Cashfree subscription checkout.</p>
+      </section>
+
+      <section class="payment-plan-card">
+        <div class="payment-plan-head">
+          <div>
+            <p class="eyebrow-label" id="paymentPlanEyebrow">Selected Plan</p>
+            <h2 id="paymentPlanName">YogaUnnati Studio</h2>
+            <p class="payment-plan-copy" id="paymentPlanCopy">The complete studio membership with guided group practice, teacher corrections, and app support.</p>
+          </div>
+          <div class="pricing-plan-price payment-plan-price">
+            <strong id="paymentPlanAmount">&#8377;1099</strong>
+            <span>per month</span>
+          </div>
+        </div>
+
+        <div class="payment-benefit-list" id="paymentBenefitList"></div>
+      </section>
+
+      <section class="payment-method-card">
+        <div class="payment-method-head">
+          <div>
+            <p class="eyebrow-label">Secure Checkout</p>
+            <h2>Cashfree subscription flow</h2>
+          </div>
+          <span class="payment-status-pill" id="paymentStatusPill">Ready</span>
+        </div>
+
+        <p class="payment-note" id="paymentMethodNote">When you continue, YogaUnnati will start a secure Cashfree subscription checkout for this monthly plan.</p>
+
+        <div class="payment-info-grid">
+          <div class="payment-info-item">
+            <span>Chosen Plan</span>
+            <strong id="paymentInfoPlan">Studio</strong>
+          </div>
+          <div class="payment-info-item">
+            <span>Amount</span>
+            <strong id="paymentInfoAmount">&#8377;1099</strong>
+          </div>
+          <div class="payment-info-item">
+            <span>Billing</span>
+            <strong>Monthly</strong>
+          </div>
+        </div>
+
+        <div class="payment-action-stack">
+          <button type="button" class="primary-btn" id="paymentPrimaryBtn" disabled>Continue to Secure Payment</button>
+          <a href="membership.html" class="secondary-btn payment-secondary-link">Change Plan</a>
+        </div>
+
+        <p class="auth-message payment-form-message" id="paymentFormMessage"></p>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/paymentPage.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/pwa.js"></script>
+  <script src="js/pageTransition.js"></script>
+</body>
+</html>

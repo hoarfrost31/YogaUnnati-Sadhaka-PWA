@@ -13,6 +13,7 @@ const entriesToCopy = [
   "memberprofile.html",
   "auth.html",
   "membership.html",
+  "payment.html",
   "admin-login.html",
   "admin.html",
   "admin-members.html",
@@ -34,6 +35,3 @@ for (const entry of entriesToCopy) {
 }
 
 console.log("Prepared web assets in ./www");
-
-
-

@@ -4237,3 +4237,168 @@ input {
 }
 
 
+
+.payment-shell {
+  padding-bottom: calc(82px + var(--safe-bottom));
+}
+
+.payment-hero-card {
+  margin-top: 18px;
+}
+
+.payment-plan-card,
+.payment-method-card {
+  margin-top: 18px;
+  padding: 22px 20px;
+  border-radius: 28px;
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow);
+}
+
+.payment-plan-head,
+.payment-method-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.payment-plan-head h2,
+.payment-method-head h2 {
+  margin: 4px 0 0;
+  font-family: 'Sora', sans-serif;
+  font-size: 1.16rem;
+  font-weight: 600;
+}
+
+.payment-plan-copy,
+.payment-note {
+  margin: 12px 0 0;
+  color: var(--text-soft);
+  line-height: 1.58;
+}
+
+.payment-plan-price {
+  text-align: right;
+}
+
+.payment-benefit-list,
+.payment-action-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.payment-benefit-list {
+  margin-top: 18px;
+}
+
+.payment-benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+}
+
+.payment-benefit-item strong {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.payment-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(209, 134, 74, 0.14);
+  color: var(--accent-deep);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.payment-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.payment-info-item {
+  padding: 14px 13px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+}
+
+.payment-info-item span {
+  display: block;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.payment-info-item strong {
+  display: block;
+  margin-top: 6px;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.payment-action-stack {
+  margin-top: 18px;
+}
+
+.payment-secondary-link {
+  width: 100%;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-form-message {
+  margin: 6px 0 0;
+}
+
+.membership-status-pill.is-pending {
+  background: rgba(209, 134, 74, 0.16);
+  color: var(--accent-deep);
+}
+
+.pricing-plan-card.is-pending-plan {
+  border-color: rgba(209, 134, 74, 0.28);
+  box-shadow: 0 16px 34px rgba(209, 134, 74, 0.12);
+}
+
+@media (max-width: 720px) {
+  .payment-plan-card,
+  .payment-method-card {
+    padding: 18px 16px;
+    border-radius: 24px;
+  }
+
+  .payment-plan-head,
+  .payment-method-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .payment-plan-price {
+    text-align: left;
+  }
+
+  .payment-info-grid {
+    grid-template-columns: 1fr;
+  }
+}

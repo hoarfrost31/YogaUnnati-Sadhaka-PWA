@@ -8,6 +8,7 @@ const DEFAULT_MEMBERSHIP = Object.freeze({
   cancelAtPeriodEnd: false,
   providerCustomerId: "",
   providerSubscriptionId: "",
+  providerStatus: "",
 });
 
 function getMembershipCacheKey(userId) {
@@ -21,7 +22,7 @@ function normalizePlanCode(planCode = "") {
 
 function normalizeStatus(status = "") {
   const safeStatus = String(status || "").trim().toLowerCase();
-  return ["inactive", "active", "past_due", "cancelled", "expired"].includes(safeStatus)
+  return ["inactive", "pending", "active", "past_due", "cancelled", "expired"].includes(safeStatus)
     ? safeStatus
     : "inactive";
 }
@@ -36,6 +37,7 @@ function normalizeMembershipData(membership = {}) {
     cancelAtPeriodEnd: Boolean(membership.cancelAtPeriodEnd ?? membership.cancel_at_period_end),
     providerCustomerId: String(membership.providerCustomerId || membership.provider_customer_id || "").trim(),
     providerSubscriptionId: String(membership.providerSubscriptionId || membership.provider_subscription_id || "").trim(),
+    providerStatus: String(membership.providerStatus || membership.provider_status || "").trim(),
   };
 }
 
@@ -79,7 +81,7 @@ function isMembershipsTableMissing(error) {
 async function fetchMembershipRow(userId) {
   const { data, error } = await window.supabaseClient
     .from("memberships")
-    .select("user_id, plan_code, status, billing_cycle, started_at, current_period_end, cancel_at_period_end, provider_customer_id, provider_subscription_id")
+    .select("user_id, plan_code, status, billing_cycle, started_at, current_period_end, cancel_at_period_end, provider_customer_id, provider_subscription_id, provider_status")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -114,6 +116,9 @@ async function ensureCurrentUserMembership(userId) {
       started_at: null,
       current_period_end: null,
       cancel_at_period_end: false,
+      provider_customer_id: null,
+      provider_subscription_id: null,
+      provider_status: null,
     };
 
     const { error: upsertError } = await window.supabaseClient
@@ -166,71 +171,6 @@ async function refreshCurrentUserMembership(userId) {
   }
 }
 
-function getCurrentIso() {
-  return new Date().toISOString();
-}
-
-function getNextMonthlyRenewalIso() {
-  const nextDate = new Date();
-  nextDate.setMonth(nextDate.getMonth() + 1);
-  return nextDate.toISOString();
-}
-
-async function saveCurrentUserMembership(userId, membership) {
-  if (!userId) {
-    return { ...DEFAULT_MEMBERSHIP };
-  }
-
-  const cleanMembership = normalizeMembershipData(membership);
-  const payload = {
-    user_id: userId,
-    plan_code: cleanMembership.planCode,
-    status: cleanMembership.status,
-    billing_cycle: cleanMembership.billingCycle || "monthly",
-    started_at: cleanMembership.startedAt || null,
-    current_period_end: cleanMembership.currentPeriodEnd || null,
-    cancel_at_period_end: cleanMembership.cancelAtPeriodEnd,
-    provider_customer_id: cleanMembership.providerCustomerId || null,
-    provider_subscription_id: cleanMembership.providerSubscriptionId || null,
-  };
-
-  try {
-    const { error } = await window.supabaseClient
-      .from("memberships")
-      .upsert(payload, { onConflict: "user_id" });
-
-    if (error) {
-      throw error;
-    }
-
-    const refreshedMembership = await refreshCurrentUserMembership(userId);
-    return refreshedMembership;
-  } catch (error) {
-    if (isMembershipsTableMissing(error)) {
-      writeMembershipCache(userId, cleanMembership);
-      return cleanMembership;
-    }
-
-    throw error;
-  }
-}
-
-async function activateMembershipPlan(userId, planCode) {
-  const normalizedPlanCode = normalizePlanCode(planCode);
-  const nextMembership = {
-    planCode: normalizedPlanCode,
-    status: normalizedPlanCode === "none" ? "inactive" : "active",
-    billingCycle: "monthly",
-    startedAt: normalizedPlanCode === "none" ? "" : getCurrentIso(),
-    currentPeriodEnd: normalizedPlanCode === "none" ? "" : getNextMonthlyRenewalIso(),
-    cancelAtPeriodEnd: false,
-    providerCustomerId: "",
-    providerSubscriptionId: "",
-  };
-
-  return saveCurrentUserMembership(userId, nextMembership);
-}
-
 window.membershipData = {
   DEFAULT_MEMBERSHIP: { ...DEFAULT_MEMBERSHIP },
   normalizeMembershipData,
@@ -238,6 +178,4 @@ window.membershipData = {
   writeMembershipCache,
   ensureCurrentUserMembership,
   refreshCurrentUserMembership,
-  saveCurrentUserMembership,
-  activateMembershipPlan,
 };

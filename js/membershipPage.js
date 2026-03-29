@@ -7,6 +7,7 @@ const MEMBERSHIP_PLAN_LABELS = {
 
 const MEMBERSHIP_STATUS_LABELS = {
   inactive: "Inactive",
+  pending: "Pending Review",
   active: "Active",
   past_due: "Payment Due",
   cancelled: "Cancelled",
@@ -42,6 +43,10 @@ function formatMembershipDate(dateValue, fallback = "Not started") {
 }
 
 function membershipStatusCopy(membership) {
+  if (membership.status === "pending") {
+    return `Your ${membershipPlanLabel(membership.planCode)} checkout is in progress or awaiting confirmation.`;
+  }
+
   if (membership.status === "active") {
     if (membership.cancelAtPeriodEnd) {
       return `${membershipPlanLabel(membership.planCode)} stays active until the end of the current billing cycle.`;
@@ -66,6 +71,10 @@ function membershipStatusCopy(membership) {
 }
 
 function membershipRenewalLabel(membership) {
+  if (membership.status === "pending") {
+    return "Awaiting payment confirmation";
+  }
+
   if (membership.status === "active" && membership.currentPeriodEnd) {
     return membership.cancelAtPeriodEnd
       ? `Ends ${formatMembershipDate(membership.currentPeriodEnd)}`
@@ -84,6 +93,10 @@ function membershipRenewalLabel(membership) {
 }
 
 function membershipBillingLabel(membership) {
+  if (membership.status === "pending") {
+    return "Monthly checkout started";
+  }
+
   if (membership.status === "inactive" || membership.planCode === "none") {
     return "Not started";
   }
@@ -101,8 +114,10 @@ function updateMembershipPlanCards(membership) {
     const planCode = card.getAttribute("data-membership-plan");
     const button = card.querySelector("[data-membership-plan-button]");
     const isCurrent = membership.status === "active" && membership.planCode === planCode;
+    const isPending = membership.status === "pending" && membership.planCode === planCode;
 
     card.classList.toggle("is-current-plan", isCurrent);
+    card.classList.toggle("is-pending-plan", isPending);
 
     if (!button) {
       return;
@@ -118,7 +133,15 @@ function updateMembershipPlanCards(membership) {
       return;
     }
 
-    button.textContent = membershipPageBusy ? "Updating..." : (button.getAttribute("data-default-label") || "Choose Plan");
+    if (isPending) {
+      button.textContent = "Checkout Started";
+      button.disabled = true;
+      button.classList.remove("primary-btn");
+      button.classList.add("secondary-btn");
+      return;
+    }
+
+    button.textContent = membershipPageBusy ? "Loading..." : (button.getAttribute("data-default-label") || "Continue to Payment");
     button.disabled = membershipPageBusy || !membershipPageUserId;
     button.classList.toggle("primary-btn", defaultVariant === "primary");
     button.classList.toggle("secondary-btn", defaultVariant !== "primary");
@@ -170,38 +193,19 @@ function renderMembershipSummary(membership) {
 
 function bindMembershipPlanButtons() {
   document.querySelectorAll("[data-membership-plan-button]").forEach((button) => {
-    button.addEventListener("click", async () => {
-      if (membershipPageBusy || !membershipPageUserId || !window.membershipData?.activateMembershipPlan) {
+    button.addEventListener("click", () => {
+      if (membershipPageBusy || !membershipPageUserId) {
         return;
       }
 
       const planCard = button.closest("[data-membership-plan]");
       const planCode = planCard?.getAttribute("data-membership-plan") || "none";
-      const cachedMembership = window.membershipData.readMembershipCache(membershipPageUserId);
-      const optimisticMembership = {
-        ...cachedMembership,
-        planCode,
-        status: planCode === "none" ? "inactive" : "active",
-        billingCycle: "monthly",
-        startedAt: planCode === "none" ? "" : new Date().toISOString(),
-        currentPeriodEnd: planCode === "none" ? "" : new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
-        cancelAtPeriodEnd: false,
-      };
-
-      setMembershipBusyState(true);
-      renderMembershipSummary(optimisticMembership);
-
-      try {
-        const membership = await window.membershipData.activateMembershipPlan(membershipPageUserId, planCode);
-        renderMembershipSummary(membership);
-        window.appAnalytics?.track?.("membership_plan_selected", { plan_code: planCode });
-      } catch (error) {
-        console.error("Membership plan update error:", error);
-        renderMembershipSummary(cachedMembership);
-      } finally {
-        setMembershipBusyState(false);
-        renderMembershipSummary(window.membershipData.readMembershipCache(membershipPageUserId));
+      if (planCode === "none") {
+        return;
       }
+
+      window.appAnalytics?.track?.("membership_payment_started", { provider: 'cashfree', plan_code: planCode });
+      window.location.href = `payment.html?plan=${encodeURIComponent(planCode)}`;
     });
   });
 }
@@ -229,6 +233,9 @@ async function initMembershipPage() {
     renderMembershipSummary(membership);
   } catch (error) {
     console.error("Membership load error:", error);
+  } finally {
+    setMembershipBusyState(false);
+    renderMembershipSummary(window.membershipData.readMembershipCache(membershipPageUserId));
   }
 }
 
