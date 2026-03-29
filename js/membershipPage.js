@@ -47,13 +47,20 @@ function membershipDaysLeftLabel(membership) {
     return "Checkout started. Confirmation pending.";
   }
 
-  if (membership.status !== "active" || !membership.currentPeriodEnd) {
+  if (membership.status !== "active") {
     return "No active membership yet.";
   }
 
-  const end = new Date(membership.currentPeriodEnd);
-  if (Number.isNaN(end.getTime())) {
-    return "No active membership yet.";
+  let end = membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd) : null;
+  if (!end || Number.isNaN(end.getTime())) {
+    const start = membership.startedAt ? new Date(membership.startedAt) : null;
+    if (start && !Number.isNaN(start.getTime())) {
+      end = new Date(start.getTime() + (30 * 24 * 60 * 60 * 1000));
+    }
+  }
+
+  if (!end || Number.isNaN(end.getTime())) {
+    return "Active membership";
   }
 
   const now = new Date();
