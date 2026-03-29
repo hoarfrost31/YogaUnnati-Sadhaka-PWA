@@ -47,20 +47,22 @@ async function verifySignature(rawBody: string, timestamp: string, signature: st
 function mapIntentStatus(statusText: string) {
   const status = String(statusText || "").trim().toUpperCase();
   if (["SUCCESS", "PAID", "ACTIVE", "CHARGED"].includes(status)) return "paid";
-  if (["FAILED", "FAILURE", "DECLINED"].includes(status)) return "failed";
+  if (["FAILED", "FAILURE", "DECLINED", "NOT_ATTEMPTED"].includes(status)) return "failed";
   if (["USER_DROPPED", "CANCELLED", "CANCELED"].includes(status)) return "cancelled";
-  if (["EXPIRED", "LINK_EXPIRED"].includes(status)) return "expired";
+  if (["EXPIRED"].includes(status)) return "expired";
   return "pending";
 }
 
 function extractPaymentPayload(payload: any) {
   const data = payload?.data || payload || {};
-  const notes = data?.link_notes || data?.payment_link?.link_notes || {};
+  const order = data?.order || data?.payment?.order || {};
+  const payment = data?.payment || {};
+  const orderTags = order?.order_tags || data?.order_tags || {};
   return {
-    paymentIntentId: String(notes?.payment_intent_id || data?.link_id || data?.payment_link?.link_id || ""),
-    paymentId: String(data?.cf_payment_id || data?.payment_id || data?.payment?.cf_payment_id || data?.payment?.payment_id || ""),
-    referenceId: String(data?.order_id || data?.payment_link_id || data?.cf_link_id || data?.payment_link?.link_id || data?.entity_id || ""),
-    statusText: String(data?.payment_status || data?.link_status || data?.payment?.payment_status || payload?.type || payload?.event || ""),
+    paymentIntentId: String(orderTags?.payment_intent_id || order?.order_id || data?.order_id || payment?.order_id || ""),
+    paymentId: String(payment?.cf_payment_id || data?.cf_payment_id || payment?.payment_id || data?.payment_id || ""),
+    referenceId: String(order?.order_id || data?.order_id || payment?.order_id || ""),
+    statusText: String(payment?.payment_status || data?.payment_status || order?.order_status || data?.order_status || payload?.type || payload?.event || ""),
     rawData: data,
   };
 }

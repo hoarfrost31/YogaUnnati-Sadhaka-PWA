@@ -5,7 +5,7 @@ const PAYMENT_PLANS = {
     amountDisplay: '\u20B9199',
     amountValue: 199,
     copy: 'The digital-only membership for members who want tracking, milestones, and app continuity.',
-    hero: 'Your app-only membership will continue through a secure Cashfree hosted checkout.',
+    hero: 'Your app-only membership will continue through secure Cashfree checkout.',
     benefits: [
       'Daily progress tracking',
       'Milestone progression',
@@ -18,7 +18,7 @@ const PAYMENT_PLANS = {
     amountDisplay: '\u20B9499',
     amountValue: 499,
     copy: 'The remote guided membership with app support for members who practice from anywhere.',
-    hero: 'Your online guided membership will continue through a secure monthly Cashfree hosted checkout.',
+    hero: 'Your online guided membership will continue through secure monthly Cashfree checkout.',
     benefits: [
       'Online guided sessions',
       'App milestones and tracking',
@@ -31,7 +31,7 @@ const PAYMENT_PLANS = {
     amountDisplay: '\u20B91099',
     amountValue: 1099,
     copy: 'The complete studio membership with guided group practice, teacher corrections, and app support.',
-    hero: 'Your full studio membership will continue through a secure monthly Cashfree hosted checkout.',
+    hero: 'Your full studio membership will continue through secure monthly Cashfree checkout.',
     benefits: [
       'Daily guided group practice',
       'Teacher corrections',
@@ -108,7 +108,7 @@ async function createPendingPaymentIntent(planCode, user) {
   );
 
   if (!phone) {
-    throw new Error("Please add a valid 10 digit mobile number in Profile Settings before payment.");
+    throw new Error('Please add a valid 10 digit mobile number in Profile Settings before payment.');
   }
 
   const payload = {
@@ -116,7 +116,7 @@ async function createPendingPaymentIntent(planCode, user) {
     user_email: String(user.email || '').trim().toLowerCase() || null,
     user_phone: phone || null,
     plan_code: planCode,
-    provider: 'cashfree_link',
+    provider: 'cashfree_order',
     status: 'pending',
   };
 
@@ -151,7 +151,7 @@ function getPaymentGatewayBaseUrl() {
   return String(window.paymentGatewayConfig?.createCashfreePaymentLinkUrl || '').trim();
 }
 
-async function createDynamicPaymentLink(planCode, paymentIntentId) {
+async function createCashfreeOrder(paymentIntentId, planCode) {
   const accessToken = await getAccessToken();
   if (!accessToken) {
     throw new Error('Please log in again before starting payment.');
@@ -177,14 +177,32 @@ async function createDynamicPaymentLink(planCode, paymentIntentId) {
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(payload?.error || 'Could not create secure payment link.');
+    throw new Error(payload?.error || 'Could not create secure checkout session.');
   }
 
-  if (!payload?.link_url) {
-    throw new Error('Cashfree did not return a hosted payment link.');
+  if (!payload?.payment_session_id) {
+    throw new Error('Cashfree did not return a payment session.');
   }
 
-  return payload.link_url;
+  return payload;
+}
+
+function getCashfreeInstance(env) {
+  if (typeof window.Cashfree !== 'function') {
+    throw new Error('Cashfree checkout is not available right now.');
+  }
+
+  return window.Cashfree({
+    mode: String(env || '').toLowerCase() === 'sandbox' ? 'sandbox' : 'production',
+  });
+}
+
+async function openCashfreeCheckout(orderPayload) {
+  const cashfree = getCashfreeInstance(orderPayload.cashfree_env);
+  await cashfree.checkout({
+    paymentSessionId: orderPayload.payment_session_id,
+    redirectTarget: '_self',
+  });
 }
 
 async function initPaymentPage() {
@@ -211,7 +229,7 @@ async function initPaymentPage() {
     payBtn.disabled = false;
     payBtn.addEventListener('click', async () => {
       setPaymentBusy(true, 'Opening secure payment...');
-      setPaymentMessage('Creating your secure Cashfree payment link...', false);
+      setPaymentMessage('Creating your secure Cashfree checkout...', false);
 
       try {
         const latestUser = await getFreshCurrentUser();
@@ -220,11 +238,12 @@ async function initPaymentPage() {
         }
 
         const paymentIntentId = await createPendingPaymentIntent(planCode, latestUser);
-        const linkUrl = await createDynamicPaymentLink(planCode, paymentIntentId);
-        window.appAnalytics?.track?.('membership_checkout_started', { provider: 'cashfree-dynamic-link', plan_code: planCode });
-        window.location.href = linkUrl;
+        const orderPayload = await createCashfreeOrder(paymentIntentId, planCode);
+        window.appAnalytics?.track?.('membership_checkout_started', { provider: 'cashfree-order', plan_code: planCode });
+        await openCashfreeCheckout(orderPayload);
+        setPaymentBusy(false, 'Continue to Secure Payment');
       } catch (error) {
-        console.error('Dynamic payment link error:', error);
+        console.error('Cashfree checkout error:', error);
         setPaymentBusy(false, 'Continue to Secure Payment');
         setPaymentMessage(error.message || 'Could not open secure payment.', true);
       }
@@ -243,11 +262,10 @@ async function initPaymentPage() {
     setPaymentMessage('Payment gateway URL is not configured yet.', true);
   }
 
-  window.appAnalytics?.track?.('payment_page_viewed', { provider: 'cashfree-dynamic-link', plan_code: planCode });
+  window.appAnalytics?.track?.('payment_page_viewed', { provider: 'cashfree-order', plan_code: planCode });
 }
 
 initPaymentPage().catch((error) => {
   console.error('Payment page init error:', error);
   setPaymentMessage('Could not load the payment page.', true);
 });
-
