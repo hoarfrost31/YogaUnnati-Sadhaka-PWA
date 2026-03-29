@@ -113,7 +113,7 @@ async function startCheckout(planCode) {
     throw new Error('Payment service URL is not configured.');
   }
 
-  const response = await fetch(`${baseUrl}/create-cashfree-membership-subscription`, {
+  const response = await fetch(`${baseUrl}/create-cashfree-membership-subscription-v2`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -209,4 +209,5 @@ initPaymentPage().catch((error) => {
   console.error('Payment page init error:', error);
   setPaymentMessage('Could not load the payment page.', true);
 });
+
 
