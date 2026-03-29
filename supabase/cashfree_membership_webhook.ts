@@ -113,6 +113,15 @@ Deno.serve(async (req) => {
     .eq("id", intentRow.id);
 
   if (intentStatus === "paid") {
+    const { data: existingMembership } = await supabase
+      .from("memberships")
+      .select("started_at")
+      .eq("user_id", intentRow.user_id)
+      .maybeSingle();
+
+    const paidAt = new Date();
+    const currentPeriodEnd = new Date(paidAt.getTime() + (30 * 24 * 60 * 60 * 1000));
+
     await supabase
       .from("memberships")
       .upsert({
@@ -120,8 +129,8 @@ Deno.serve(async (req) => {
         plan_code: intentRow.plan_code,
         status: "active",
         billing_cycle: "monthly",
-        started_at: new Date().toISOString(),
-        current_period_end: null,
+        started_at: existingMembership?.started_at || paidAt.toISOString(),
+        current_period_end: currentPeriodEnd.toISOString(),
         cancel_at_period_end: false,
         provider_customer_id: null,
         provider_subscription_id: payment.paymentId || payment.referenceId || null,
@@ -131,3 +140,4 @@ Deno.serve(async (req) => {
 
   return jsonResponse({ ok: true, intent_id: intentRow.id, status: intentStatus });
 });
+
