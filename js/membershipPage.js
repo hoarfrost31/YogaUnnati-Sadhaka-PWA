@@ -145,7 +145,7 @@ function updateMembershipPlanCards(membership) {
     }
 
     if (isLockedOtherPlan) {
-      button.textContent = membership.status === "active" ? "Unavailable While Active" : "Unavailable During Checkout";
+      button.textContent = button.getAttribute("data-default-label") || "Select";
       button.disabled = true;
       button.classList.remove("primary-btn");
       button.classList.add("secondary-btn");
@@ -277,3 +277,4 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
