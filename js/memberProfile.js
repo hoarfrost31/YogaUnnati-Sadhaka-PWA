@@ -45,7 +45,7 @@ function showToast(message) {
 
 async function invitePeople() {
   const shareMessage = "Hey, I've been attending these yoga sessions regularly and it's been really helpful. Thought you might want to check it out.";
-  const shareUrl = "https://www.yogaunnati.com/en";
+  const shareUrl = "https://yogaunnati.app";
   const shareData = {
     title: "YogaUnnati",
     text: shareMessage,
@@ -445,6 +445,7 @@ if (memberLogoutBtn) {
     await logout();
   });
 }
+
 
 
 

@@ -12,6 +12,13 @@ const entriesToCopy = [
   "profile-settings.html",
   "memberprofile.html",
   "auth.html",
+  "membership.html",
+  "admin-login.html",
+  "admin.html",
+  "admin-members.html",
+  "admin-member.html",
+  "admin-create-member.html",
+  "CNAME",
   "manifest.webmanifest",
   "sw.js",
   "css",
@@ -27,4 +34,6 @@ for (const entry of entriesToCopy) {
 }
 
 console.log("Prepared web assets in ./www");
+
+
 
