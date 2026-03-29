@@ -110,11 +110,14 @@ function setMembershipBusyState(isBusy) {
 
 function updateMembershipPlanCards(membership) {
   const planCards = document.querySelectorAll("[data-membership-plan]");
+  const hasLockedMembership = ["active", "pending"].includes(membership.status) && membership.planCode !== "none";
+
   planCards.forEach((card) => {
     const planCode = card.getAttribute("data-membership-plan");
     const button = card.querySelector("[data-membership-plan-button]");
     const isCurrent = membership.status === "active" && membership.planCode === planCode;
     const isPending = membership.status === "pending" && membership.planCode === planCode;
+    const isLockedOtherPlan = hasLockedMembership && membership.planCode !== planCode;
 
     card.classList.toggle("is-current-plan", isCurrent);
     card.classList.toggle("is-pending-plan", isPending);
@@ -135,6 +138,14 @@ function updateMembershipPlanCards(membership) {
 
     if (isPending) {
       button.textContent = "Checkout Started";
+      button.disabled = true;
+      button.classList.remove("primary-btn");
+      button.classList.add("secondary-btn");
+      return;
+    }
+
+    if (isLockedOtherPlan) {
+      button.textContent = membership.status === "active" ? "Unavailable While Active" : "Unavailable During Checkout";
       button.disabled = true;
       button.classList.remove("primary-btn");
       button.classList.add("secondary-btn");
