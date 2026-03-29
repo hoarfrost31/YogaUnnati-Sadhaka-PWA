@@ -54,10 +54,18 @@ function normalizeAvatarUrl(avatarUrl = "") {
   return safeAvatarUrl;
 }
 
+function normalizeIndianPhone(input = "") {
+  const digits = String(input || "").replace(/\D/g, "");
+  if (digits.length === 10) return digits;
+  if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2);
+  return "";
+}
+
 function normalizeProfileData(profile = {}) {
   return {
     displayName: (profile.displayName || "").trim(),
     avatarUrl: normalizeAvatarUrl(profile.avatarUrl),
+    phone: normalizeIndianPhone(profile.phone),
     classReminderEnabled: Boolean(profile.classReminderEnabled),
   };
 }
@@ -100,6 +108,7 @@ function getProfileFromUser(user) {
   return normalizeProfileData({
     displayName: displayName || emailPrefix || DEFAULT_PROFILE_NAME,
     avatarUrl: metadata.avatar_data_url || metadata.avatar_url || "",
+    phone: metadata.phone || metadata.phone_number || metadata.mobile || user?.phone || "",
     classReminderEnabled: Boolean(metadata.class_reminder_enabled),
   });
 }
@@ -216,6 +225,9 @@ async function saveCurrentUserProfile(userId, profile) {
     data: {
       display_name: cleanProfile.displayName,
       avatar_data_url: cleanProfile.avatarUrl,
+      phone: cleanProfile.phone,
+      phone_number: cleanProfile.phone,
+      mobile: cleanProfile.phone,
       class_reminder_enabled: cleanProfile.classReminderEnabled,
     },
   });
@@ -270,6 +282,9 @@ async function saveReminderPreference(userId, enabled) {
     data: {
       display_name: nextProfile.displayName,
       avatar_data_url: nextProfile.avatarUrl,
+      phone: nextProfile.phone,
+      phone_number: nextProfile.phone,
+      mobile: nextProfile.phone,
       class_reminder_enabled: enabled,
     },
   });
@@ -323,3 +338,4 @@ async function fetchAllProfiles() {
   markRemoteRefresh("profiles_public", "");
   return data || [];
 }
+

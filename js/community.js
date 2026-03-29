@@ -1,6 +1,7 @@
 const supabaseClient = window.supabaseClient;
 
 const profileNameInput = document.getElementById("profileNameInput");
+const profilePhoneInput = document.getElementById("profilePhoneInput");
 const profileImageInput = document.getElementById("profileImageInput");
 const profileBackLink = document.getElementById("profileBackLink");
 const profileAvatarPreview = document.getElementById("profileAvatarPreview");
@@ -112,6 +113,13 @@ function initProfileBackLink() {
   });
 }
 
+function normalizeIndianPhone(input = "") {
+  const digits = String(input || "").replace(/\D/g, "");
+  if (digits.length === 10) return digits;
+  if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2);
+  return "";
+}
+
 function showToast(message) {
   const toast = document.getElementById("toast");
   toast.textContent = message;
@@ -138,6 +146,9 @@ function renderProfile(profile) {
   reminderPreferenceFromAccount = Boolean(activeProfile.classReminderEnabled);
 
   profileNameInput.value = activeProfile.displayName || "";
+  if (profilePhoneInput) {
+    profilePhoneInput.value = activeProfile.phone || "";
+  }
   profileNameHeading.textContent = displayName;
   profileEmailText.textContent = userEmail;
   pendingAvatarUrl = avatarUrl;
@@ -306,10 +317,17 @@ if (enableNotificationsToggle) {
 
 saveProfileBtn.addEventListener("click", async () => {
   const displayName = profileNameInput.value.trim();
+  const phone = normalizeIndianPhone(profilePhoneInput?.value || "");
 
   if (!displayName) {
     showToast("Please add your name");
     profileNameInput.focus();
+    return;
+  }
+
+  if (!phone) {
+    showToast("Please add a valid 10 digit mobile number");
+    profilePhoneInput?.focus();
     return;
   }
 
@@ -320,12 +338,14 @@ saveProfileBtn.addEventListener("click", async () => {
     const profile = await saveCurrentUserProfile(userId, {
       displayName,
       avatarUrl: pendingAvatarUrl,
+      phone,
     });
 
     renderProfile(profile);
     window.appAnalytics?.track("save_profile", {
       has_avatar: Boolean(profile.avatarUrl),
       display_name_length: profile.displayName?.length || 0,
+      has_phone: Boolean(profile.phone),
     });
     showToast("Profile updated");
   } catch (error) {
@@ -370,5 +390,7 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 initApp();
+
+
 
 

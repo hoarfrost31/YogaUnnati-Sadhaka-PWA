@@ -107,6 +107,10 @@ async function createPendingPaymentIntent(planCode, user) {
     || ''
   );
 
+  if (!phone) {
+    throw new Error("Please add a valid 10 digit mobile number in Profile Settings before payment.");
+  }
+
   const payload = {
     user_id: user.id,
     user_email: String(user.email || '').trim().toLowerCase() || null,
@@ -232,3 +236,4 @@ initPaymentPage().catch((error) => {
   console.error('Payment page init error:', error);
   setPaymentMessage('Could not load the payment page.', true);
 });
+
