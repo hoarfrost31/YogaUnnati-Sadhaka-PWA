@@ -57,7 +57,7 @@ function setPaymentBusy(isBusy, buttonLabel) {
   const pill = document.getElementById('paymentStatusPill');
   if (button) {
     button.disabled = Boolean(isBusy);
-    button.textContent = buttonLabel || 'Continue to Payment';
+    button.textContent = buttonLabel || 'Continue to Secure Payment';
   }
   if (pill) {
     pill.textContent = isBusy ? 'Opening' : 'Ready';
@@ -216,7 +216,7 @@ async function initPaymentPage() {
   if (payBtn) {
     payBtn.disabled = false;
     payBtn.addEventListener('click', async () => {
-      setPaymentBusy(true, 'Opening payment...');
+      setPaymentBusy(true, 'Opening secure payment...');
       setPaymentMessage('Creating your secure Cashfree checkout...', false);
 
       try {
@@ -229,10 +229,10 @@ async function initPaymentPage() {
         const orderPayload = await createCashfreeOrder(paymentIntentId, planCode);
         window.appAnalytics?.track?.('membership_checkout_started', { provider: 'cashfree-order', plan_code: planCode });
         await openCashfreeCheckout(orderPayload);
-        setPaymentBusy(false, 'Continue to Payment');
+        setPaymentBusy(false, 'Continue to Secure Payment');
       } catch (error) {
         console.error('Cashfree checkout error:', error);
-        setPaymentBusy(false, 'Continue to Payment');
+        setPaymentBusy(false, 'Continue to Secure Payment');
         setPaymentMessage(error.message || 'Could not open secure payment.', true);
       }
     });
