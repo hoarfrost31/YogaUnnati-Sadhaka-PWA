@@ -42,6 +42,26 @@ function formatMembershipDate(dateValue, fallback = "Not started") {
   });
 }
 
+function membershipDaysLeftLabel(membership) {
+  if (membership.status === "pending") {
+    return "Checkout started. Confirmation pending.";
+  }
+
+  if (membership.status !== "active" || !membership.currentPeriodEnd) {
+    return "No active membership yet.";
+  }
+
+  const end = new Date(membership.currentPeriodEnd);
+  if (Number.isNaN(end.getTime())) {
+    return "No active membership yet.";
+  }
+
+  const now = new Date();
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const diffDays = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / msPerDay));
+  const unit = diffDays === 1 ? "day" : "days";
+  return `${diffDays} ${unit} left`;
+}
 function membershipStatusCopy(membership) {
   if (membership.status === "pending") {
     return `Your ${membershipPlanLabel(membership.planCode)} checkout is in progress or awaiting confirmation.`;
@@ -70,6 +90,7 @@ function membershipStatusCopy(membership) {
   return "Choose a plan below to begin your membership journey.";
 }
 
+/* legacy renewal helper retained for other statuses */
 function membershipRenewalLabel(membership) {
   if (membership.status === "pending") {
     return "Awaiting payment confirmation";
@@ -161,12 +182,8 @@ function updateMembershipPlanCards(membership) {
 
 function renderMembershipSummary(membership) {
   const currentPlanHeading = document.getElementById("membershipCurrentPlan");
-  const statusCopy = document.getElementById("membershipStatusCopy");
   const statusPill = document.getElementById("membershipStatusPill");
-  const currentPlanLabel = document.getElementById("membershipCurrentPlanLabel");
-  const billingLabel = document.getElementById("membershipBillingLabel");
-  const startDateLabel = document.getElementById("membershipStartDateLabel");
-  const renewalLabel = document.getElementById("membershipRenewalLabel");
+  const daysLabel = document.getElementById("membershipStatusDays");
 
   if (currentPlanHeading) {
     currentPlanHeading.textContent = membership.planCode === "none"
@@ -174,34 +191,17 @@ function renderMembershipSummary(membership) {
       : membershipPlanLabel(membership.planCode);
   }
 
-  if (statusCopy) {
-    statusCopy.textContent = membershipStatusCopy(membership);
-  }
-
   if (statusPill) {
     statusPill.textContent = membershipStatusLabel(membership.status);
     statusPill.className = `membership-status-pill is-${membership.status}`;
   }
 
-  if (currentPlanLabel) {
-    currentPlanLabel.textContent = membershipPlanLabel(membership.planCode);
-  }
-
-  if (billingLabel) {
-    billingLabel.textContent = membershipBillingLabel(membership);
-  }
-
-  if (startDateLabel) {
-    startDateLabel.textContent = formatMembershipDate(membership.startedAt, "Not started");
-  }
-
-  if (renewalLabel) {
-    renewalLabel.textContent = membershipRenewalLabel(membership);
+  if (daysLabel) {
+    daysLabel.textContent = membershipDaysLeftLabel(membership);
   }
 
   updateMembershipPlanCards(membership);
 }
-
 function bindMembershipPlanButtons() {
   document.querySelectorAll("[data-membership-plan-button]").forEach((button) => {
     button.addEventListener("click", () => {

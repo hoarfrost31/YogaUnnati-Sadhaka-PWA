@@ -4510,4 +4510,10 @@ input {
     grid-template-columns: 1fr;
   }
 }
+.membership-status-days {
+  margin: 12px 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-soft);
+}
 
