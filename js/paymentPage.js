@@ -134,9 +134,8 @@ async function getAccessToken() {
   return data?.session?.access_token || '';
 }
 
-function getFunctionsBaseUrl() {
-  const projectUrl = String(window.supabaseClient?.supabaseUrl || '').replace(/\/+$/, '');
-  return projectUrl ? `${projectUrl}/functions/v1` : '';
+function getPaymentGatewayBaseUrl() {
+  return String(window.paymentGatewayConfig?.createCashfreePaymentLinkUrl || '').trim();
 }
 
 async function createDynamicPaymentLink(planCode, paymentIntentId) {
@@ -145,12 +144,12 @@ async function createDynamicPaymentLink(planCode, paymentIntentId) {
     throw new Error('Please log in again before starting payment.');
   }
 
-  const baseUrl = getFunctionsBaseUrl();
-  if (!baseUrl) {
-    throw new Error('Payment service URL is not configured.');
+  const endpointUrl = getPaymentGatewayBaseUrl();
+  if (!endpointUrl) {
+    throw new Error('Payment gateway URL is not configured yet.');
   }
 
-  const response = await fetch(`${baseUrl}/create-cashfree-payment-link`, {
+  const response = await fetch(endpointUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -220,6 +219,10 @@ async function initPaymentPage() {
   }
   if (paymentState === 'success') {
     setPaymentMessage('Payment completed. Your membership status will update after confirmation.', false);
+  }
+
+  if (!getPaymentGatewayBaseUrl()) {
+    setPaymentMessage('Payment gateway URL is not configured yet.', true);
   }
 
   window.appAnalytics?.track?.('payment_page_viewed', { provider: 'cashfree-dynamic-link', plan_code: planCode });
