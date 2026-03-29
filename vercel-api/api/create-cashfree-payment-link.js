@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
 const PLAN_MAP = {
-  app: { amount: 199, purpose: 'YogaUnnati App Membership' },
-  online: { amount: 499, purpose: 'YogaUnnati Online Membership' },
-  studio: { amount: 1099, purpose: 'YogaUnnati Studio Membership' },
+  app: { amount: 1, purpose: 'YogaUnnati App Membership' },
+  online: { amount: 1, purpose: 'YogaUnnati Online Membership' },
+  studio: { amount: 1, purpose: 'YogaUnnati Studio Membership' },
 };
 
 function json(res, status, body) {
