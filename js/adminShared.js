@@ -10,7 +10,7 @@ function buildAdminRoute(rootPath, scopedPath) {
 window.adminRoutes = {
   isScopedApp: IS_SCOPED_ADMIN_APP,
   login: buildAdminRoute("admin-login.html", "login.html"),
-  dashboard: buildAdminRoute("admin.html", "members.html"),
+  dashboard: buildAdminRoute("admin.html", "index.html"),
   members: buildAdminRoute("admin-members.html", "members.html"),
   createMember: buildAdminRoute("admin-create-member.html", "create-member.html"),
   appHome: buildAdminRoute("index.html", "../index.html"),

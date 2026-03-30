@@ -4620,3 +4620,38 @@ input {
     align-items: flex-start;
   }
 }
+
+.admin-tabs {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 18px;
+}
+
+.admin-tab {
+  min-height: 46px;
+  padding: 11px 16px;
+  border-radius: 16px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+}
+
+.admin-tab.is-active {
+  color: #fff;
+  background: linear-gradient(90deg, var(--accent-deep) 0%, #d99258 100%);
+  box-shadow: 0 10px 22px rgba(209, 134, 74, 0.18);
+}
+
+@media (max-width: 720px) {
+  .admin-tabs {
+    width: 100%;
+  }
+}
