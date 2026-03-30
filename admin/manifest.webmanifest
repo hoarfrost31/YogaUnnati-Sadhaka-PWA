@@ -1,6 +1,6 @@
 {
-  "name": "YogaUnnati Admin",
-  "short_name": "YU Admin",
+  "name": "Admin",
+  "short_name": "Admin",
   "description": "Admin control room for YogaUnnati memberships and members.",
   "start_url": "./login.html",
   "scope": "./",
@@ -22,3 +22,4 @@
     }
   ]
 }
+

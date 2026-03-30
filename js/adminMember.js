@@ -1,6 +1,10 @@
 const adminMemberNameEl = document.getElementById("adminMemberName");
 const adminMemberMetaEl = document.getElementById("adminMemberMeta");
 const adminMemberLevelEl = document.getElementById("adminMemberLevel");
+const adminSummaryMembershipPlanEl = document.getElementById("adminSummaryMembershipPlan");
+const adminSummaryMembershipStatusEl = document.getElementById("adminSummaryMembershipStatus");
+const adminSummaryMembershipStartEl = document.getElementById("adminSummaryMembershipStart");
+const adminSummaryMembershipRenewalEl = document.getElementById("adminSummaryMembershipRenewal");
 const adminDetailTotalDaysEl = document.getElementById("adminDetailTotalDays");
 const adminDetailStreakEl = document.getElementById("adminDetailStreak");
 const adminDetailLastPracticeEl = document.getElementById("adminDetailLastPractice");
@@ -48,6 +52,35 @@ function calculateAdminStreak(practiceDates) {
   }
 
   return streak;
+}
+
+function formatMembershipPlanLabel(planCode) {
+  if (planCode === "studio") {
+    return "YogaUnnati Studio";
+  }
+  if (planCode === "online") {
+    return "YogaUnnati Online";
+  }
+  if (planCode === "app") {
+    return "YogaUnnati App";
+  }
+  return "No membership";
+}
+
+function formatMembershipStatusLabel(status) {
+  if (status === "active") {
+    return "Active";
+  }
+  if (status === "past_due") {
+    return "Payment Due";
+  }
+  if (status === "cancelled") {
+    return "Cancelled";
+  }
+  if (status === "expired") {
+    return "Expired";
+  }
+  return "Inactive";
 }
 
 function formatAdminDate(dateString) {
@@ -144,6 +177,20 @@ async function loadMembershipRow(memberId) {
   return data || null;
 }
 
+function renderMembershipSummary(membershipRow) {
+  if (!adminSummaryMembershipPlanEl || !adminSummaryMembershipStatusEl || !adminSummaryMembershipStartEl || !adminSummaryMembershipRenewalEl) {
+    return;
+  }
+
+  const planCode = membershipRow?.plan_code || "none";
+  const status = membershipRow?.status || (planCode === "none" ? "inactive" : "active");
+
+  adminSummaryMembershipPlanEl.textContent = formatMembershipPlanLabel(planCode);
+  adminSummaryMembershipStatusEl.textContent = formatMembershipStatusLabel(status);
+  adminSummaryMembershipStartEl.textContent = formatAdminDate(membershipRow?.started_at || "");
+  adminSummaryMembershipRenewalEl.textContent = formatAdminDate(membershipRow?.current_period_end || "");
+}
+
 function renderMembershipEditor(membershipRow) {
   currentAdminMembershipRow = membershipRow || null;
   const planCode = membershipRow?.plan_code || "none";
@@ -198,6 +245,7 @@ async function saveMemberMembership() {
       throw error;
     }
 
+    renderMembershipSummary(payload);
     renderMembershipEditor(payload);
     setAdminMemberMembershipMessage("Membership updated.");
     window.appAnalytics?.track("admin_membership_updated", {
@@ -280,6 +328,7 @@ async function loadAdminMember() {
     : `${milestoneState.remainingDays} days remaining to the next unlock`;
   adminDetailMemberIdEl.textContent = memberId;
 
+  renderMembershipSummary(membershipRow);
   renderMembershipEditor(membershipRow);
   renderAdminPracticeCalendar();
 
@@ -319,5 +368,6 @@ loadAdminMember().catch((error) => {
   adminRecentPracticeListEl.innerHTML = '<div class="admin-empty-state">Member detail could not be loaded.</div>';
   setAdminMemberMembershipMessage("Membership editor could not be loaded.");
 });
+
 
 

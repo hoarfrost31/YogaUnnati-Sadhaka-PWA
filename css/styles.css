@@ -4532,3 +4532,21 @@ input {
   font-weight: 700;
 }
 
+.admin-topbar-end {
+  justify-content: flex-end;
+}
+
+.admin-member-summary-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-membership-stat-card strong {
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+@media (max-width: 980px) {
+  .admin-member-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
