@@ -4773,3 +4773,7 @@ input {
     grid-template-columns: 1fr;
   }
 }
+
+.admin-member-progress-grid-below {
+  margin-top: 18px;
+}
