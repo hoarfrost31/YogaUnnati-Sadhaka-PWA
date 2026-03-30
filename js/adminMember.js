@@ -5,6 +5,8 @@ const adminSummaryMembershipPlanEl = document.getElementById("adminSummaryMember
 const adminSummaryMembershipStatusEl = document.getElementById("adminSummaryMembershipStatus");
 const adminSummaryMembershipStartEl = document.getElementById("adminSummaryMembershipStart");
 const adminSummaryMembershipRenewalEl = document.getElementById("adminSummaryMembershipRenewal");
+const adminMembershipHistoryCountEl = document.getElementById("adminMembershipHistoryCount");
+const adminMembershipHistoryListEl = document.getElementById("adminMembershipHistoryList");
 const adminDetailTotalDaysEl = document.getElementById("adminDetailTotalDays");
 const adminDetailStreakEl = document.getElementById("adminDetailStreak");
 const adminDetailLastPracticeEl = document.getElementById("adminDetailLastPractice");
@@ -23,6 +25,7 @@ const adminMemberMembershipStartEl = document.getElementById("adminMemberMembers
 const adminMemberMembershipRenewalEl = document.getElementById("adminMemberMembershipRenewal");
 const adminMemberSaveMembershipBtnEl = document.getElementById("adminMemberSaveMembershipBtn");
 const adminMemberMembershipMsgEl = document.getElementById("adminMemberMembershipMsg");
+const BILLING_PERIOD_DAYS = 30;
 
 let adminMemberPracticeDates = [];
 let adminCalendarDate = new Date();
@@ -128,10 +131,55 @@ function getCurrentIso() {
   return new Date().toISOString();
 }
 
+function addBillingDays(baseDate, days = BILLING_PERIOD_DAYS) {
+  const date = new Date(baseDate);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return new Date(date.getTime() + (days * 24 * 60 * 60 * 1000));
+}
+
 function getNextMonthlyRenewalIso(baseDate = new Date()) {
-  const nextDate = new Date(baseDate);
-  nextDate.setMonth(nextDate.getMonth() + 1);
-  return nextDate.toISOString();
+  const nextDate = addBillingDays(baseDate);
+  return nextDate ? nextDate.toISOString() : "";
+}
+
+function getDefaultMembershipStatus(planCode) {
+  return planCode === "none" ? "inactive" : "active";
+}
+
+function shouldTrackMembershipCycle(planCode, status, periodStart, periodEnd) {
+  if (planCode === "none" || !periodStart || !periodEnd) {
+    return false;
+  }
+
+  return ["active", "past_due", "cancelled", "expired"].includes(status);
+}
+
+function syncMembershipDatesFromForm() {
+  if (!adminMemberMembershipPlanEl || !adminMemberMembershipStartEl || !adminMemberMembershipRenewalEl || !adminMemberMembershipStatusEl) {
+    return;
+  }
+
+  const planCode = adminMemberMembershipPlanEl.value;
+
+  if (planCode === "none") {
+    adminMemberMembershipStatusEl.value = "inactive";
+    adminMemberMembershipStartEl.value = "";
+    adminMemberMembershipRenewalEl.value = "";
+    return;
+  }
+
+  if (adminMemberMembershipStatusEl.value === "inactive") {
+    adminMemberMembershipStatusEl.value = "active";
+  }
+
+  const startValue = adminMemberMembershipStartEl.value || formatIsoDate(new Date());
+  adminMemberMembershipStartEl.value = startValue;
+
+  const nextRenewalDate = addBillingDays(new Date(`${startValue}T00:00:00`));
+  adminMemberMembershipRenewalEl.value = nextRenewalDate ? formatIsoDate(nextRenewalDate) : "";
 }
 
 function renderAdminPracticeCalendar() {
@@ -185,13 +233,27 @@ async function loadMembershipRow(memberId) {
   return data || null;
 }
 
+async function loadMembershipCycles(memberId) {
+  const { data, error } = await window.supabaseClient
+    .from("membership_cycles")
+    .select("id, plan_code, status, period_start, period_end, source, note, created_at")
+    .eq("user_id", memberId)
+    .order("period_start", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
 function renderMembershipSummary(membershipRow) {
   if (!adminSummaryMembershipPlanEl || !adminSummaryMembershipStatusEl || !adminSummaryMembershipStartEl || !adminSummaryMembershipRenewalEl) {
     return;
   }
 
   const planCode = membershipRow?.plan_code || "none";
-  const status = membershipRow?.status || (planCode === "none" ? "inactive" : "active");
+  const status = membershipRow?.status || getDefaultMembershipStatus(planCode);
 
   adminSummaryMembershipPlanEl.textContent = formatMembershipPlanLabel(planCode);
   adminSummaryMembershipStatusEl.textContent = formatMembershipStatusLabel(status);
@@ -202,12 +264,114 @@ function renderMembershipSummary(membershipRow) {
 function renderMembershipEditor(membershipRow) {
   currentAdminMembershipRow = membershipRow || null;
   const planCode = membershipRow?.plan_code || "none";
-  const status = membershipRow?.status || (planCode === "none" ? "inactive" : "active");
+  const status = membershipRow?.status || getDefaultMembershipStatus(planCode);
 
   adminMemberMembershipPlanEl.value = planCode;
   adminMemberMembershipStatusEl.value = status;
   adminMemberMembershipStartEl.value = formatDateForInput(membershipRow?.started_at || "");
   adminMemberMembershipRenewalEl.value = formatDateForInput(membershipRow?.current_period_end || "");
+}
+
+function getHistorySourceLabel(source) {
+  if (source === "payment") {
+    return "Gateway payment";
+  }
+  if (source === "admin") {
+    return "Admin update";
+  }
+  if (source === "backfill") {
+    return "Backfilled record";
+  }
+  return source || "Recorded";
+}
+
+function renderMembershipHistory(cycleRows) {
+  if (!adminMembershipHistoryListEl || !adminMembershipHistoryCountEl) {
+    return;
+  }
+
+  const count = cycleRows.length;
+  adminMembershipHistoryCountEl.textContent = `${count} period${count === 1 ? "" : "s"}`;
+
+  if (!count) {
+    adminMembershipHistoryListEl.innerHTML = '<div class="admin-empty-state">No subscription periods recorded yet.</div>';
+    return;
+  }
+
+  adminMembershipHistoryListEl.innerHTML = cycleRows.map((row) => {
+    const rangeLabel = row.period_end
+      ? `${formatAdminDate(row.period_start)} to ${formatAdminDate(row.period_end)}`
+      : `Started ${formatAdminDate(row.period_start)}`;
+    const metaTags = [
+      formatMembershipPlanLabel(row.plan_code),
+      formatMembershipStatusLabel(row.status),
+      getHistorySourceLabel(row.source),
+    ].filter(Boolean);
+    const noteMarkup = row.note ? `<p class="admin-history-note">${row.note}</p>` : "";
+
+    return `
+      <article class="admin-history-item">
+        <div class="admin-history-item-head">
+          <div>
+            <strong>${formatMembershipPlanLabel(row.plan_code)}</strong>
+            <p class="admin-history-range">${rangeLabel}</p>
+          </div>
+          <span class="admin-chip">${formatMembershipStatusLabel(row.status)}</span>
+        </div>
+        <div class="admin-history-meta">
+          ${metaTags.map((tag) => `<span class="admin-history-tag">${tag}</span>`).join("")}
+        </div>
+        ${noteMarkup}
+      </article>
+    `;
+  }).join("");
+}
+
+async function insertMembershipCycleIfMissing({ userId, planCode, status, periodStart, periodEnd, source, note }) {
+  try {
+    const normalizedStart = new Date(periodStart).toISOString();
+    const normalizedEnd = periodEnd ? new Date(periodEnd).toISOString() : null;
+    let duplicateQuery = window.supabaseClient
+      .from("membership_cycles")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("plan_code", planCode)
+      .eq("period_start", normalizedStart);
+
+    duplicateQuery = normalizedEnd
+      ? duplicateQuery.eq("period_end", normalizedEnd)
+      : duplicateQuery.is("period_end", null);
+
+    const { data: existingCycle, error: lookupError } = await duplicateQuery.maybeSingle();
+    if (lookupError) {
+      if (lookupError.code === "42P01") {
+        return;
+      }
+      throw lookupError;
+    }
+
+    if (existingCycle?.id) {
+      return;
+    }
+
+    const { error } = await window.supabaseClient
+      .from("membership_cycles")
+      .insert({
+        user_id: userId,
+        plan_code: planCode,
+        status,
+        period_start: normalizedStart,
+        period_end: normalizedEnd,
+        source,
+        note,
+      });
+
+    if (error && error.code !== "42P01") {
+      throw error;
+    }
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 async function saveMemberMembership() {
@@ -233,7 +397,7 @@ async function saveMemberMembership() {
       ? null
       : (renewalValue
         ? new Date(`${renewalValue}T00:00:00`).toISOString()
-        : (currentAdminMembershipRow?.current_period_end || getNextMonthlyRenewalIso(resolvedStartAt || new Date())));
+        : getNextMonthlyRenewalIso(resolvedStartAt || new Date()));
 
     const payload = {
       user_id: currentAdminMemberId,
@@ -253,8 +417,32 @@ async function saveMemberMembership() {
       throw error;
     }
 
-    renderMembershipSummary(payload);
-    renderMembershipEditor(payload);
+    if (shouldTrackMembershipCycle(planCode, status, resolvedStartAt, resolvedPeriodEnd)) {
+      await insertMembershipCycleIfMissing({
+        userId: currentAdminMemberId,
+        planCode,
+        status,
+        periodStart: resolvedStartAt,
+        periodEnd: resolvedPeriodEnd,
+        source: "admin",
+        note: "Saved from admin member editor",
+      });
+    }
+
+    const membershipRow = await loadMembershipRow(currentAdminMemberId);
+    let membershipCycles = [];
+
+    try {
+      membershipCycles = await loadMembershipCycles(currentAdminMemberId);
+    } catch (cycleError) {
+      if (cycleError?.code !== "42P01") {
+        throw cycleError;
+      }
+    }
+
+    renderMembershipSummary(membershipRow);
+    renderMembershipEditor(membershipRow);
+    renderMembershipHistory(membershipCycles);
     setAdminMemberMembershipMessage("Membership updated.");
     window.appAnalytics?.track("admin_membership_updated", {
       plan_code: planCode,
@@ -284,7 +472,7 @@ async function loadAdminMember() {
 
   currentAdminMemberId = memberId;
 
-  const [profileRow, practiceLogsResult, membershipRow] = await Promise.all([
+  const [profileRow, practiceLogsResult, membershipRow, membershipCycles] = await Promise.all([
     fetchProfileRow(memberId).catch((error) => {
       if (isProfilesTableMissing(error)) {
         return null;
@@ -295,6 +483,12 @@ async function loadAdminMember() {
     loadMembershipRow(memberId).catch((error) => {
       if (error?.code === "42P01") {
         return null;
+      }
+      throw error;
+    }),
+    loadMembershipCycles(memberId).catch((error) => {
+      if (error?.code === "42P01") {
+        return [];
       }
       throw error;
     }),
@@ -338,6 +532,7 @@ async function loadAdminMember() {
 
   renderMembershipSummary(membershipRow);
   renderMembershipEditor(membershipRow);
+  renderMembershipHistory(membershipCycles);
   renderAdminPracticeCalendar();
 
   if (!adminMemberPracticeDates.length) {
@@ -365,6 +560,14 @@ if (adminCalendarNextBtn) {
   });
 }
 
+if (adminMemberMembershipPlanEl) {
+  adminMemberMembershipPlanEl.addEventListener("change", syncMembershipDatesFromForm);
+}
+
+if (adminMemberMembershipStartEl) {
+  adminMemberMembershipStartEl.addEventListener("change", syncMembershipDatesFromForm);
+}
+
 if (adminMemberSaveMembershipBtnEl) {
   adminMemberSaveMembershipBtnEl.addEventListener("click", saveMemberMembership);
 }
@@ -374,9 +577,8 @@ loadAdminMember().catch((error) => {
   adminMemberMetaEl.textContent = "Could not load this member record.";
   adminPracticeCalendarGridEl.innerHTML = '<div class="admin-empty-state">Calendar could not be loaded.</div>';
   adminRecentPracticeListEl.innerHTML = '<div class="admin-empty-state">Member detail could not be loaded.</div>';
+  if (adminMembershipHistoryListEl) {
+    adminMembershipHistoryListEl.innerHTML = '<div class="admin-empty-state">Subscription history could not be loaded.</div>';
+  }
   setAdminMemberMembershipMessage("Membership editor could not be loaded.");
 });
-
-
-
-

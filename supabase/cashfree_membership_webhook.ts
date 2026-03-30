@@ -4,6 +4,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const cashfreeSecretKey = Deno.env.get("CASHFREE_SECRET_KEY") || "";
+const BILLING_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -67,6 +68,10 @@ function extractPaymentPayload(payload: any) {
   };
 }
 
+function addBillingPeriod(date: Date) {
+  return new Date(date.getTime() + BILLING_PERIOD_MS);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -115,12 +120,16 @@ Deno.serve(async (req) => {
   if (intentStatus === "paid") {
     const { data: existingMembership } = await supabase
       .from("memberships")
-      .select("started_at")
+      .select("started_at, current_period_end")
       .eq("user_id", intentRow.user_id)
       .maybeSingle();
 
     const paidAt = new Date();
-    const currentPeriodEnd = new Date(paidAt.getTime() + (30 * 24 * 60 * 60 * 1000));
+    const existingPeriodEnd = existingMembership?.current_period_end ? new Date(existingMembership.current_period_end) : null;
+    const cycleStart = existingPeriodEnd && !Number.isNaN(existingPeriodEnd.getTime()) && existingPeriodEnd.getTime() > paidAt.getTime()
+      ? existingPeriodEnd
+      : paidAt;
+    const cycleEnd = addBillingPeriod(cycleStart);
 
     await supabase
       .from("memberships")
@@ -130,14 +139,35 @@ Deno.serve(async (req) => {
         status: "active",
         billing_cycle: "monthly",
         started_at: existingMembership?.started_at || paidAt.toISOString(),
-        current_period_end: currentPeriodEnd.toISOString(),
+        current_period_end: cycleEnd.toISOString(),
         cancel_at_period_end: false,
         provider_customer_id: null,
         provider_subscription_id: payment.paymentId || payment.referenceId || null,
         provider_status: payment.statusText || "PAID",
       }, { onConflict: "user_id" });
+
+    const { data: existingCycle, error: cycleLookupError } = await supabase
+      .from("membership_cycles")
+      .select("id")
+      .eq("payment_intent_id", intentRow.id)
+      .maybeSingle();
+
+    if (!cycleLookupError && !existingCycle?.id) {
+      await supabase
+        .from("membership_cycles")
+        .insert({
+          user_id: intentRow.user_id,
+          plan_code: intentRow.plan_code,
+          status: "active",
+          period_start: cycleStart.toISOString(),
+          period_end: cycleEnd.toISOString(),
+          source: "payment",
+          payment_intent_id: intentRow.id,
+          provider_payment_id: payment.paymentId || payment.referenceId || null,
+          note: "Recorded from Cashfree payment success",
+        });
+    }
   }
 
   return jsonResponse({ ok: true, intent_id: intentRow.id, status: intentStatus });
 });
-

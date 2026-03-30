@@ -4,15 +4,24 @@ const adminCreatePasswordEl = document.getElementById("adminCreatePassword");
 const adminCreateMembershipPlanEl = document.getElementById("adminCreateMembershipPlan");
 const adminCreateMemberBtnEl = document.getElementById("adminCreateMemberBtn");
 const adminCreateMemberMsgEl = document.getElementById("adminCreateMemberMsg");
+const BILLING_PERIOD_DAYS = 30;
 
 function setAdminCreateMessage(text) {
   adminCreateMemberMsgEl.textContent = text;
 }
 
-function getNextMonthlyRenewalIso() {
-  const nextDate = new Date();
-  nextDate.setMonth(nextDate.getMonth() + 1);
-  return nextDate.toISOString();
+function addBillingDays(baseDate, days = BILLING_PERIOD_DAYS) {
+  const date = new Date(baseDate);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return new Date(date.getTime() + (days * 24 * 60 * 60 * 1000));
+}
+
+function getNextMonthlyRenewalIso(baseDate = new Date()) {
+  const nextDate = addBillingDays(baseDate);
+  return nextDate ? nextDate.toISOString() : null;
 }
 
 async function ensureProfileRow(userId, displayName) {
@@ -31,15 +40,38 @@ async function ensureProfileRow(userId, displayName) {
   }
 }
 
+async function insertMembershipCycleRecord(userId, membershipPayload) {
+  if (!membershipPayload?.started_at || !membershipPayload?.current_period_end || membershipPayload?.plan_code === "none") {
+    return;
+  }
+
+  const { error } = await window.supabaseClient
+    .from("membership_cycles")
+    .insert({
+      user_id: userId,
+      plan_code: membershipPayload.plan_code,
+      status: membershipPayload.status,
+      period_start: membershipPayload.started_at,
+      period_end: membershipPayload.current_period_end,
+      source: "admin",
+      note: "Initial membership assigned from admin create member",
+    });
+
+  if (error && error.code !== "42P01") {
+    throw error;
+  }
+}
+
 async function assignMembershipToUser(userId, planCode) {
   const normalizedPlan = String(planCode || "none").trim().toLowerCase();
+  const startedAt = normalizedPlan === "none" ? null : new Date().toISOString();
   const payload = {
     user_id: userId,
     plan_code: normalizedPlan,
     status: normalizedPlan === "none" ? "inactive" : "active",
     billing_cycle: "monthly",
-    started_at: normalizedPlan === "none" ? null : new Date().toISOString(),
-    current_period_end: normalizedPlan === "none" ? null : getNextMonthlyRenewalIso(),
+    started_at: startedAt,
+    current_period_end: normalizedPlan === "none" ? null : getNextMonthlyRenewalIso(startedAt),
     cancel_at_period_end: false,
   };
 
@@ -49,6 +81,10 @@ async function assignMembershipToUser(userId, planCode) {
 
   if (error) {
     throw error;
+  }
+
+  if (normalizedPlan !== "none") {
+    await insertMembershipCycleRecord(userId, payload);
   }
 }
 
