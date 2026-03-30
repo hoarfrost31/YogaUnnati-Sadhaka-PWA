@@ -3,6 +3,7 @@ const adminMemberMetaEl = document.getElementById("adminMemberMeta");
 const adminMemberLevelEl = document.getElementById("adminMemberLevel");
 const adminSummaryMembershipPlanEl = document.getElementById("adminSummaryMembershipPlan");
 const adminSummaryMembershipStatusEl = document.getElementById("adminSummaryMembershipStatus");
+const adminSummaryMembershipStatusNoteEl = document.getElementById("adminSummaryMembershipStatusNote");
 const adminMembershipHistoryCountEl = document.getElementById("adminMembershipHistoryCount");
 const adminMembershipHistoryListEl = document.getElementById("adminMembershipHistoryList");
 const adminDetailTotalDaysEl = document.getElementById("adminDetailTotalDays");
@@ -11,6 +12,7 @@ const adminDetailMilestoneTitleEl = document.getElementById("adminDetailMileston
 const adminDetailMilestoneProgressEl = document.getElementById("adminDetailMilestoneProgress");
 const adminDetailMilestoneRemainingEl = document.getElementById("adminDetailMilestoneRemaining");
 const adminMemberReferenceLineEl = document.getElementById("adminMemberReferenceLine");
+const adminMemberPhoneLineEl = document.getElementById("adminMemberPhoneLine");
 const adminCalendarLabelEl = document.getElementById("adminCalendarLabel");
 const adminPracticeCalendarGridEl = document.getElementById("adminPracticeCalendarGrid");
 const adminCalendarPrevBtn = document.getElementById("adminCalendarPrev");
@@ -236,9 +238,30 @@ function renderMembershipSummary(membershipRow) {
 
   const planCode = membershipRow?.plan_code || "none";
   const status = membershipRow?.status || getDefaultMembershipStatus(planCode);
+  const currentPeriodEnd = membershipRow?.current_period_end ? new Date(membershipRow.current_period_end) : null;
+  const now = new Date();
+  let statusNote = "Subscription state";
+
+  if (currentPeriodEnd && !Number.isNaN(currentPeriodEnd.getTime()) && status !== "inactive") {
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const daysLeft = Math.ceil((currentPeriodEnd.getTime() - now.getTime()) / msPerDay);
+
+    if (daysLeft > 1) {
+      statusNote = `${daysLeft} days left`;
+    } else if (daysLeft === 1) {
+      statusNote = "1 day left";
+    } else if (daysLeft === 0) {
+      statusNote = "Due today";
+    } else {
+      statusNote = `${Math.abs(daysLeft)} days overdue`;
+    }
+  }
 
   adminSummaryMembershipPlanEl.textContent = formatMembershipPlanLabel(planCode);
   adminSummaryMembershipStatusEl.textContent = formatMembershipStatusLabel(status);
+  if (adminSummaryMembershipStatusNoteEl) {
+    adminSummaryMembershipStatusNoteEl.textContent = statusNote;
+  }
 }
 
 function renderMembershipEditor(membershipRow) {
@@ -454,6 +477,7 @@ async function loadAdminMember() {
   const milestoneState = getCurrentMilestoneState(memberId, getMilestoneProgressCount(adminMemberPracticeDates));
   const profile = profileRow ? getProfileFromRow(profileRow) : normalizeProfileData();
   const displayName = profile.displayName || "Yoga Member";
+  const phoneNumber = profile.phone || "";
 
   if (lastPractice) {
     const lastPracticeDate = new Date(`${lastPractice}T00:00:00`);
@@ -464,6 +488,9 @@ async function loadAdminMember() {
   }
 
   adminMemberNameEl.textContent = displayName;
+  if (adminMemberPhoneLineEl) {
+    adminMemberPhoneLineEl.textContent = phoneNumber ? `Phone: ${phoneNumber}` : "Phone: -";
+  }
   adminMemberMetaEl.textContent = lastPractice
     ? `Last practice on ${formatAdminDate(lastPractice)}`
     : "No practice recorded yet.";
@@ -516,6 +543,9 @@ initializeAdminMemberTabs();
 loadAdminMember().catch((error) => {
   console.error(error);
   adminMemberMetaEl.textContent = "Could not load this member record.";
+  if (adminMemberPhoneLineEl) {
+    adminMemberPhoneLineEl.textContent = "Phone: -";
+  }
   if (adminMemberReferenceLineEl) {
     adminMemberReferenceLineEl.textContent = "Member ID: -";
   }
@@ -527,6 +557,7 @@ loadAdminMember().catch((error) => {
   }
   setAdminMemberMembershipMessage("Membership editor could not be loaded.");
 });
+
 
 
 

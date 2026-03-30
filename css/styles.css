@@ -4822,3 +4822,15 @@ input {
     max-width: none;
   }
 }
+
+.admin-member-phone-line {
+  margin: 0;
+  color: rgba(63, 50, 39, 0.72);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.admin-member-reference-side {
+  margin: 0;
+  text-align: right;
+}
