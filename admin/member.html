@@ -26,13 +26,15 @@
       </div>
 
       <section class="admin-hero-card admin-member-hero">
-        <div>
-          <p class="eyebrow-label">Member Record</p>
+        <div class="admin-member-hero-copy">
+          <p class="eyebrow-label admin-member-record-label">Member Record</p>
           <h1 class="page-title" id="adminMemberName">Loading...</h1>
-          <p class="subtitle admin-subtitle" id="adminMemberMeta">Preparing member details.</p>
           <p class="admin-member-reference-line" id="adminMemberReferenceLine">Member ID: -</p>
         </div>
-        <div class="admin-chip" id="adminMemberLevel">-</div>
+        <div class="admin-member-hero-side">
+          <div class="admin-chip" id="adminMemberLevel">-</div>
+          <p class="subtitle admin-subtitle admin-member-last-practice" id="adminMemberMeta">Preparing member details.</p>
+        </div>
       </section>
 
       <section class="admin-stat-grid admin-member-summary-grid admin-member-summary-grid-compact">
@@ -58,7 +60,6 @@
         <div class="admin-detail-panel is-active" data-admin-member-panel="calendar">
           <div class="admin-card-head admin-calendar-head">
             <div>
-              <p class="eyebrow-label">Practice Calendar</p>
               <h2>Month view</h2>
             </div>
             <div class="admin-calendar-controls">
@@ -84,7 +85,6 @@
         <div class="admin-detail-panel" data-admin-member-panel="membership" hidden>
           <div class="admin-card-head">
             <div>
-              <p class="eyebrow-label">Membership</p>
               <h2>Assign or update plan</h2>
             </div>
           </div>
@@ -129,8 +129,7 @@
         <div class="admin-detail-panel" data-admin-member-panel="history" hidden>
           <div class="admin-card-head">
             <div>
-              <p class="eyebrow-label">Subscription History</p>
-              <h2>Recorded membership periods</h2>
+              <h2>Membership periods</h2>
             </div>
             <span class="admin-chip" id="adminMembershipHistoryCount">0 periods</span>
           </div>
