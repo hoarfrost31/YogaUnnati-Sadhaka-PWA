@@ -4655,3 +4655,8 @@ input {
     width: 100%;
   }
 }
+
+.admin-shell-header {
+  margin-bottom: 0;
+}
+
