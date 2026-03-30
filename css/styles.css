@@ -4693,3 +4693,40 @@ input {
     justify-content: space-between;
   }
 }
+
+.admin-detail-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.admin-detail-tab {
+  min-height: 46px;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+  color: var(--text);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-detail-tab.is-active {
+  color: #fff;
+  background: linear-gradient(90deg, var(--accent-deep) 0%, #d99258 100%);
+  box-shadow: 0 10px 22px rgba(209, 134, 74, 0.18);
+}
+
+.admin-detail-panel[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .admin-detail-tabs {
+    grid-template-columns: 1fr;
+  }
+}
