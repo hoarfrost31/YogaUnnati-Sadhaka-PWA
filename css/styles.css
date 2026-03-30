@@ -4742,3 +4742,34 @@ input {
 }
 
 
+
+.admin-member-summary-grid-compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-member-progress-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.admin-member-progress-card {
+  height: 100%;
+}
+
+.admin-member-milestone-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+@media (max-width: 960px) {
+  .admin-member-progress-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-member-summary-grid-compact {
+    grid-template-columns: 1fr;
+  }
+}
