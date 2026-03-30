@@ -3,8 +3,6 @@ const adminMemberMetaEl = document.getElementById("adminMemberMeta");
 const adminMemberLevelEl = document.getElementById("adminMemberLevel");
 const adminSummaryMembershipPlanEl = document.getElementById("adminSummaryMembershipPlan");
 const adminSummaryMembershipStatusEl = document.getElementById("adminSummaryMembershipStatus");
-const adminSummaryMembershipStartEl = document.getElementById("adminSummaryMembershipStart");
-const adminSummaryMembershipRenewalEl = document.getElementById("adminSummaryMembershipRenewal");
 const adminMembershipHistoryCountEl = document.getElementById("adminMembershipHistoryCount");
 const adminMembershipHistoryListEl = document.getElementById("adminMembershipHistoryList");
 const adminDetailTotalDaysEl = document.getElementById("adminDetailTotalDays");
@@ -13,7 +11,7 @@ const adminDetailLastPracticeEl = document.getElementById("adminDetailLastPracti
 const adminDetailMilestoneTitleEl = document.getElementById("adminDetailMilestoneTitle");
 const adminDetailMilestoneProgressEl = document.getElementById("adminDetailMilestoneProgress");
 const adminDetailMilestoneRemainingEl = document.getElementById("adminDetailMilestoneRemaining");
-const adminDetailMemberIdEl = document.getElementById("adminDetailMemberId");
+const adminMemberReferenceLineEl = document.getElementById("adminMemberReferenceLine");
 const adminCalendarLabelEl = document.getElementById("adminCalendarLabel");
 const adminPracticeCalendarGridEl = document.getElementById("adminPracticeCalendarGrid");
 const adminCalendarPrevBtn = document.getElementById("adminCalendarPrev");
@@ -235,15 +233,13 @@ async function loadMembershipCycles(memberId) {
 }
 
 function renderMembershipSummary(membershipRow) {
-  if (!adminSummaryMembershipPlanEl || !adminSummaryMembershipStatusEl || !adminSummaryMembershipStartEl || !adminSummaryMembershipRenewalEl) return;
+  if (!adminSummaryMembershipPlanEl || !adminSummaryMembershipStatusEl) return;
 
   const planCode = membershipRow?.plan_code || "none";
   const status = membershipRow?.status || getDefaultMembershipStatus(planCode);
 
   adminSummaryMembershipPlanEl.textContent = formatMembershipPlanLabel(planCode);
   adminSummaryMembershipStatusEl.textContent = formatMembershipStatusLabel(status);
-  adminSummaryMembershipStartEl.textContent = formatAdminDate(membershipRow?.started_at || "");
-  adminSummaryMembershipRenewalEl.textContent = formatAdminDate(membershipRow?.current_period_end || "");
 }
 
 function renderMembershipEditor(membershipRow) {
@@ -481,7 +477,9 @@ async function loadAdminMember() {
   adminDetailMilestoneRemainingEl.textContent = milestoneState.remainingDays === 0
     ? "Milestone completed"
     : `${milestoneState.remainingDays} days remaining to the next unlock`;
-  adminDetailMemberIdEl.textContent = memberId;
+  if (adminMemberReferenceLineEl) {
+    adminMemberReferenceLineEl.textContent = `Member ID: ${memberId}`;
+  }
 
   renderMembershipSummary(membershipRow);
   renderMembershipEditor(membershipRow);
@@ -520,6 +518,9 @@ initializeAdminMemberTabs();
 loadAdminMember().catch((error) => {
   console.error(error);
   adminMemberMetaEl.textContent = "Could not load this member record.";
+  if (adminMemberReferenceLineEl) {
+    adminMemberReferenceLineEl.textContent = "Member ID: -";
+  }
   if (adminPracticeCalendarGridEl) {
     adminPracticeCalendarGridEl.innerHTML = '<div class="admin-empty-state">Calendar could not be loaded.</div>';
   }
@@ -528,3 +529,7 @@ loadAdminMember().catch((error) => {
   }
   setAdminMemberMembershipMessage("Membership editor could not be loaded.");
 });
+
+
+
+

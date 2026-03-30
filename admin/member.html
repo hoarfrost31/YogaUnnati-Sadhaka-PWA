@@ -23,7 +23,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
           <span>Back to Members</span>
         </a>
-        <button type="button" class="secondary-btn admin-inline-btn admin-logout-btn" data-admin-logout>Logout</button>
       </div>
 
       <section class="admin-hero-card admin-member-hero">
@@ -31,6 +30,7 @@
           <p class="eyebrow-label">Member Record</p>
           <h1 class="page-title" id="adminMemberName">Loading...</h1>
           <p class="subtitle admin-subtitle" id="adminMemberMeta">Preparing member details.</p>
+          <p class="admin-member-reference-line" id="adminMemberReferenceLine">Member ID: -</p>
         </div>
         <div class="admin-chip" id="adminMemberLevel">-</div>
       </section>
@@ -45,16 +45,6 @@
           <span class="eyebrow-label">Membership Status</span>
           <strong id="adminSummaryMembershipStatus">-</strong>
           <span>Subscription state</span>
-        </article>
-        <article class="admin-stat-card admin-membership-stat-card">
-          <span class="eyebrow-label">Joined</span>
-          <strong id="adminSummaryMembershipStart">-</strong>
-          <span>Membership start date</span>
-        </article>
-        <article class="admin-stat-card admin-membership-stat-card">
-          <span class="eyebrow-label">Next Payment</span>
-          <strong id="adminSummaryMembershipRenewal">-</strong>
-          <span>Upcoming renewal date</span>
         </article>
         <article class="admin-stat-card">
           <span class="eyebrow-label">Total Days</span>
@@ -73,7 +63,7 @@
         </article>
       </section>
 
-      <section class="admin-card-grid admin-member-grid">
+      <section class="admin-card-grid admin-member-grid admin-member-grid-single">
         <article class="admin-card">
           <div class="admin-card-head">
             <div>
@@ -86,16 +76,6 @@
             <p id="adminDetailMilestoneProgress">-</p>
             <p id="adminDetailMilestoneRemaining">-</p>
           </div>
-        </article>
-
-        <article class="admin-card">
-          <div class="admin-card-head">
-            <div>
-              <p class="eyebrow-label">Member ID</p>
-              <h2>Reference</h2>
-            </div>
-          </div>
-          <div class="admin-reference-block" id="adminDetailMemberId">-</div>
         </article>
       </section>
 

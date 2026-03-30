@@ -4730,3 +4730,15 @@ input {
     grid-template-columns: 1fr;
   }
 }
+
+.admin-member-reference-line {
+  margin: 0.35rem 0 0;
+  color: rgba(63, 50, 39, 0.72);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.admin-member-grid-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+
