@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f3ed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="YogaUnnati Admin" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="../images/apple-touch-icon.png" />
+  <title>Admin Member Detail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body class="page-shell admin-page">
+  <div class="app-container admin-shell">
+    <div class="page-content">
+      <div class="admin-topbar">
+        <a href="members.html" class="back-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
+          <span>Back to Members</span>
+        </a>
+        <button type="button" class="secondary-btn admin-inline-btn admin-logout-btn" data-admin-logout>Logout</button>
+      </div>
+
+      <section class="admin-hero-card admin-member-hero">
+        <div>
+          <p class="eyebrow-label">Member Record</p>
+          <h1 class="page-title" id="adminMemberName">Loading...</h1>
+          <p class="subtitle admin-subtitle" id="adminMemberMeta">Preparing member details.</p>
+        </div>
+        <div class="admin-chip" id="adminMemberLevel">-</div>
+      </section>
+
+      <section class="admin-stat-grid">
+        <article class="admin-stat-card">
+          <span class="eyebrow-label">Total Days</span>
+          <strong id="adminDetailTotalDays">0</strong>
+          <span>Recorded practices</span>
+        </article>
+        <article class="admin-stat-card">
+          <span class="eyebrow-label">Current Streak</span>
+          <strong id="adminDetailStreak">0</strong>
+          <span>Consecutive momentum</span>
+        </article>
+        <article class="admin-stat-card">
+          <span class="eyebrow-label">Last Practice</span>
+          <strong id="adminDetailLastPractice">-</strong>
+          <span>Most recent marked day</span>
+        </article>
+      </section>
+
+      <section class="admin-card-grid admin-member-grid">
+        <article class="admin-card">
+          <div class="admin-card-head">
+            <div>
+              <p class="eyebrow-label">Milestone</p>
+              <h2>Current progress</h2>
+            </div>
+          </div>
+          <div class="admin-progress-block">
+            <strong id="adminDetailMilestoneTitle">-</strong>
+            <p id="adminDetailMilestoneProgress">-</p>
+            <p id="adminDetailMilestoneRemaining">-</p>
+          </div>
+        </article>
+
+        <article class="admin-card">
+          <div class="admin-card-head">
+            <div>
+              <p class="eyebrow-label">Member ID</p>
+              <h2>Reference</h2>
+            </div>
+          </div>
+          <div class="admin-reference-block" id="adminDetailMemberId">-</div>
+        </article>
+      </section>
+
+      <section class="admin-card admin-form-card">
+        <div class="admin-card-head">
+          <div>
+            <p class="eyebrow-label">Membership</p>
+            <h2>Assign or update plan</h2>
+          </div>
+        </div>
+
+        <div class="admin-form-grid">
+          <div>
+            <label class="field-label" for="adminMemberMembershipPlan">Membership Plan</label>
+            <select id="adminMemberMembershipPlan" class="input">
+              <option value="none">No membership</option>
+              <option value="app">YogaUnnati App</option>
+              <option value="online">YogaUnnati Online</option>
+              <option value="studio">YogaUnnati Studio</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="adminMemberMembershipStatus">Status</label>
+            <select id="adminMemberMembershipStatus" class="input">
+              <option value="inactive">Inactive</option>
+              <option value="active">Active</option>
+              <option value="past_due">Payment Due</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="expired">Expired</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="adminMemberMembershipStart">Membership Start Date</label>
+            <input id="adminMemberMembershipStart" class="input" type="date">
+          </div>
+          <div>
+            <label class="field-label" for="adminMemberMembershipRenewal">Next Payment Date</label>
+            <input id="adminMemberMembershipRenewal" class="input" type="date">
+          </div>
+        </div>
+
+        <div class="profile-form-actions admin-form-actions">
+          <button id="adminMemberSaveMembershipBtn" class="primary-btn" type="button">Save Membership</button>
+        </div>
+
+        <p id="adminMemberMembershipMsg" class="auth-message admin-inline-message"></p>
+      </section>
+
+      <section class="admin-card admin-calendar-card">
+        <div class="admin-card-head admin-calendar-head">
+          <div>
+            <p class="eyebrow-label">Practice Calendar</p>
+            <h2>Month view</h2>
+          </div>
+          <div class="admin-calendar-controls">
+            <button type="button" class="secondary-btn admin-calendar-btn" id="adminCalendarPrev" aria-label="Previous month">&#8249;</button>
+            <strong id="adminCalendarLabel" class="admin-calendar-label">-</strong>
+            <button type="button" class="secondary-btn admin-calendar-btn" id="adminCalendarNext" aria-label="Next month">&#8250;</button>
+          </div>
+        </div>
+        <div class="admin-calendar-weekdays">
+          <span>Sun</span>
+          <span>Mon</span>
+          <span>Tue</span>
+          <span>Wed</span>
+          <span>Thu</span>
+          <span>Fri</span>
+          <span>Sat</span>
+        </div>
+        <div id="adminPracticeCalendarGrid" class="admin-calendar-grid">
+          <div class="admin-empty-state">Loading practice calendar...</div>
+        </div>
+      </section>
+
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <div>
+            <p class="eyebrow-label">Recent Practice</p>
+            <h2>Latest entries</h2>
+          </div>
+        </div>
+        <div id="adminRecentPracticeList" class="admin-recent-list">
+          <div class="admin-empty-state">Loading practice history...</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="../js/supabaseClient.js"></script>
+  <script src="../js/adminShared.js"></script>
+  <script src="../js/analytics.js"></script>
+  <script src="../js/practiceData.js"></script>
+  <script src="../js/profileData.js"></script>
+  <script src="../js/pwa.js"></script>
+  <script src="../js/pageTransition.js"></script>
+  <script src="../js/adminMember.js"></script>
+</body>
+</html>
+
+
+

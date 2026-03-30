@@ -48,7 +48,7 @@ function renderMembers(members) {
 
   adminMembersListEl.innerHTML = members
     .map((member) => `
-      <a href="admin-member.html?uid=${encodeURIComponent(member.id)}" class="admin-member-row">
+      <a href="${window.adminRoutes?.member(member.id) || `admin-member.html?uid=${encodeURIComponent(member.id)}`}" class="admin-member-row">
         <div class="admin-member-primary">
           <strong>${member.displayName}</strong>
           <span>${member.level} · ${member.totalDays} total days · ${member.streak} day streak</span>
@@ -133,3 +133,4 @@ loadAdminMembers().catch((error) => {
   console.error(error);
   adminMembersListEl.innerHTML = '<div class="admin-empty-state">Could not load members.</div>';
 });
+

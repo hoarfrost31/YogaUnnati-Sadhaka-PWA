@@ -72,7 +72,7 @@ async function loadAdminDashboard() {
 
   adminPracticePulseEl.innerHTML = membersWithActivity
     .map((member) => `
-      <a href="admin-member.html?uid=${encodeURIComponent(member.id)}" class="admin-link-card">
+      <a href="${window.adminRoutes?.member(member.id) || `admin-member.html?uid=${encodeURIComponent(member.id)}`}" class="admin-link-card">
         <strong>${member.displayName}</strong>
         <span>${member.totalDays} total days · ${member.milestone}${member.lastPractice ? ` · Last on ${formatAdminDate(member.lastPractice)}` : ""}${member.practicedToday ? " · Practiced today" : ""}</span>
       </a>
@@ -84,3 +84,4 @@ loadAdminDashboard().catch((error) => {
   console.error(error);
   adminPracticePulseEl.innerHTML = '<div class="admin-empty-state">Could not load dashboard data.</div>';
 });
+

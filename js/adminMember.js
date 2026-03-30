@@ -222,7 +222,7 @@ async function loadAdminMember() {
 
   const memberId = new URLSearchParams(window.location.search).get("uid");
   if (!memberId) {
-    window.location.href = "admin-members.html";
+    window.location.href = window.adminRoutes?.members || "admin-members.html";
     return;
   }
 
@@ -319,4 +319,5 @@ loadAdminMember().catch((error) => {
   adminRecentPracticeListEl.innerHTML = '<div class="admin-empty-state">Member detail could not be loaded.</div>';
   setAdminMemberMembershipMessage("Membership editor could not be loaded.");
 });
+
 

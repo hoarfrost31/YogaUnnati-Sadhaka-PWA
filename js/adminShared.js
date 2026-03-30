@@ -1,5 +1,24 @@
 const ADMIN_ACCESS_KEY = "yogaunnati_admin_access_v1";
 const ADMIN_EMAILS = ["nkapse27@gmail.com"];
+const ADMIN_PATHNAME = window.location.pathname.toLowerCase().replace(/\/+$/, "");
+const IS_SCOPED_ADMIN_APP = /(^|\/)admin(\/|$)/i.test(ADMIN_PATHNAME);
+
+function buildAdminRoute(rootPath, scopedPath) {
+  return IS_SCOPED_ADMIN_APP ? scopedPath : rootPath;
+}
+
+window.adminRoutes = {
+  isScopedApp: IS_SCOPED_ADMIN_APP,
+  login: buildAdminRoute("admin-login.html", "login.html"),
+  dashboard: buildAdminRoute("admin.html", "index.html"),
+  members: buildAdminRoute("admin-members.html", "members.html"),
+  createMember: buildAdminRoute("admin-create-member.html", "create-member.html"),
+  appHome: buildAdminRoute("index.html", "../index.html"),
+  member(memberId) {
+    const base = buildAdminRoute("admin-member.html", "member.html");
+    return `${base}?uid=${encodeURIComponent(memberId)}`;
+  },
+};
 
 function normalizeAdminEmail(value) {
   return String(value || "").trim().toLowerCase();
@@ -93,10 +112,10 @@ window.adminAccess = {
       console.error("Admin logout failed:", error);
     }
 
-    window.location.href = "admin-login.html";
+    window.location.href = window.adminRoutes?.login || "admin-login.html";
   },
   async requireAdminAccess(options = {}) {
-    const redirectTo = options.redirectTo || "admin-login.html";
+    const redirectTo = options.redirectTo || window.adminRoutes?.login || "admin-login.html";
     const user = await resolveAdminUserWithRetry();
     const record = readAdminAccessRecord();
     const email = normalizeAdminEmail(user?.email);
@@ -121,3 +140,4 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+

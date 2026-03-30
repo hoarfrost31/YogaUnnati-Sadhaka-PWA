@@ -114,7 +114,7 @@ loginBtn.onclick = async () => {
       window.adminAccess?.grant?.(signedInEmail);
       setMessage("Admin login successful! Opening dashboard...");
       window.setTimeout(() => {
-        window.location.href = "admin.html";
+        window.location.href = window.adminRoutes?.dashboard || "admin.html";
       }, 220);
       return;
     }
@@ -128,6 +128,7 @@ loginBtn.onclick = async () => {
     }, 220);
   }
 };
+
 
 
 

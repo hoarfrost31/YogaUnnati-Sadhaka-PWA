@@ -1,4 +1,4 @@
-const CACHE_NAME = "yogaunnati-pwa-v74";
+const CACHE_NAME = "yogaunnati-pwa-v75";
 const APP_SHELL_PATHS = [
   "",
   "install.html",
@@ -87,7 +87,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== CACHE_NAME)
+            .filter((key) => key.startsWith("yogaunnati-pwa-") && key !== CACHE_NAME)
             .map((key) => caches.delete(key))
         )
       )
@@ -258,5 +258,7 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
+
 
 
