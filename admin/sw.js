@@ -1,4 +1,4 @@
-const CACHE_NAME = "yogaunnati-admin-pwa-v2";
+const CACHE_NAME = "yogaunnati-admin-pwa-v3";
 const APP_SHELL_PATHS = [
   "login.html",
   "index.html",
@@ -109,5 +109,6 @@ self.addEventListener("fetch", (event) => {
     return cachedResponse || networkFetch;
   }));
 });
+
 
 
