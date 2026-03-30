@@ -7,7 +7,6 @@ const adminMembershipHistoryCountEl = document.getElementById("adminMembershipHi
 const adminMembershipHistoryListEl = document.getElementById("adminMembershipHistoryList");
 const adminDetailTotalDaysEl = document.getElementById("adminDetailTotalDays");
 const adminDetailStreakEl = document.getElementById("adminDetailStreak");
-const adminDetailLastPracticeEl = document.getElementById("adminDetailLastPractice");
 const adminDetailMilestoneTitleEl = document.getElementById("adminDetailMilestoneTitle");
 const adminDetailMilestoneProgressEl = document.getElementById("adminDetailMilestoneProgress");
 const adminDetailMilestoneRemainingEl = document.getElementById("adminDetailMilestoneRemaining");
@@ -471,7 +470,6 @@ async function loadAdminMember() {
   adminMemberLevelEl.textContent = milestoneState.milestone.level;
   adminDetailTotalDaysEl.textContent = String(totalDays);
   adminDetailStreakEl.textContent = String(streak);
-  adminDetailLastPracticeEl.textContent = formatAdminDate(lastPractice);
   adminDetailMilestoneTitleEl.textContent = milestoneState.milestone.title;
   adminDetailMilestoneProgressEl.textContent = `${Math.min(milestoneState.completedWithinMilestone, milestoneState.totalWithinMilestone)} / ${milestoneState.totalWithinMilestone} days in current milestone`;
   adminDetailMilestoneRemainingEl.textContent = milestoneState.remainingDays === 0
