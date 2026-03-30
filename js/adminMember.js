@@ -88,7 +88,15 @@ function formatAdminDate(dateString) {
     return "-";
   }
 
-  const date = new Date(`${dateString}T00:00:00`);
+  const normalizedValue = String(dateString);
+  const date = normalizedValue.includes("T")
+    ? new Date(normalizedValue)
+    : new Date(`${normalizedValue}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -368,6 +376,7 @@ loadAdminMember().catch((error) => {
   adminRecentPracticeListEl.innerHTML = '<div class="admin-empty-state">Member detail could not be loaded.</div>';
   setAdminMemberMembershipMessage("Membership editor could not be loaded.");
 });
+
 
 
 
