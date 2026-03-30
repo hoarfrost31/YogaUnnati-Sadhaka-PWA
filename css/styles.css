@@ -4660,3 +4660,36 @@ input {
   margin-bottom: 0;
 }
 
+
+.admin-collapsible-head {
+  align-items: center;
+}
+
+.admin-card-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-section-toggle {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(249, 239, 227, 0.92);
+  color: var(--accent-deep);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-card-body[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .admin-card-head-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
