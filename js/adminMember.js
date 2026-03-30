@@ -25,7 +25,8 @@ const adminMemberMembershipStartEl = document.getElementById("adminMemberMembers
 const adminMemberMembershipRenewalEl = document.getElementById("adminMemberMembershipRenewal");
 const adminMemberSaveMembershipBtnEl = document.getElementById("adminMemberSaveMembershipBtn");
 const adminMemberMembershipMsgEl = document.getElementById("adminMemberMembershipMsg");
-const BILLING_PERIOD_DAYS = 30;`r`nconst adminSectionToggleEls = Array.from(document.querySelectorAll("[data-admin-toggle]"));
+const adminSectionToggleEls = Array.from(document.querySelectorAll("[data-admin-toggle]"));
+const BILLING_PERIOD_DAYS = 30;
 
 let adminMemberPracticeDates = [];
 let adminCalendarDate = new Date();
@@ -34,6 +35,32 @@ let currentAdminMembershipRow = null;
 
 function setAdminMemberMembershipMessage(text) {
   adminMemberMembershipMsgEl.textContent = text;
+}
+
+function setAdminSectionExpanded(button, expanded) {
+  const targetId = button?.dataset?.adminToggle;
+  if (!targetId) {
+    return;
+  }
+
+  const targetEl = document.getElementById(targetId);
+  if (!targetEl) {
+    return;
+  }
+
+  button.setAttribute("aria-expanded", expanded ? "true" : "false");
+  button.textContent = expanded ? "Hide" : "Show";
+  targetEl.hidden = !expanded;
+}
+
+function initializeAdminSectionToggles() {
+  adminSectionToggleEls.forEach((button) => {
+    setAdminSectionExpanded(button, false);
+    button.addEventListener("click", () => {
+      const isExpanded = button.getAttribute("aria-expanded") === "true";
+      setAdminSectionExpanded(button, !isExpanded);
+    });
+  });
 }
 
 function calculateAdminStreak(practiceDates) {
@@ -572,6 +599,8 @@ if (adminMemberSaveMembershipBtnEl) {
   adminMemberSaveMembershipBtnEl.addEventListener("click", saveMemberMembership);
 }
 
+initializeAdminSectionToggles();
+
 loadAdminMember().catch((error) => {
   console.error(error);
   adminMemberMetaEl.textContent = "Could not load this member record.";
@@ -581,28 +610,4 @@ loadAdminMember().catch((error) => {
     adminMembershipHistoryListEl.innerHTML = '<div class="admin-empty-state">Subscription history could not be loaded.</div>';
   }
   setAdminMemberMembershipMessage("Membership editor could not be loaded.");
-});
-
-function setAdminSectionExpanded(button, expanded) {
-  const targetId = button?.dataset?.adminToggle;
-  if (!targetId) {
-    return;
-  }
-
-  const targetEl = document.getElementById(targetId);
-  if (!targetEl) {
-    return;
-  }
-
-  button.setAttribute("aria-expanded", expanded ? "true" : "false");
-  button.textContent = expanded ? "Hide" : "Show";
-  targetEl.hidden = !expanded;
-}
-
-adminSectionToggleEls.forEach((button) => {
-  setAdminSectionExpanded(button, false);
-  button.addEventListener("click", () => {
-    const isExpanded = button.getAttribute("aria-expanded") === "true";
-    setAdminSectionExpanded(button, !isExpanded);
-  });
 });
