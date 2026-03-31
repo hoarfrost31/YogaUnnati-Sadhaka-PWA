@@ -2,11 +2,11 @@ import { createClient } from '@supabase/supabase-js';
 
 const DEFAULT_ADMIN_EMAILS = ['nkapse27@gmail.com'];
 const USER_TABLES_TO_CLEAN = [
-  'practice_logs',
-  'profiles',
-  'push_subscriptions',
-  'notification_delivery_log',
-  'analytics_events',
+  { table: 'practice_logs', column: 'user_id' },
+  { table: 'profiles', column: 'id' },
+  { table: 'push_subscriptions', column: 'user_id' },
+  { table: 'notification_delivery_log', column: 'user_id' },
+  { table: 'analytics_events', column: 'user_id' },
 ];
 
 function json(res, status, body) {
@@ -28,9 +28,9 @@ function getAllowedAdminEmails() {
 }
 
 async function deleteUserScopedRows(adminClient, memberId) {
-  for (const table of USER_TABLES_TO_CLEAN) {
+  for (const target of USER_TABLES_TO_CLEAN) {
     try {
-      const { error } = await adminClient.from(table).delete().eq('user_id', memberId);
+      const { error } = await adminClient.from(target.table).delete().eq(target.column, memberId);
       if (error && error.code !== '42P01') throw error;
     } catch (error) {
       if (error?.code !== '42P01') throw error;
@@ -111,3 +111,4 @@ export default async function handler(req, res) {
     json(res, 500, { error: error?.message || 'Unexpected server error.' });
   }
 }
+
