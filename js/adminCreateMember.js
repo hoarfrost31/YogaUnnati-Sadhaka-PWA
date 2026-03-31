@@ -1,6 +1,7 @@
 const adminCreateDisplayNameEl = document.getElementById("adminCreateDisplayName");
 const adminCreateEmailEl = document.getElementById("adminCreateEmail");
 const adminCreatePasswordEl = document.getElementById("adminCreatePassword");
+const adminCreatePhoneEl = document.getElementById("adminCreatePhone");
 const adminCreateMembershipPlanEl = document.getElementById("adminCreateMembershipPlan");
 const adminCreateMemberBtnEl = document.getElementById("adminCreateMemberBtn");
 const adminCreateMemberMsgEl = document.getElementById("adminCreateMemberMsg");
@@ -24,10 +25,19 @@ function getNextMonthlyRenewalIso(baseDate = new Date()) {
   return nextDate ? nextDate.toISOString() : null;
 }
 
-async function ensureProfileRow(userId, displayName) {
+function normalizeIndianPhone(input) {
+  const digits = String(input || "").replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.length === 10) return digits;
+  if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2);
+  return "";
+}
+
+async function ensureProfileRow(userId, displayName, phone) {
   const payload = {
     id: userId,
     display_name: displayName || "Yoga Member",
+    phone: phone || null,
     avatar_url: null,
   };
 
@@ -101,6 +111,7 @@ adminCreateMemberBtnEl.addEventListener("click", async () => {
   const displayName = adminCreateDisplayNameEl.value.trim();
   const email = adminCreateEmailEl.value.trim();
   const password = adminCreatePasswordEl.value;
+  const phone = normalizeIndianPhone(adminCreatePhoneEl?.value || "");
   const membershipPlan = adminCreateMembershipPlanEl.value;
 
   if (!email || !password) {
@@ -110,6 +121,11 @@ adminCreateMemberBtnEl.addEventListener("click", async () => {
 
   if (password.length < 6) {
     setAdminCreateMessage("Password must be at least 6 characters.");
+    return;
+  }
+
+  if (adminCreatePhoneEl && !phone) {
+    setAdminCreateMessage("Enter a valid 10-digit mobile number.");
     return;
   }
 
@@ -123,6 +139,9 @@ adminCreateMemberBtnEl.addEventListener("click", async () => {
       options: {
         data: {
           display_name: displayName,
+          phone,
+          phone_number: phone,
+          mobile: phone,
         },
       },
     });
@@ -133,7 +152,7 @@ adminCreateMemberBtnEl.addEventListener("click", async () => {
     }
 
     if (data?.user?.id) {
-      await ensureProfileRow(data.user.id, displayName || email.split("@")[0] || "Yoga Member");
+      await ensureProfileRow(data.user.id, displayName || email.split("@")[0] || "Yoga Member", phone);
       await assignMembershipToUser(data.user.id, membershipPlan);
     }
 
@@ -150,6 +169,9 @@ adminCreateMemberBtnEl.addEventListener("click", async () => {
     adminCreateDisplayNameEl.value = "";
     adminCreateEmailEl.value = "";
     adminCreatePasswordEl.value = "";
+    if (adminCreatePhoneEl) {
+      adminCreatePhoneEl.value = "";
+    }
     adminCreateMembershipPlanEl.value = "none";
   } catch (error) {
     console.error(error);
@@ -163,3 +185,4 @@ initAdminCreateMemberPage().catch((error) => {
   console.error(error);
   setAdminCreateMessage("Could not open member creation.");
 });
+
