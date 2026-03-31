@@ -23,9 +23,13 @@ const adminMemberMembershipStartEl = document.getElementById("adminMemberMembers
 const adminMemberMembershipRenewalEl = document.getElementById("adminMemberMembershipRenewal");
 const adminMemberSaveMembershipBtnEl = document.getElementById("adminMemberSaveMembershipBtn");
 const adminMemberMembershipMsgEl = document.getElementById("adminMemberMembershipMsg");
+const adminMemberPasswordInputEl = document.getElementById("adminMemberPasswordInput");
+const adminMemberSetPasswordBtnEl = document.getElementById("adminMemberSetPasswordBtn");
+const adminMemberPasswordMsgEl = document.getElementById("adminMemberPasswordMsg");
 const adminMemberTabEls = Array.from(document.querySelectorAll("[data-admin-member-tab]"));
 const adminMemberPanelEls = Array.from(document.querySelectorAll("[data-admin-member-panel]"));
 const BILLING_PERIOD_DAYS = 30;
+const ADMIN_SET_PASSWORD_URL = 'https://vercel-api-hoarfrost31s-projects.vercel.app/api/admin-set-member-password';
 
 let adminMemberPracticeDates = [];
 let adminCalendarDate = new Date();
@@ -35,6 +39,12 @@ let currentAdminMembershipRow = null;
 function setAdminMemberMembershipMessage(text) {
   if (adminMemberMembershipMsgEl) {
     adminMemberMembershipMsgEl.textContent = text;
+  }
+}
+
+function setAdminMemberPasswordMessage(text) {
+  if (adminMemberPasswordMsgEl) {
+    adminMemberPasswordMsgEl.textContent = text;
   }
 }
 
@@ -437,6 +447,54 @@ async function saveMemberMembership() {
   }
 }
 
+async function setMemberPassword() {
+  if (!currentAdminMemberId || !adminMemberPasswordInputEl || !adminMemberSetPasswordBtnEl) return;
+
+  const newPassword = String(adminMemberPasswordInputEl.value || '').trim();
+  if (newPassword.length < 6) {
+    setAdminMemberPasswordMessage('Password must be at least 6 characters.');
+    return;
+  }
+
+  setAdminMemberPasswordMessage('Updating password...');
+  adminMemberSetPasswordBtnEl.disabled = true;
+
+  try {
+    const { data: sessionData, error: sessionError } = await window.supabaseClient.auth.getSession();
+    if (sessionError || !sessionData?.session?.access_token) {
+      throw new Error('Admin session could not be verified.');
+    }
+
+    const response = await fetch(ADMIN_SET_PASSWORD_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionData.session.access_token}`,
+      },
+      body: JSON.stringify({
+        member_id: currentAdminMemberId,
+        new_password: newPassword,
+      }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload?.error || 'Could not update password.');
+    }
+
+    adminMemberPasswordInputEl.value = '';
+    setAdminMemberPasswordMessage('Password updated successfully.');
+    window.appAnalytics?.track('admin_member_password_updated', {
+      member_id: currentAdminMemberId,
+    });
+  } catch (error) {
+    console.error(error);
+    setAdminMemberPasswordMessage(error.message || 'Could not update password.');
+  } finally {
+    adminMemberSetPasswordBtnEl.disabled = false;
+  }
+}
+
 async function loadAdminMember() {
   const adminUser = await window.adminAccess.requireAdminAccess();
   if (!adminUser) return;
@@ -489,18 +547,18 @@ async function loadAdminMember() {
 
   adminMemberNameEl.textContent = displayName;
   if (adminMemberPhoneLineEl) {
-    adminMemberPhoneLineEl.textContent = phoneNumber ? `Phone: ${phoneNumber}` : "Phone: -";
+    adminMemberPhoneLineEl.textContent = phoneNumber ? `Phone: ${phoneNumber}` : 'Phone: -';
   }
   adminMemberMetaEl.textContent = lastPractice
     ? `Last practice on ${formatAdminDate(lastPractice)}`
-    : "No practice recorded yet.";
+    : 'No practice recorded yet.';
   adminMemberLevelEl.textContent = milestoneState.milestone.level;
   adminDetailTotalDaysEl.textContent = String(totalDays);
   adminDetailStreakEl.textContent = String(streak);
   adminDetailMilestoneTitleEl.textContent = milestoneState.milestone.title;
   adminDetailMilestoneProgressEl.textContent = `${Math.min(milestoneState.completedWithinMilestone, milestoneState.totalWithinMilestone)} / ${milestoneState.totalWithinMilestone} days in current milestone`;
   adminDetailMilestoneRemainingEl.textContent = milestoneState.remainingDays === 0
-    ? "Milestone completed"
+    ? 'Milestone completed'
     : `${milestoneState.remainingDays} days remaining to the next unlock`;
   if (adminMemberReferenceLineEl) {
     adminMemberReferenceLineEl.textContent = `Member ID: ${memberId}`;
@@ -513,41 +571,45 @@ async function loadAdminMember() {
 }
 
 if (adminCalendarPrevBtn) {
-  adminCalendarPrevBtn.addEventListener("click", () => {
+  adminCalendarPrevBtn.addEventListener('click', () => {
     adminCalendarDate = new Date(adminCalendarDate.getFullYear(), adminCalendarDate.getMonth() - 1, 1);
     renderAdminPracticeCalendar();
   });
 }
 
 if (adminCalendarNextBtn) {
-  adminCalendarNextBtn.addEventListener("click", () => {
+  adminCalendarNextBtn.addEventListener('click', () => {
     adminCalendarDate = new Date(adminCalendarDate.getFullYear(), adminCalendarDate.getMonth() + 1, 1);
     renderAdminPracticeCalendar();
   });
 }
 
 if (adminMemberMembershipPlanEl) {
-  adminMemberMembershipPlanEl.addEventListener("change", syncMembershipDatesFromForm);
+  adminMemberMembershipPlanEl.addEventListener('change', syncMembershipDatesFromForm);
 }
 
 if (adminMemberMembershipStartEl) {
-  adminMemberMembershipStartEl.addEventListener("change", syncMembershipDatesFromForm);
+  adminMemberMembershipStartEl.addEventListener('change', syncMembershipDatesFromForm);
 }
 
 if (adminMemberSaveMembershipBtnEl) {
-  adminMemberSaveMembershipBtnEl.addEventListener("click", saveMemberMembership);
+  adminMemberSaveMembershipBtnEl.addEventListener('click', saveMemberMembership);
+}
+
+if (adminMemberSetPasswordBtnEl) {
+  adminMemberSetPasswordBtnEl.addEventListener('click', setMemberPassword);
 }
 
 initializeAdminMemberTabs();
 
 loadAdminMember().catch((error) => {
   console.error(error);
-  adminMemberMetaEl.textContent = "Could not load this member record.";
+  adminMemberMetaEl.textContent = 'Could not load this member record.';
   if (adminMemberPhoneLineEl) {
-    adminMemberPhoneLineEl.textContent = "Phone: -";
+    adminMemberPhoneLineEl.textContent = 'Phone: -';
   }
   if (adminMemberReferenceLineEl) {
-    adminMemberReferenceLineEl.textContent = "Member ID: -";
+    adminMemberReferenceLineEl.textContent = 'Member ID: -';
   }
   if (adminPracticeCalendarGridEl) {
     adminPracticeCalendarGridEl.innerHTML = '<div class="admin-empty-state">Calendar could not be loaded.</div>';
@@ -555,13 +617,6 @@ loadAdminMember().catch((error) => {
   if (adminMembershipHistoryListEl) {
     adminMembershipHistoryListEl.innerHTML = '<div class="admin-empty-state">Subscription history could not be loaded.</div>';
   }
-  setAdminMemberMembershipMessage("Membership editor could not be loaded.");
+  setAdminMemberMembershipMessage('Membership editor could not be loaded.');
+  setAdminMemberPasswordMessage('Password tools could not be loaded.');
 });
-
-
-
-
-
-
-
-
