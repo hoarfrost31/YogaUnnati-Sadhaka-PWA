@@ -469,7 +469,8 @@ async function setMemberPassword() {
   adminMemberSetPasswordBtnEl.disabled = true;
 
   try {
-    const session = window.authService?.session || null;
+    const { data: sessionData } = await window.supabaseClient.auth.getSession();
+    const session = sessionData?.session || null;
     const accessToken = session?.access_token || '';
     if (!accessToken) {
       throw new Error('Admin session missing. Please sign in again.');
@@ -515,7 +516,8 @@ async function deleteMemberAccount() {
   adminMemberDeleteBtnEl.disabled = true;
 
   try {
-    const session = window.authService?.session || null;
+    const { data: sessionData } = await window.supabaseClient.auth.getSession();
+    const session = sessionData?.session || null;
     const accessToken = session?.access_token || '';
     if (!accessToken) {
       throw new Error('Admin session missing. Please sign in again.');
@@ -678,6 +680,7 @@ loadAdminMember().catch((error) => {
   setAdminMemberPasswordMessage('Password tools could not be loaded.');
   setAdminMemberDeleteMessage('Delete tools could not be loaded.');
 });
+
 
 
 
