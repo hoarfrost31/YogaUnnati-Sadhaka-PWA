@@ -52,3 +52,7 @@ on public.practice_logs
 for select
 to authenticated
 using (true);
+
+
+alter table public.profiles add column if not exists phone text;
+
