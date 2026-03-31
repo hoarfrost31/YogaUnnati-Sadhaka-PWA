@@ -26,10 +26,13 @@ const adminMemberMembershipMsgEl = document.getElementById("adminMemberMembershi
 const adminMemberPasswordInputEl = document.getElementById("adminMemberPasswordInput");
 const adminMemberSetPasswordBtnEl = document.getElementById("adminMemberSetPasswordBtn");
 const adminMemberPasswordMsgEl = document.getElementById("adminMemberPasswordMsg");
+const adminMemberDeleteBtnEl = document.getElementById("adminMemberDeleteBtn");
+const adminMemberDeleteMsgEl = document.getElementById("adminMemberDeleteMsg");
 const adminMemberTabEls = Array.from(document.querySelectorAll("[data-admin-member-tab]"));
 const adminMemberPanelEls = Array.from(document.querySelectorAll("[data-admin-member-panel]"));
 const BILLING_PERIOD_DAYS = 30;
 const ADMIN_SET_PASSWORD_URL = 'https://vercel-api-hoarfrost31s-projects.vercel.app/api/admin-set-member-password';
+const ADMIN_DELETE_MEMBER_URL = 'https://vercel-api-hoarfrost31s-projects.vercel.app/api/admin-delete-member';
 
 let adminMemberPracticeDates = [];
 let adminCalendarDate = new Date();
@@ -45,6 +48,12 @@ function setAdminMemberMembershipMessage(text) {
 function setAdminMemberPasswordMessage(text) {
   if (adminMemberPasswordMsgEl) {
     adminMemberPasswordMsgEl.textContent = text;
+  }
+}
+
+function setAdminMemberDeleteMessage(text) {
+  if (adminMemberDeleteMsgEl) {
+    adminMemberDeleteMsgEl.textContent = text;
   }
 }
 
@@ -496,6 +505,49 @@ async function setMemberPassword() {
   }
 }
 
+async function deleteMemberAccount() {
+  if (!currentAdminMemberId || !adminMemberDeleteBtnEl) return;
+
+  const confirmed = window.confirm('Delete this member account permanently? This removes their login and member data.');
+  if (!confirmed) return;
+
+  setAdminMemberDeleteMessage('Deleting member account...');
+  adminMemberDeleteBtnEl.disabled = true;
+
+  try {
+    const session = window.authService?.session || null;
+    const accessToken = session?.access_token || '';
+    if (!accessToken) {
+      throw new Error('Admin session missing. Please sign in again.');
+    }
+
+    const response = await fetch(ADMIN_DELETE_MEMBER_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ member_id: currentAdminMemberId }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload?.ok) {
+      throw new Error(payload?.error || 'Could not delete member.');
+    }
+
+    setAdminMemberDeleteMessage('Member deleted. Returning to members...');
+    window.appAnalytics?.track('admin_member_deleted', {
+      member_id: currentAdminMemberId,
+    });
+    window.setTimeout(() => {
+      window.location.href = window.adminRoutes?.members || 'members.html';
+    }, 900);
+  } catch (error) {
+    console.error(error);
+    setAdminMemberDeleteMessage(error.message || 'Could not delete member.');
+    adminMemberDeleteBtnEl.disabled = false;
+  }
+}
 async function loadAdminMember() {
   const adminUser = await window.adminAccess.requireAdminAccess();
   if (!adminUser) return;
@@ -601,6 +653,10 @@ if (adminMemberSetPasswordBtnEl) {
   adminMemberSetPasswordBtnEl.addEventListener('click', setMemberPassword);
 }
 
+if (adminMemberDeleteBtnEl) {
+  adminMemberDeleteBtnEl.addEventListener('click', deleteMemberAccount);
+}
+
 initializeAdminMemberTabs();
 
 loadAdminMember().catch((error) => {
@@ -620,6 +676,10 @@ loadAdminMember().catch((error) => {
   }
   setAdminMemberMembershipMessage('Membership editor could not be loaded.');
   setAdminMemberPasswordMessage('Password tools could not be loaded.');
+  setAdminMemberDeleteMessage('Delete tools could not be loaded.');
 });
+
+
+
 
 
