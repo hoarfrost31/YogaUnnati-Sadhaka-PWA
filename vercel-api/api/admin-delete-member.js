@@ -31,9 +31,9 @@ async function deleteUserScopedRows(adminClient, memberId) {
   for (const target of USER_TABLES_TO_CLEAN) {
     try {
       const { error } = await adminClient.from(target.table).delete().eq(target.column, memberId);
-      if (error && error.code !== '42P01') throw error;
+      if (error && !['42P01', 'PGRST205'].includes(String(error.code || ''))) throw error;
     } catch (error) {
-      if (error?.code !== '42P01') throw error;
+      if (!['42P01', 'PGRST205'].includes(String(error?.code || ''))) throw error;
     }
   }
 }
@@ -111,4 +111,5 @@ export default async function handler(req, res) {
     json(res, 500, { error: error?.message || 'Unexpected server error.' });
   }
 }
+
 
