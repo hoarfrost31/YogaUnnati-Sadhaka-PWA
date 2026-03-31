@@ -100,9 +100,20 @@ export default async function handler(req, res) {
     const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey);
     await deleteUserScopedRows(adminClient, memberId);
 
-    const { error } = await adminClient.auth.admin.deleteUser(memberId);
+    const { error } = await adminClient.auth.admin.deleteUser(memberId, false);
     if (error) {
-      json(res, 500, { error: error.message || 'Could not delete member.' });
+      json(res, 500, { error: error.message || 'Could not delete member auth account.' });
+      return;
+    }
+
+    const { data: deletedLookup, error: deletedLookupError } = await adminClient.auth.admin.getUserById(memberId);
+    if (deletedLookup?.user?.id) {
+      json(res, 500, { error: 'Member auth account still exists after delete attempt.' });
+      return;
+    }
+
+    if (deletedLookupError && !/not found/i.test(String(deletedLookupError.message || ''))) {
+      json(res, 500, { error: deletedLookupError.message || 'Could not verify member deletion.' });
       return;
     }
 
@@ -111,5 +122,6 @@ export default async function handler(req, res) {
     json(res, 500, { error: error?.message || 'Unexpected server error.' });
   }
 }
+
 
 
