@@ -460,25 +460,18 @@ async function setMemberPassword() {
   adminMemberSetPasswordBtnEl.disabled = true;
 
   try {
-    const { data: sessionData, error: sessionError } = await window.supabaseClient.auth.getSession();
-    if (sessionError || !sessionData?.session?.access_token) {
-      throw new Error('Admin session could not be verified.');
-    }
-
-    const response = await fetch(ADMIN_SET_PASSWORD_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${sessionData.session.access_token}`,
-      },
-      body: JSON.stringify({
+    const { data: payload, error } = await window.supabaseClient.functions.invoke('admin-set-member-password', {
+      body: {
         member_id: currentAdminMemberId,
         new_password: newPassword,
-      }),
+      },
     });
 
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) {
+    if (error) {
+      throw new Error(error.message || 'Could not update password.');
+    }
+
+    if (!payload?.ok) {
       throw new Error(payload?.error || 'Could not update password.');
     }
 
@@ -620,3 +613,4 @@ loadAdminMember().catch((error) => {
   setAdminMemberMembershipMessage('Membership editor could not be loaded.');
   setAdminMemberPasswordMessage('Password tools could not be loaded.');
 });
+
