@@ -5,24 +5,10 @@ const adminCreatePhoneEl = document.getElementById("adminCreatePhone");
 const adminCreateMembershipPlanEl = document.getElementById("adminCreateMembershipPlan");
 const adminCreateMemberBtnEl = document.getElementById("adminCreateMemberBtn");
 const adminCreateMemberMsgEl = document.getElementById("adminCreateMemberMsg");
-const BILLING_PERIOD_DAYS = 30;
+const ADMIN_CREATE_MEMBER_URL = 'https://vercel-api-hoarfrost31s-projects.vercel.app/api/admin-create-member';
 
 function setAdminCreateMessage(text) {
   adminCreateMemberMsgEl.textContent = text;
-}
-
-function addBillingDays(baseDate, days = BILLING_PERIOD_DAYS) {
-  const date = new Date(baseDate);
-  if (Number.isNaN(date.getTime())) {
-    return null;
-  }
-
-  return new Date(date.getTime() + (days * 24 * 60 * 60 * 1000));
-}
-
-function getNextMonthlyRenewalIso(baseDate = new Date()) {
-  const nextDate = addBillingDays(baseDate);
-  return nextDate ? nextDate.toISOString() : null;
 }
 
 function normalizeIndianPhone(input) {
@@ -33,69 +19,9 @@ function normalizeIndianPhone(input) {
   return "";
 }
 
-async function ensureProfileRow(userId, displayName, phone) {
-  const payload = {
-    id: userId,
-    display_name: displayName || "Yoga Member",
-    phone: phone || null,
-    avatar_url: null,
-  };
-
-  const { error } = await window.supabaseClient
-    .from("profiles")
-    .upsert(payload, { onConflict: "id" });
-
-  if (error) {
-    throw error;
-  }
-}
-
-async function insertMembershipCycleRecord(userId, membershipPayload) {
-  if (!membershipPayload?.started_at || !membershipPayload?.current_period_end || membershipPayload?.plan_code === "none") {
-    return;
-  }
-
-  const { error } = await window.supabaseClient
-    .from("membership_cycles")
-    .insert({
-      user_id: userId,
-      plan_code: membershipPayload.plan_code,
-      status: membershipPayload.status,
-      period_start: membershipPayload.started_at,
-      period_end: membershipPayload.current_period_end,
-      source: "admin",
-      note: "Initial membership assigned from admin create member",
-    });
-
-  if (error && error.code !== "42P01") {
-    throw error;
-  }
-}
-
-async function assignMembershipToUser(userId, planCode) {
-  const normalizedPlan = String(planCode || "none").trim().toLowerCase();
-  const startedAt = normalizedPlan === "none" ? null : new Date().toISOString();
-  const payload = {
-    user_id: userId,
-    plan_code: normalizedPlan,
-    status: normalizedPlan === "none" ? "inactive" : "active",
-    billing_cycle: "monthly",
-    started_at: startedAt,
-    current_period_end: normalizedPlan === "none" ? null : getNextMonthlyRenewalIso(startedAt),
-    cancel_at_period_end: false,
-  };
-
-  const { error } = await window.supabaseClient
-    .from("memberships")
-    .upsert(payload, { onConflict: "user_id" });
-
-  if (error) {
-    throw error;
-  }
-
-  if (normalizedPlan !== "none") {
-    await insertMembershipCycleRecord(userId, payload);
-  }
+async function getAdminAccessToken() {
+  const { data } = await window.supabaseClient.auth.getSession();
+  return data?.session?.access_token || '';
 }
 
 async function initAdminCreateMemberPage() {
@@ -133,27 +59,29 @@ adminCreateMemberBtnEl.addEventListener("click", async () => {
   setAdminCreateMessage("Creating member...");
 
   try {
-    const { data, error } = await window.supabaseClient.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          display_name: displayName,
-          phone,
-          phone_number: phone,
-          mobile: phone,
-        },
-      },
-    });
-
-    if (error) {
-      setAdminCreateMessage(error.message);
-      return;
+    const accessToken = await getAdminAccessToken();
+    if (!accessToken) {
+      throw new Error("Admin session missing. Please sign in again.");
     }
 
-    if (data?.user?.id) {
-      await ensureProfileRow(data.user.id, displayName || email.split("@")[0] || "Yoga Member", phone);
-      await assignMembershipToUser(data.user.id, membershipPlan);
+    const response = await fetch(ADMIN_CREATE_MEMBER_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        display_name: displayName,
+        email,
+        password,
+        phone,
+        membership_plan: membershipPlan,
+      }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload?.ok) {
+      throw new Error(payload?.error || 'Could not create member.');
     }
 
     window.appAnalytics?.track("create_member_admin", {
@@ -165,7 +93,7 @@ adminCreateMemberBtnEl.addEventListener("click", async () => {
       ? "No starting membership assigned."
       : `${membershipPlan} membership assigned.`;
 
-    setAdminCreateMessage(`Member account created. ${membershipMessage} Sign back in as admin if your session changed.`);
+    setAdminCreateMessage(`Member account created. ${membershipMessage}`);
     adminCreateDisplayNameEl.value = "";
     adminCreateEmailEl.value = "";
     adminCreatePasswordEl.value = "";
@@ -185,4 +113,3 @@ initAdminCreateMemberPage().catch((error) => {
   console.error(error);
   setAdminCreateMessage("Could not open member creation.");
 });
-
