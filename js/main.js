@@ -25,7 +25,6 @@ const homeMilestoneBarFillEl = document.getElementById("homeMilestoneBarFill");
 const brandTaglineEl = document.getElementById("brandTagline");
 const homeMembershipReminderCardEl = document.getElementById("homeMembershipReminderCard");
 const homeMembershipReminderTextEl = document.getElementById("homeMembershipReminderText");
-const homeMembershipReminderDebugTextEl = document.getElementById("homeMembershipReminderDebugText");
 const todayPracticeActionsEl = document.getElementById("todayPracticeActions");
 const HOME_MILESTONE_BAR_ANIMATED_KEY = "home_milestone_bar_animated_v1";
 const TOMORROW_RSVP_KEY = "yogaunnati_tomorrow_rsvp";
@@ -36,7 +35,6 @@ const PROFILE_REFRESH_TTL_MS = 5 * 60 * 1000;
 const COMMUNITY_HOME_REFRESH_TTL_MS = 2 * 60 * 1000;
 const MEMBERSHIP_REFRESH_TTL_MS = 5 * 60 * 1000;
 const MEMBERSHIP_REMINDER_NOTIFICATION_KEY = "membership_payment_reminder_v1";
-
 
 // 👤 Temporary user (replace later with auth)
 // const userId = "user_1";
@@ -121,8 +119,6 @@ function membershipReminderPlanLabel(planCode) {
   if (planCode === "app") return "YogaUnnati App";
   return "Your membership";
 }
-
-
 
 
 function getReminderStorageKey(userIdValue) {
@@ -667,42 +663,22 @@ async function maybeSendMembershipReminderNotification(reminder) {
   }
 }
 
-function renderMembershipReminderDebug(label, membership, reminder, errorText = "") {
-  if (!homeMembershipReminderDebugTextEl) {
-    return;
-  }
-
-  const payload = {
-    label,
-    userId,
-    membership,
-    reminder,
-    error: errorText || null,
-  };
-
-  homeMembershipReminderDebugTextEl.textContent = JSON.stringify(payload, null, 2);
-}
-
 async function loadHomeMembershipReminder() {
   if (!userId || !window.membershipData) {
-    renderMembershipReminderDebug('missing-prerequisites', null, null, 'userId or membershipData missing');
     return;
   }
 
   const cachedMembership = window.membershipData.readMembershipCache(userId);
   let reminder = getMembershipReminderState(cachedMembership);
   renderHomeMembershipReminder(reminder);
-  renderMembershipReminderDebug('cached', cachedMembership, reminder);
 
   try {
     const membership = await window.membershipData.refreshCurrentUserMembership(userId);
     reminder = getMembershipReminderState(membership);
     renderHomeMembershipReminder(reminder);
-    renderMembershipReminderDebug('remote', membership, reminder);
     await maybeSendMembershipReminderNotification(reminder);
   } catch (error) {
     console.error("Membership reminder load error:", error);
-    renderMembershipReminderDebug('error', null, null, error?.message || String(error));
   }
 }
 
@@ -1229,11 +1205,6 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
-
-
-
-
-
 
 
 
