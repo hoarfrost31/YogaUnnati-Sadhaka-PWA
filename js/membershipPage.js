@@ -219,13 +219,10 @@ function updateMembershipPlanCards(membership) {
     }
 
     if (topBadge) {
-      const showBadge = planCode === "online" || shouldShowStatus;
+      const showBadge = shouldShowStatus;
       topBadge.classList.toggle("hidden", !showBadge);
       topBadge.hidden = !showBadge;
-      if (planCode === "online") {
-        topBadge.textContent = "Coming Soon";
-        topBadge.className = "pricing-badge is-coming-soon";
-      } else {
+      if (showBadge) {
         topBadge.textContent = membershipStatusLabel(statusKey);
         topBadge.className = `pricing-badge is-${statusKey}`;
       }
@@ -361,6 +358,7 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
 
