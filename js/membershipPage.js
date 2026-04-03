@@ -200,7 +200,9 @@ function updateMembershipPlanCards(membership) {
     const statusWrap = card.querySelector("[data-membership-plan-status]");
     const statusPill = card.querySelector("[data-membership-plan-pill]");
     const statusCopy = card.querySelector("[data-membership-plan-status-copy]");
+    const topBadge = card.querySelector("[data-membership-plan-badge]");
     const shouldShowStatus = isCurrent || isPending;
+    const statusKey = isPending ? "pending" : membership.status;
 
     statusWrap?.classList.toggle("hidden", !shouldShowStatus);
     if (statusWrap) {
@@ -208,13 +210,23 @@ function updateMembershipPlanCards(membership) {
     }
 
     if (statusPill) {
-      const statusKey = isPending ? "pending" : membership.status;
       statusPill.textContent = membershipStatusLabel(statusKey);
       statusPill.className = `membership-status-pill is-${statusKey}`;
     }
 
     if (statusCopy) {
       statusCopy.textContent = membershipDaysLeftLabel(membership);
+    }
+
+    if (topBadge) {
+      const showBadge = planCode === "online" || shouldShowStatus;
+      topBadge.classList.toggle("hidden", !showBadge);
+      topBadge.hidden = !showBadge;
+      if (planCode === "online") {
+        topBadge.textContent = "Coming Soon";
+      } else {
+        topBadge.textContent = membershipStatusLabel(statusKey);
+      }
     }
 
     if (!button) {
@@ -226,8 +238,8 @@ function updateMembershipPlanCards(membership) {
     if (planCode === "online") {
       button.textContent = "Coming Soon";
       button.disabled = true;
-      button.classList.remove("primary-btn");
-      button.classList.add("secondary-btn");
+      button.classList.remove("primary-btn", "is-change-plan");
+      button.classList.add("secondary-btn", "is-coming-soon");
       return;
     }
 
@@ -264,6 +276,8 @@ function updateMembershipPlanCards(membership) {
     button.disabled = membershipPageBusy || !membershipPageUserId;
     button.classList.toggle("primary-btn", !canChangePlanDuringRenewal && defaultVariant === "primary");
     button.classList.toggle("secondary-btn", canChangePlanDuringRenewal || defaultVariant !== "primary");
+    button.classList.toggle("is-change-plan", canChangePlanDuringRenewal);
+    button.classList.remove("is-coming-soon");
   });
 }
 
@@ -345,6 +359,7 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
 

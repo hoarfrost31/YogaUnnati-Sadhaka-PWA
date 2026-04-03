@@ -4867,3 +4867,23 @@ input {
   font-weight: 600;
 }
 
+
+.pricing-page .pricing-cta-btn.is-change-plan {
+  border: 1px solid rgba(209, 134, 74, 0.44);
+  background: rgba(249, 239, 227, 0.92);
+  color: var(--accent-deep);
+}
+
+.pricing-page .pricing-cta-btn.is-coming-soon {
+  border: 1px solid rgba(21, 31, 52, 0.08);
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--text-soft);
+}
+
+.pricing-plan-copy {
+  margin-top: 10px;
+}
+
+.pricing-plan-copy p {
+  line-height: 1.4;
+}
