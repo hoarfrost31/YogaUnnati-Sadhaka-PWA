@@ -7,6 +7,11 @@ const memberProfileSinceEl = document.getElementById("memberProfileSince");
 const memberProfileEditLinkEl = document.getElementById("memberProfileEditLink");
 const memberLogoutBtn = document.getElementById("memberLogoutBtn");
 const memberProfileActionsMountEl = document.getElementById("memberProfileActionsMount");
+const memberProfileMembershipCardEl = document.getElementById("memberProfileMembershipCard");
+const memberProfileMembershipTitleEl = document.getElementById("memberProfileMembershipTitle");
+const memberProfileMembershipPillEl = document.getElementById("memberProfileMembershipPill");
+const memberProfileMembershipCopyEl = document.getElementById("memberProfileMembershipCopy");
+const memberProfileMembershipButtonEl = document.getElementById("memberProfileMembershipButton");
 const memberMilestoneIconEl = document.getElementById("memberMilestoneIcon");
 const memberMilestoneTitleEl = document.getElementById("memberMilestoneTitle");
 const memberMilestoneLevelEl = document.getElementById("memberMilestoneLevel");
@@ -16,6 +21,92 @@ const MEMBER_PROFILE_CACHE_PREFIX = "member_profile_cache_v1:";
 const MEMBER_PROFILE_REFRESH_TTL_MS = 2 * 60 * 1000;
 const GOOGLE_REVIEW_URL = "https://g.page/r/CWcsUmi4imb4EBM/review";
 let currentUserId = "";
+
+const PROFILE_MEMBERSHIP_STATUS_LABELS = {
+  inactive: "Inactive",
+  pending: "Pending Review",
+  active: "Active",
+  past_due: "Payment Due",
+  cancelled: "Cancelled",
+  expired: "Expired",
+};
+
+function profileMembershipPlanLabel(planCode) {
+  return {
+    none: "No active plan",
+    app: "YogaUnnati App",
+    online: "YogaUnnati Online",
+    studio: "YogaUnnati Studio",
+  }[planCode] || "No active plan";
+}
+
+function profileMembershipStatusLabel(status) {
+  return PROFILE_MEMBERSHIP_STATUS_LABELS[status] || PROFILE_MEMBERSHIP_STATUS_LABELS.inactive;
+}
+
+function profileMembershipDaysLeftCopy(membership) {
+  if (membership.status === "pending") {
+    return "Your latest checkout is awaiting confirmation.";
+  }
+
+  if (["inactive", "cancelled", "expired"].includes(membership.status) || membership.planCode === "none") {
+    return "Choose a membership whenever you are ready.";
+  }
+
+  const end = membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd) : null;
+  if (!end || Number.isNaN(end.getTime())) {
+    return membership.status === "past_due"
+      ? "Your membership payment is due now."
+      : "Your membership is active.";
+  }
+
+  const diffDays = Math.ceil((end.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+  if (diffDays < 0) {
+    return `${Math.abs(diffDays)} ${Math.abs(diffDays) === 1 ? "day" : "days"} overdue. Renew now.`;
+  }
+
+  if (diffDays === 0) {
+    return "Due today. Renew now to continue uninterrupted.";
+  }
+
+  return `${diffDays} ${diffDays === 1 ? "day" : "days"} left in your current cycle.`;
+}
+
+function renderProfileMembershipCard(membership, isOwnProfile) {
+  if (!memberProfileMembershipCardEl) {
+    return;
+  }
+
+  const shouldShow = Boolean(isOwnProfile);
+  memberProfileMembershipCardEl.classList.toggle("hidden", !shouldShow);
+  memberProfileMembershipCardEl.hidden = !shouldShow;
+  if (!shouldShow) {
+    return;
+  }
+
+  const safeMembership = membership || window.membershipData?.DEFAULT_MEMBERSHIP || {
+    planCode: "none",
+    status: "inactive",
+    currentPeriodEnd: "",
+  };
+
+  if (memberProfileMembershipTitleEl) {
+    memberProfileMembershipTitleEl.textContent = profileMembershipPlanLabel(safeMembership.planCode);
+  }
+
+  if (memberProfileMembershipPillEl) {
+    memberProfileMembershipPillEl.textContent = profileMembershipStatusLabel(safeMembership.status);
+    memberProfileMembershipPillEl.className = `membership-status-pill is-${safeMembership.status || "inactive"}`;
+  }
+
+  if (memberProfileMembershipCopyEl) {
+    memberProfileMembershipCopyEl.textContent = profileMembershipDaysLeftCopy(safeMembership);
+  }
+
+  if (memberProfileMembershipButtonEl) {
+    memberProfileMembershipButtonEl.textContent = safeMembership.planCode === "none" ? "Choose Membership" : "Manage Membership";
+  }
+}
 
 function showToast(message) {
   let toast = document.getElementById("toast");
@@ -339,6 +430,7 @@ function setOwnProfileActionsVisible(isOwnProfile) {
   }
 
   renderOwnProfileActions(isOwnProfile);
+  renderProfileMembershipCard(window.membershipData?.DEFAULT_MEMBERSHIP, isOwnProfile);
 }
 
 async function initMemberProfile() {
@@ -356,7 +448,8 @@ async function initMemberProfile() {
     return;
   }
 
-  currentUserId = currentUser.id;  setOwnProfileActionsVisible(memberId === currentUserId);
+  currentUserId = currentUser.id;
+  setOwnProfileActionsVisible(memberId === currentUserId);
   window.appAnalytics?.identify(currentUserId);
   window.appAnalytics?.track("open_member_profile", {
     source: "member_page",
@@ -368,6 +461,8 @@ async function initMemberProfile() {
     const selfSnapshot = buildCachedSelfSnapshot(memberId);
     writeMemberProfileCache(memberId, selfSnapshot);
     renderMemberProfile(selfSnapshot);
+    const cachedMembership = window.membershipData?.readMembershipCache?.(memberId) || window.membershipData?.DEFAULT_MEMBERSHIP;
+    renderProfileMembershipCard(cachedMembership, true);
   }
 
   const cachedSnapshot = readMemberProfileCache(memberId);
@@ -379,7 +474,7 @@ async function initMemberProfile() {
     return;
   }
 
-  const [profileResult, practiceResult] = await Promise.all([
+  const [profileResult, practiceResult, membershipResult] = await Promise.all([
     window.supabaseClient
       .from("profiles")
       .select("id, display_name, avatar_url")
@@ -389,6 +484,9 @@ async function initMemberProfile() {
       .from("practice_logs")
       .select("date")
       .eq("user_id", memberId),
+    memberId === currentUserId && window.membershipData?.ensureCurrentUserMembership
+      ? window.membershipData.ensureCurrentUserMembership(memberId).then((data) => ({ data, error: null })).catch((error) => ({ data: window.membershipData.DEFAULT_MEMBERSHIP, error }))
+      : Promise.resolve({ data: window.membershipData?.DEFAULT_MEMBERSHIP, error: null }),
   ]);
 
   if (profileResult.error && profileResult.error.code !== "PGRST116") {
@@ -398,6 +496,12 @@ async function initMemberProfile() {
   if (practiceResult.error) {
     console.error(practiceResult.error);
   }
+
+  if (membershipResult?.error) {
+    console.error("Member profile membership load error:", membershipResult.error);
+  }
+
+  renderProfileMembershipCard(membershipResult?.data || window.membershipData?.DEFAULT_MEMBERSHIP, memberId === currentUserId);
 
   const snapshot = buildMemberSnapshot(
     memberId,
@@ -423,6 +527,8 @@ document.addEventListener("visibilitychange", () => {
   const selfSnapshot = buildCachedSelfSnapshot(memberId);
   writeMemberProfileCache(memberId, selfSnapshot);
   renderMemberProfile(selfSnapshot);
+  const cachedMembership = window.membershipData?.readMembershipCache?.(memberId) || window.membershipData?.DEFAULT_MEMBERSHIP;
+  renderProfileMembershipCard(cachedMembership, true);
 });
 
 if (memberBackLinkEl) {
@@ -451,4 +557,11 @@ if (memberLogoutBtn) {
 
 
 
+
+
+if (memberProfileMembershipButtonEl) {
+  memberProfileMembershipButtonEl.addEventListener("click", () => {
+    window.location.href = "membership.html";
+  });
+}
 

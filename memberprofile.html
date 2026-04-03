@@ -74,6 +74,15 @@
       </div>
     </section>
 
+    <section class="membership-status-card membership-status-card-compact hidden" id="memberProfileMembershipCard" hidden>
+      <div class="membership-status-head membership-status-head-compact">
+        <h2 id="memberProfileMembershipTitle">No active plan</h2>
+        <span class="membership-status-pill is-inactive" id="memberProfileMembershipPill">Inactive</span>
+      </div>
+      <p class="membership-status-days" id="memberProfileMembershipCopy">Choose a membership whenever you are ready.</p>
+      <button type="button" class="primary-btn pricing-cta-btn" id="memberProfileMembershipButton">Choose Membership</button>
+    </section>
+
     <div id="memberProfileActionsMount"></div>
   </div>
 
@@ -102,11 +111,15 @@
 <script src="js/analytics.js"></script>
 <script src="js/practiceData.js"></script>
 <script src="js/profileData.js"></script>
+<script src="js/membershipData.js"></script>
 <script src="js/pwa.js"></script>
 <script src="js/pageTransition.js"></script>
 <script src="js/memberProfile.js"></script>
 </body>
 </html>
+
+
+
 
 
 
