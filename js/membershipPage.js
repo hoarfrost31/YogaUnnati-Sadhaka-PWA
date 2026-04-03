@@ -285,7 +285,7 @@ function updateMembershipPlanCards(membership) {
     if (isCurrent) {
       button.textContent = membershipPageBusy
         ? "Updating..."
-        : (isRenewableCurrent ? "Continue to Payment" : "Current Plan");
+        : (isRenewableCurrent ? "Make Payment" : "Current Plan");
       button.disabled = membershipPageBusy || !membershipPageUserId || !isRenewableCurrent;
       button.classList.remove("secondary-btn");
       button.classList.add("primary-btn");
@@ -398,6 +398,7 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
 
