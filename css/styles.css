@@ -5070,25 +5070,31 @@ input {
 
 
 .pricing-page .pricing-badge {
-  margin-bottom: 6px;
+  margin-bottom: 12px;
 }
 
 .pricing-page .pricing-plan-copy {
-  margin-top: 2px;
+  margin-top: 8px;
 }
 
 .pricing-page .membership-plan-status {
-  margin-top: 6px;
+  margin-top: 12px;
 }
 
 .pricing-page .membership-plan-support {
-  margin-top: 2px;
+  margin-top: 8px;
 }
 
 .pricing-page .membership-plan-toggle {
-  margin-top: 6px;
+  margin-top: 12px;
+}
+
+.pricing-page .pricing-cta-btn {
+  margin-top: 16px;
 }
 
 .pricing-page .membership-plan-status-icon {
   display: none;
 }
+
+
