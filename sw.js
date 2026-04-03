@@ -302,9 +302,7 @@ self.addEventListener("fetch", (event) => {
 
 
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> parent of ecc1246 (Update home payment reminder copy)
+
 
