@@ -4887,3 +4887,15 @@ input {
 .pricing-plan-copy p {
   line-height: 1.4;
 }
+
+.pricing-badge.is-active {
+  background: rgba(104, 165, 117, 0.16);
+  color: #2f7a3c;
+}
+
+.pricing-badge.is-pending,
+.pricing-badge.is-past_due,
+.pricing-badge.is-coming-soon {
+  background: rgba(249, 239, 227, 0.92);
+  color: var(--accent-deep);
+}

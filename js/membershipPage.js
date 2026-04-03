@@ -224,8 +224,10 @@ function updateMembershipPlanCards(membership) {
       topBadge.hidden = !showBadge;
       if (planCode === "online") {
         topBadge.textContent = "Coming Soon";
+        topBadge.className = "pricing-badge is-coming-soon";
       } else {
         topBadge.textContent = membershipStatusLabel(statusKey);
+        topBadge.className = `pricing-badge is-${statusKey}`;
       }
     }
 
@@ -359,6 +361,7 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
 
