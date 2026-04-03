@@ -42,13 +42,19 @@ function formatMembershipDate(dateValue, fallback = "Not started") {
   });
 }
 
-function membershipDaysLeftLabel(membership) {
+function membershipPaymentStatus(membership) {
   if (membership.status === "pending") {
-    return "Checkout started. Confirmation pending.";
+    return {
+      label: "Checkout started. Confirmation pending.",
+      tone: "amber",
+    };
   }
 
-  if (membership.status !== "active") {
-    return "No active membership yet.";
+  if (!["active", "past_due"].includes(membership.status)) {
+    return {
+      label: "Choose a membership whenever you are ready.",
+      tone: "neutral",
+    };
   }
 
   let end = membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd) : null;
@@ -60,14 +66,46 @@ function membershipDaysLeftLabel(membership) {
   }
 
   if (!end || Number.isNaN(end.getTime())) {
-    return "Active membership";
+    return {
+      label: membership.status === "past_due" ? "Payment overdue" : "Next payment date unavailable",
+      tone: membership.status === "past_due" ? "red" : "neutral",
+    };
   }
 
-  const now = new Date();
-  const msPerDay = 24 * 60 * 60 * 1000;
-  const diffDays = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / msPerDay));
-  const unit = diffDays === 1 ? "day" : "days";
-  return `${diffDays} ${unit} left`;
+  const diffDays = Math.ceil((end.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+
+  if (diffDays < 0 || membership.status === "past_due") {
+    return {
+      label: "Payment overdue",
+      tone: "red",
+    };
+  }
+
+  if (diffDays === 0) {
+    return {
+      label: "Payment due today",
+      tone: "red",
+    };
+  }
+
+  if (diffDays === 1) {
+    return {
+      label: "Next payment due tomorrow",
+      tone: "orange",
+    };
+  }
+
+  if (diffDays === 2) {
+    return {
+      label: "Next payment due in 2 days",
+      tone: "amber",
+    };
+  }
+
+  return {
+    label: `Next payment due in ${diffDays} days`,
+    tone: diffDays >= 3 ? "green" : "amber",
+  };
 }
 function membershipStatusCopy(membership) {
   if (membership.status === "pending") {
@@ -208,7 +246,9 @@ function updateMembershipPlanCards(membership) {
     }
 
     if (statusCopy) {
-      statusCopy.textContent = membershipDaysLeftLabel(membership);
+      const paymentStatus = membershipPaymentStatus(membership);
+      statusCopy.textContent = paymentStatus.label;
+      statusCopy.className = `membership-plan-status-copy is-${paymentStatus.tone}`;
     }
 
     if (topBadge) {
@@ -264,7 +304,7 @@ function updateMembershipPlanCards(membership) {
     const canChangePlanDuringRenewal = renewalWindowOpen && membership.planCode !== "none" && membership.planCode !== planCode;
     button.textContent = membershipPageBusy
       ? "Loading..."
-      : (canChangePlanDuringRenewal ? "Change Plan" : (button.getAttribute("data-default-label") || "Continue to Payment"));
+      : (canChangePlanDuringRenewal ? (planCode === "app" ? "Switch to App Plan" : "Change Plan") : (button.getAttribute("data-default-label") || "Make Payment"));
     button.disabled = membershipPageBusy || !membershipPageUserId;
     button.classList.toggle("primary-btn", !canChangePlanDuringRenewal && defaultVariant === "primary");
     button.classList.toggle("secondary-btn", canChangePlanDuringRenewal || defaultVariant !== "primary");
@@ -351,6 +391,7 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
 

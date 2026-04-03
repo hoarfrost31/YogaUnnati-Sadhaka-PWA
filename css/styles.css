@@ -4907,34 +4907,164 @@ input {
 }
 
 .pricing-page .pricing-plan-grid .pricing-plan-card {
+  gap: 12px;
+  padding: 22px 20px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 14px 34px rgba(32, 22, 14, 0.08);
+}
+
+.pricing-page .premium-plan-head {
+  align-items: flex-start;
   gap: 14px;
 }
 
-.pricing-page .pricing-plan-head {
-  gap: 12px;
+.pricing-page .premium-plan-price {
+  text-align: right;
+}
+
+.pricing-page .premium-plan-price strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.pricing-page .premium-plan-price span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+}
+
+.pricing-page .pricing-plan-head h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  line-height: 1.08;
 }
 
 .pricing-page .pricing-plan-copy {
-  margin-top: 4px;
+  margin-top: 0;
 }
 
-.pricing-page .membership-plan-toggle {
-  margin-top: 2px;
-}
-
-.pricing-page .pricing-cta-btn {
-  margin-top: 8px;
+.pricing-page .pricing-plan-copy p {
+  color: var(--text-soft);
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .pricing-page .membership-plan-status {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 0;
   background: transparent;
   border: 0;
   box-shadow: none;
 }
 
+.pricing-page .membership-plan-status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 0.9rem;
+  color: currentColor;
+  flex-shrink: 0;
+}
+
 .pricing-page .membership-plan-status-copy {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.pricing-page .membership-plan-status-copy.is-green,
+.pricing-page .membership-plan-status.is-green {
+  color: #2f7a3c;
+}
+
+.pricing-page .membership-plan-status-copy.is-amber,
+.pricing-page .membership-plan-status.is-amber {
+  color: #a35d10;
+}
+
+.pricing-page .membership-plan-status-copy.is-orange,
+.pricing-page .membership-plan-status.is-orange {
+  color: #b85d1d;
+}
+
+.pricing-page .membership-plan-status-copy.is-red,
+.pricing-page .membership-plan-status.is-red {
+  color: #b33a2e;
+}
+
+.pricing-page .membership-plan-status-copy.is-neutral,
+.pricing-page .membership-plan-status.is-neutral {
+  color: var(--text-soft);
+}
+
+.pricing-page .membership-plan-support {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-faint);
+}
+
+.pricing-page .membership-plan-toggle {
+  margin-top: 0;
+  padding: 10px 14px;
+}
+
+.pricing-page .pricing-feature-list {
+  margin-top: 4px;
+}
+
+.pricing-page .pricing-cta-btn {
+  margin-top: 8px;
+  min-height: 50px;
+  border-radius: 999px;
+}
+
+.pricing-page .pricing-cta-btn.is-change-plan {
+  border: 1px solid rgba(209, 134, 74, 0.42);
+  background: rgba(255, 247, 239, 0.96);
   color: var(--accent-deep);
+  box-shadow: none;
+}
+
+.pricing-page .pricing-cta-btn.is-coming-soon {
+  border: 1px solid rgba(21, 31, 52, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-soft);
+  box-shadow: none;
+}
+
+.pricing-page .pricing-badge {
+  min-height: 26px;
+  width: fit-content;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.pricing-page .pricing-badge.is-active {
+  background: rgba(104, 165, 117, 0.14);
+  border-color: rgba(104, 165, 117, 0.16);
+  color: #2f7a3c;
+}
+
+@media (max-width: 720px) {
+  .pricing-page .pricing-plan-grid .pricing-plan-card {
+    padding: 20px 18px;
+  }
+
+  .pricing-page .premium-plan-price strong {
+    font-size: 1.86rem;
+  }
+
+  .pricing-page .pricing-plan-head h2 {
+    font-size: 1.28rem;
+  }
 }
 
