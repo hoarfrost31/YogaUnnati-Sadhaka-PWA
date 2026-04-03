@@ -1,4 +1,4 @@
-const CACHE_NAME = "yogaunnati-pwa-v109";
+const CACHE_NAME = "yogaunnati-pwa-v110";
 const APP_SHELL_PATHS = [
   "",
   "install.html",
@@ -12,19 +12,9 @@ const APP_SHELL_PATHS = [
   "membership.html",
   "payment.html",
   "auth.html",
-  "admin-login.html",
-  "admin.html",
-  "admin-members.html",
-  "admin-member.html",
-  "admin-create-member.html",
   "manifest.webmanifest",
   "css/styles.css",
   "js/supabaseClient.js",
-  "js/adminShared.js",
-  "js/adminDashboard.js",
-  "js/adminMembers.js",
-  "js/adminMember.js",
-  "js/adminCreateMember.js",
   "js/analytics.js",
   "js/pwaConfig.js",
   "js/practiceData.js",
@@ -258,56 +248,3 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

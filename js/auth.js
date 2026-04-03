@@ -6,8 +6,6 @@ const passwordInput = document.getElementById("password");
 const msg = document.getElementById("msg");
 const loginBtn = document.getElementById("loginBtn");
 const signupBtn = document.getElementById("signupBtn");
-const currentPath = window.location.pathname.toLowerCase().replace(/\/+$/, "");
-const isAdminAuthPage = Boolean(window.__YOGAUNNATI_ADMIN_LOGIN__) || /(^|\/)admin-login(?:\.html)?$/i.test(currentPath) || window.location.href.toLowerCase().includes("admin-login.html");
 
 function setMessage(text) {
   msg.textContent = text;
@@ -54,16 +52,11 @@ if (signupBtn) {
         return;
       }
 
-      window.adminAccess?.clear?.();
       window.appAnalytics?.track("sign_up", {
         has_display_name: Boolean(displayName),
-        source: isAdminAuthPage ? "admin-login" : "auth",
+        source: "auth",
       });
-      setMessage(
-        isAdminAuthPage
-          ? "Member account created. If your session switched, sign in as admin again."
-          : "Account created! Now login."
-      );
+      setMessage("Account created! Now login.");
     } finally {
       setButtonsDisabled(false);
     }
@@ -72,7 +65,6 @@ if (signupBtn) {
 
 loginBtn.onclick = async () => {
   const email = emailInput.value.trim();
-  const normalizedEmail = email.toLowerCase();
   const password = passwordInput.value;
 
   if (!email || !password) {
@@ -84,7 +76,7 @@ loginBtn.onclick = async () => {
   setMessage("Signing in...");
 
   try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
+    const { error } = await supabaseClient.auth.signInWithPassword({
       email,
       password,
     });
@@ -94,32 +86,11 @@ loginBtn.onclick = async () => {
       return;
     }
 
-    const signedInUser = data?.user || data?.session?.user || await window.appAuth?.getCurrentUser?.({ forceRefresh: true });
-    const signedInEmail = String(signedInUser?.email || normalizedEmail).trim().toLowerCase();
-
     window.appAnalytics?.track("login", {
       method: "password",
-      source: isAdminAuthPage ? "admin-login" : "auth",
+      source: "auth",
     });
 
-    if (isAdminAuthPage) {
-      const isAllowedAdmin = window.adminAccess?.isAllowedEmail?.(signedInEmail);
-      if (!isAllowedAdmin) {
-        window.adminAccess?.clear?.();
-        await supabaseClient.auth.signOut();
-        setMessage("This account is not an admin.");
-        return;
-      }
-
-      window.adminAccess?.grant?.(signedInEmail);
-      setMessage("Admin login successful! Opening dashboard...");
-      window.setTimeout(() => {
-        window.location.href = window.adminRoutes?.dashboard || "admin.html";
-      }, 220);
-      return;
-    }
-
-    window.adminAccess?.clear?.();
     setMessage("Login successful!");
     window.location.href = "index.html";
   } finally {
@@ -128,7 +99,3 @@ loginBtn.onclick = async () => {
     }, 220);
   }
 };
-
-
-
-
