@@ -173,6 +173,14 @@ function updateMembershipPlanCards(membership) {
 
     const defaultVariant = button.getAttribute("data-default-variant") || "secondary";
 
+    if (planCode === "online") {
+      button.textContent = "Coming Soon";
+      button.disabled = true;
+      button.classList.remove("primary-btn");
+      button.classList.add("secondary-btn");
+      return;
+    }
+
     if (isCurrent) {
       button.textContent = membershipPageBusy
         ? "Updating..."
@@ -306,6 +314,7 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
 
