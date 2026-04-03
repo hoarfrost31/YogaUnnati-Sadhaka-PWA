@@ -154,7 +154,7 @@ function setMembershipBusyState(isBusy) {
 function updateMembershipPlanCards(membership) {
   const planCards = document.querySelectorAll("[data-membership-plan]");
   const renewalWindowOpen = membershipIsWithinRenewalWindow(membership);
-  const hasLockedMembership = ["active", "pending", "past_due"].includes(membership.status) && membership.planCode !== "none";
+  const hasLockedMembership = membership.status === "pending" || ((["active", "past_due"].includes(membership.status)) && membership.planCode !== "none" && !renewalWindowOpen);
 
   planCards.forEach((card) => {
     const planCode = card.getAttribute("data-membership-plan");
@@ -303,5 +303,6 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
