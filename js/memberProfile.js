@@ -444,7 +444,10 @@ function setOwnProfileActionsVisible(isOwnProfile) {
   }
 
   renderOwnProfileActions(isOwnProfile);
-  renderProfileMembershipCard(window.membershipData?.DEFAULT_MEMBERSHIP, isOwnProfile);
+  const visibleMembership = isOwnProfile && currentUserId
+    ? (window.membershipData?.readMembershipCache?.(currentUserId) || window.membershipData?.DEFAULT_MEMBERSHIP)
+    : (window.membershipData?.DEFAULT_MEMBERSHIP);
+  renderProfileMembershipCard(visibleMembership, isOwnProfile);
 }
 
 async function initMemberProfile() {
