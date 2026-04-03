@@ -137,18 +137,37 @@ function isLastSeenColumnMissing(error) {
   return ["42703", "PGRST204"].includes(String(error?.code || ""));
 }
 
-async function fetchProfileRow(userId) {
-  const { data, error } = await window.supabaseClient
-    .from("profiles")
-    .select("id, display_name, avatar_url, phone, last_seen_at")
-    .eq("id", userId)
-    .maybeSingle();
+async function fetchProfilesSelect(builderFactory) {
+  const { data, error } = await builderFactory(true);
+  if (!error) {
+    return data || [];
+  }
 
-  if (error) {
+  if (!isLastSeenColumnMissing(error)) {
     throw error;
   }
 
-  return data;
+  const fallbackResult = await builderFactory(false);
+  if (fallbackResult.error) {
+    throw fallbackResult.error;
+  }
+
+  return (fallbackResult.data || []).map((row) => ({
+    ...row,
+    last_seen_at: "",
+  }));
+}
+
+async function fetchProfileRow(userId) {
+  const rows = await fetchProfilesSelect((includeLastSeen) =>
+    window.supabaseClient
+      .from("profiles")
+      .select(includeLastSeen ? "id, display_name, avatar_url, phone, last_seen_at" : "id, display_name, avatar_url, phone")
+      .eq("id", userId)
+      .limit(1)
+  );
+
+  return rows[0] || null;
 }
 
 async function ensureCurrentUserProfile(userId) {
@@ -316,38 +335,42 @@ async function fetchProfilesByIds(userIds = []) {
     return [];
   }
 
-  const { data, error } = await window.supabaseClient
-    .from("profiles")
-    .select("id, display_name, avatar_url, phone, last_seen_at")
-    .in("id", uniqueIds);
+  try {
+    const data = await fetchProfilesSelect((includeLastSeen) =>
+      window.supabaseClient
+        .from("profiles")
+        .select(includeLastSeen ? "id, display_name, avatar_url, phone, last_seen_at" : "id, display_name, avatar_url, phone")
+        .in("id", uniqueIds)
+    );
 
-  if (error) {
+    markRemoteRefresh("profiles_public", "");
+    return data || [];
+  } catch (error) {
     if (isProfilesTableMissing(error)) {
       return [];
     }
 
     throw error;
   }
-
-  markRemoteRefresh("profiles_public", "");
-  return data || [];
 }
 
 async function fetchAllProfiles() {
-  const { data, error } = await window.supabaseClient
-    .from("profiles")
-    .select("id, display_name, avatar_url, phone, last_seen_at");
+  try {
+    const data = await fetchProfilesSelect((includeLastSeen) =>
+      window.supabaseClient
+        .from("profiles")
+        .select(includeLastSeen ? "id, display_name, avatar_url, phone, last_seen_at" : "id, display_name, avatar_url, phone")
+    );
 
-  if (error) {
+    markRemoteRefresh("profiles_public", "");
+    return data || [];
+  } catch (error) {
     if (isProfilesTableMissing(error)) {
       return [];
     }
 
     throw error;
   }
-
-  markRemoteRefresh("profiles_public", "");
-  return data || [];
 }
 
 function readLastSeenSyncAt(userId) {
