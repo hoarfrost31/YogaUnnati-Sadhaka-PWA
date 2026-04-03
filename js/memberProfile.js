@@ -44,6 +44,20 @@ function profileMembershipStatusLabel(status) {
   return PROFILE_MEMBERSHIP_STATUS_LABELS[status] || PROFILE_MEMBERSHIP_STATUS_LABELS.inactive;
 }
 
+function profileMembershipRequiresPaymentSoon(membership) {
+  if (!["active", "past_due"].includes(membership.status) || membership.planCode === "none") {
+    return false;
+  }
+
+  const end = membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd) : null;
+  if (!end || Number.isNaN(end.getTime())) {
+    return membership.status === "past_due";
+  }
+
+  const diffDays = Math.ceil((end.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+  return diffDays <= 3;
+}
+
 function profileMembershipDaysLeftCopy(membership) {
   if (membership.status === "pending") {
     return "Your latest checkout is awaiting confirmation.";
@@ -104,7 +118,7 @@ function renderProfileMembershipCard(membership, isOwnProfile) {
   }
 
   if (memberProfileMembershipButtonEl) {
-    memberProfileMembershipButtonEl.textContent = safeMembership.planCode === "none" ? "Choose Membership" : "Manage Membership";
+    memberProfileMembershipButtonEl.textContent = safeMembership.planCode === "none" ? "Choose Membership" : (profileMembershipRequiresPaymentSoon(safeMembership) ? "Make Payment" : "Manage Membership");
   }
 }
 
@@ -564,4 +578,5 @@ if (memberProfileMembershipButtonEl) {
     window.location.href = "membership.html";
   });
 }
+
 
