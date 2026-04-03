@@ -4906,4 +4906,35 @@ input {
   color: var(--accent-deep);
 }
 
+.pricing-page .pricing-plan-grid .pricing-plan-card {
+  gap: 14px;
+}
+
+.pricing-page .pricing-plan-head {
+  gap: 12px;
+}
+
+.pricing-page .pricing-plan-copy {
+  margin-top: 4px;
+}
+
+.pricing-page .membership-plan-toggle {
+  margin-top: 2px;
+}
+
+.pricing-page .pricing-cta-btn {
+  margin-top: 8px;
+}
+
+.pricing-page .membership-plan-status {
+  display: block;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.pricing-page .membership-plan-status-copy {
+  color: var(--accent-deep);
+}
 
