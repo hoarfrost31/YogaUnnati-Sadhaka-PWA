@@ -598,7 +598,7 @@ function getMembershipReminderState(membership) {
   if (membership.status === "past_due" || diffDays < 0) {
     return {
       tone: "warning",
-      message: `Namaskaram \uD83D\uDE4F Payment overdue for ${membershipReminderPlanLabel(membership.planCode)}. [Click here]`,
+      message: `Payment overdue for ${membershipReminderPlanLabel(membership.planCode)}. Open Membership to renew now.`,
       notification: `${membershipReminderPlanLabel(membership.planCode)} payment is overdue. Please renew now.`,
       key: `overdue:${formatIsoDate(dueDate)}`,
     };
@@ -609,10 +609,10 @@ function getMembershipReminderState(membership) {
     return {
       tone: diffDays === 0 ? "warning" : "encouragement",
       message: diffDays === 0
-        ? `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} payment is due today. [Click here]`
-        : `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} payment due in ${diffDays} ${dayLabel} on ${formattedDate}. [Click here]`,
+        ? `${membershipReminderPlanLabel(membership.planCode)} payment is due today.`
+        : `${membershipReminderPlanLabel(membership.planCode)} payment due in ${diffDays} ${dayLabel} on ${formattedDate}.`,
       notification: diffDays === 0
-        ? `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} payment is due today. [Click here]`
+        ? `${membershipReminderPlanLabel(membership.planCode)} payment is due today.`
         : `${membershipReminderPlanLabel(membership.planCode)} payment is due in ${diffDays} ${dayLabel}.`,
       key: `due:${formatIsoDate(dueDate)}:${diffDays}`,
     };
@@ -664,22 +664,42 @@ async function maybeSendMembershipReminderNotification(reminder) {
   }
 }
 
+function renderMembershipReminderDebug(label, membership, reminder, errorText = "") {
+  if (!homeMembershipReminderDebugTextEl) {
+    return;
+  }
+
+  const payload = {
+    label,
+    userId,
+    membership,
+    reminder,
+    error: errorText || null,
+  };
+
+  homeMembershipReminderDebugTextEl.textContent = JSON.stringify(payload, null, 2);
+}
+
 async function loadHomeMembershipReminder() {
   if (!userId || !window.membershipData) {
+    renderMembershipReminderDebug("missing-prerequisites", null, null, "userId or membershipData missing");
     return;
   }
 
   const cachedMembership = window.membershipData.readMembershipCache(userId);
   let reminder = getMembershipReminderState(cachedMembership);
   renderHomeMembershipReminder(reminder);
+  renderMembershipReminderDebug("cached", cachedMembership, reminder);
 
   try {
     const membership = await window.membershipData.refreshCurrentUserMembership(userId);
     reminder = getMembershipReminderState(membership);
     renderHomeMembershipReminder(reminder);
+    renderMembershipReminderDebug("remote", membership, reminder);
     await maybeSendMembershipReminderNotification(reminder);
   } catch (error) {
     console.error("Membership reminder load error:", error);
+    renderMembershipReminderDebug("error", null, null, error?.message || String(error));
   }
 }
 
@@ -1226,7 +1246,10 @@ initApp();
 
 
 
+<<<<<<< HEAD
 
 
 
 
+=======
+>>>>>>> parent of ecc1246 (Update home payment reminder copy)

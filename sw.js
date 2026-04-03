@@ -1,5 +1,4 @@
-const CACHE_NAME = "yogaunnati-pwa-v103";
-const APP_SHELL_PATHS = [
+const CACHE_NAME = "yogaunnati-pwa-v106";`r`nconst APP_SHELL_PATHS = [
   "",
   "install.html",
   "install-ios.html",
@@ -303,5 +302,9 @@ self.addEventListener("fetch", (event) => {
 
 
 
+<<<<<<< HEAD
 
+
+=======
+>>>>>>> parent of ecc1246 (Update home payment reminder copy)
 
