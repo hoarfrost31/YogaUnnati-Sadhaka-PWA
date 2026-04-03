@@ -655,7 +655,7 @@ async function maybeSendMembershipReminderNotification(reminder) {
   }
 
   try {
-    const sent = await notificationsApi.sendNotification("YogaUnnati", reminder.notification);
+    const sent = await notificationsApi.sendNotification("YogaUnnati", reminder.notification, { data: { url: "./membership.html?from=home" } });
     if (sent) {
       localStorage.setItem(storageKey, "sent");
     }
@@ -1234,6 +1234,7 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
 
 
 
