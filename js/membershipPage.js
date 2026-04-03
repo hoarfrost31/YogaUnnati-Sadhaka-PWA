@@ -151,7 +151,37 @@ function setMembershipBusyState(isBusy) {
   membershipPageBusy = Boolean(isBusy);
 }
 
+function reorderMembershipPlanCards(membership) {
+  const planGrid = document.querySelector(".pricing-plan-grid");
+  if (!planGrid) {
+    return;
+  }
+
+  const cards = Array.from(planGrid.querySelectorAll("[data-membership-plan]"));
+  if (!cards.length) {
+    return;
+  }
+
+  const defaultOrder = {
+    studio: 0,
+    app: 1,
+    online: 2,
+  };
+
+  cards
+    .sort((left, right) => {
+      const leftPlan = left.getAttribute("data-membership-plan") || "";
+      const rightPlan = right.getAttribute("data-membership-plan") || "";
+      const leftPriority = membership.planCode !== "none" && membership.planCode === leftPlan ? -1 : (defaultOrder[leftPlan] ?? 99);
+      const rightPriority = membership.planCode !== "none" && membership.planCode === rightPlan ? -1 : (defaultOrder[rightPlan] ?? 99);
+      return leftPriority - rightPriority;
+    })
+    .forEach((card) => planGrid.appendChild(card));
+}
+
 function updateMembershipPlanCards(membership) {
+  reorderMembershipPlanCards(membership);
+
   const planCards = document.querySelectorAll("[data-membership-plan]");
   const renewalWindowOpen = membershipIsWithinRenewalWindow(membership);
   const hasLockedMembership = membership.status === "pending" || ((["active", "past_due"].includes(membership.status)) && membership.planCode !== "none" && !renewalWindowOpen);
@@ -315,6 +345,7 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
 
