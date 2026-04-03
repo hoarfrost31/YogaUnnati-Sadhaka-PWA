@@ -100,6 +100,15 @@ async function isLoginDisabled(userId) {
 }
 
 window.appAuth = {
+  getCachedUser() {
+    const cachedUser = readCachedAuthUser();
+    if (cachedUser?.id) {
+      return cachedUser;
+    }
+
+    const persistedUser = readPersistedSessionUser();
+    return persistedUser?.id ? persistedUser : null;
+  },
   consumeNotice() {
     try {
       const message = sessionStorage.getItem(AUTH_NOTICE_KEY) || "";

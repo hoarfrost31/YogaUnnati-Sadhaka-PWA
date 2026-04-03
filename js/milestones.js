@@ -11,6 +11,14 @@ async function initUser() {
 
   userId = currentUser.id;
 }
+
+function hydrateMilestonesFromCache() {
+  if (!userId) {
+    return;
+  }
+
+  renderMilestones(readPracticeCache(userId));
+}
 const milestones = APP_MILESTONES;
 const PRACTICE_REFRESH_TTL_MS = 90 * 1000;
 
@@ -109,9 +117,15 @@ function renderMilestones(practiceDates = []) {
 }
 
 async function initApp() {
+  const cachedUser = window.appAuth?.getCachedUser?.();
+  if (cachedUser?.id) {
+    userId = cachedUser.id;
+    hydrateMilestonesFromCache();
+  }
+
   await initUser();
   window.appAnalytics?.identify(userId);
-  renderMilestones(readPracticeCache(userId));
+  hydrateMilestonesFromCache();
   if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
     refreshMilestones();
   }

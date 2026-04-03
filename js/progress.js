@@ -161,6 +161,15 @@ async function initUser() {
 
   userId = currentUser.id;
 }
+
+function hydrateProgressFromCache() {
+  if (!userId) {
+    return;
+  }
+
+  practiceDates = readPracticeCache(userId);
+  syncProgressUI(false);
+}
 function renderProgressStatus(messages) {
   if (!progressStatusCardEl || !progressStatusIconEl || !progressStatusTextEl || !messages.length) {
     return;
@@ -679,10 +688,15 @@ if (progressTodayBtn) {
 }
 
 async function initApp() {
+  const cachedUser = window.appAuth?.getCachedUser?.();
+  if (cachedUser?.id) {
+    userId = cachedUser.id;
+    hydrateProgressFromCache();
+  }
+
   await initUser();
   window.appAnalytics?.identify(userId);
-  practiceDates = readPracticeCache(userId);
-  syncProgressUI(false);
+  hydrateProgressFromCache();
   if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
     refreshPracticeDates();
   }

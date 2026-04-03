@@ -727,6 +727,32 @@ async function initUser() {
 
   userId = currentUser.id;
 }
+
+function hydrateHomeFromCache() {
+  if (!userId) {
+    return;
+  }
+
+  if (homeAvatarLinkEl) {
+    homeAvatarLinkEl.href = `memberprofile.html?uid=${encodeURIComponent(userId)}`;
+    if (!homeAvatarLinkEl.dataset.analyticsBound) {
+      homeAvatarLinkEl.addEventListener("click", () => {
+        window.appAnalytics?.track("open_member_profile", {
+          source: "home_avatar",
+          member_id: userId,
+          is_own_profile: true,
+        });
+      });
+      homeAvatarLinkEl.dataset.analyticsBound = "true";
+    }
+  }
+
+  applyHomeProfile(readProfileCache(userId));
+  practiceDates = readPracticeCache(userId);
+  syncHomeUI();
+  renderHomeCommunitySnapshot(readHomeCommunityCache(userId));
+  loadHomeMembershipReminder();
+}
 function getTodayIsoDate() {
   const now = new Date();
   const year = now.getFullYear();
@@ -1183,19 +1209,15 @@ if (weekCardLinkEl) {
 // loadStats();
 
 async function initApp() {
+  const cachedUser = window.appAuth?.getCachedUser?.();
+  if (cachedUser?.id) {
+    userId = cachedUser.id;
+    hydrateHomeFromCache();
+  }
+
   await initUser();   // 🔥 must complete first
   window.appAnalytics?.identify(userId);
-  if (homeAvatarLinkEl && userId) {
-    homeAvatarLinkEl.href = `memberprofile.html?uid=${encodeURIComponent(userId)}`;
-    homeAvatarLinkEl.addEventListener("click", () => {
-      window.appAnalytics?.track("open_member_profile", {
-        source: "home_avatar",
-        member_id: userId,
-        is_own_profile: true,
-      });
-    }, { once: true });
-  }
-  applyHomeProfile(readProfileCache(userId));
+  hydrateHomeFromCache();
   if (shouldRefreshRemote("profile", userId, PROFILE_REFRESH_TTL_MS)) {
     loadHomeProfile();
   }
@@ -1210,10 +1232,6 @@ async function initApp() {
       }
     });
   }
-  loadHomeMembershipReminder();
-  practiceDates = readPracticeCache(userId);
-  syncHomeUI();
-  renderHomeCommunitySnapshot(readHomeCommunityCache(userId));
   if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
     refreshPracticeDates();
   }

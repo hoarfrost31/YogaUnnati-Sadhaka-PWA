@@ -101,6 +101,14 @@ async function initUser() {
 
   userId = currentUser.id;
 }
+
+function hydrateCommunityBoardFromCache() {
+  if (!userId) {
+    return;
+  }
+
+  renderBoard(hydrateCachedMembers(readCommunityBoardCache(userId)));
+}
 function calculateStreak(practiceDates) {
   const dates = [...practiceDates].sort().reverse();
   let streak = 0;
@@ -243,9 +251,15 @@ async function buildCommunityMembers() {
   return members;
 }
 async function initApp() {
+  const cachedUser = window.appAuth?.getCachedUser?.();
+  if (cachedUser?.id) {
+    userId = cachedUser.id;
+    hydrateCommunityBoardFromCache();
+  }
+
   await initUser();
   window.appAnalytics?.identify(userId);
-  renderBoard(hydrateCachedMembers(readCommunityBoardCache(userId)));
+  hydrateCommunityBoardFromCache();
 
   try {
     if (
