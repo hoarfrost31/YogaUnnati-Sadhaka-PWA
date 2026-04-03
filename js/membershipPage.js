@@ -132,19 +132,36 @@ function membershipBillingLabel(membership) {
   return membership.billingCycle === "monthly" ? "Monthly" : membership.billingCycle;
 }
 
+function membershipIsWithinRenewalWindow(membership) {
+  if (!["active", "past_due"].includes(membership.status) || membership.planCode === "none") {
+    return false;
+  }
+
+  const end = membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd) : null;
+  if (!end || Number.isNaN(end.getTime())) {
+    return false;
+  }
+
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const diffDays = Math.ceil((end.getTime() - Date.now()) / msPerDay);
+  return diffDays <= 3;
+}
+
 function setMembershipBusyState(isBusy) {
   membershipPageBusy = Boolean(isBusy);
 }
 
 function updateMembershipPlanCards(membership) {
   const planCards = document.querySelectorAll("[data-membership-plan]");
-  const hasLockedMembership = ["active", "pending"].includes(membership.status) && membership.planCode !== "none";
+  const renewalWindowOpen = membershipIsWithinRenewalWindow(membership);
+  const hasLockedMembership = ["active", "pending", "past_due"].includes(membership.status) && membership.planCode !== "none";
 
   planCards.forEach((card) => {
     const planCode = card.getAttribute("data-membership-plan");
     const button = card.querySelector("[data-membership-plan-button]");
-    const isCurrent = membership.status === "active" && membership.planCode === planCode;
+    const isCurrent = ["active", "past_due"].includes(membership.status) && membership.planCode === planCode;
     const isPending = membership.status === "pending" && membership.planCode === planCode;
+    const isRenewableCurrent = isCurrent && renewalWindowOpen;
     const isLockedOtherPlan = hasLockedMembership && membership.planCode !== planCode;
 
     card.classList.toggle("is-current-plan", isCurrent);
@@ -157,8 +174,10 @@ function updateMembershipPlanCards(membership) {
     const defaultVariant = button.getAttribute("data-default-variant") || "secondary";
 
     if (isCurrent) {
-      button.textContent = membershipPageBusy ? "Updating..." : "Current Plan";
-      button.disabled = true;
+      button.textContent = membershipPageBusy
+        ? "Updating..."
+        : (isRenewableCurrent ? "Continue to Payment" : "Current Plan");
+      button.disabled = membershipPageBusy || !membershipPageUserId || !isRenewableCurrent;
       button.classList.remove("secondary-btn");
       button.classList.add("primary-btn");
       return;
@@ -284,4 +303,5 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
