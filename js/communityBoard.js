@@ -215,7 +215,7 @@ async function buildCommunityMembers() {
 
   memberIds.forEach((memberId) => {
     const practiceDates = practiceMap.get(memberId) || [];
-    const totalDays = [...new Set(practiceDates)].length;
+    const totalDays = getAdjustedPracticeTotalDays(practiceDates);
 
     if (memberId !== userId && totalDays === 0) {
       return;
@@ -302,6 +302,7 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 initApp();
+
 
 
 

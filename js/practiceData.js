@@ -210,6 +210,10 @@ function formatPracticeIsoDate(date) {
   return `${year}-${month}-${day}`;
 }
 
+function getAdjustedPracticeTotalDays(practiceDates, referenceDate = new Date()) {
+  return getMilestoneProgressCount(practiceDates, referenceDate);
+}
+
 function getMilestoneProgressCount(practiceDates, referenceDate = new Date()) {
   const uniqueDates = normalizePracticeDates(practiceDates);
 
@@ -483,3 +487,5 @@ if (document.readyState === "loading") {
 } else {
   window.milestoneUnlockBanner.restorePending();
 }
+
+

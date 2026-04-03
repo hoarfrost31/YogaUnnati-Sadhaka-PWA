@@ -55,7 +55,7 @@ async function loadAdminDashboard() {
       return {
         id: profileRow.id,
         displayName: getProfileFromRow(profileRow).displayName || DEFAULT_PROFILE_NAME,
-        totalDays: [...new Set(dates)].length,
+        totalDays: getAdjustedPracticeTotalDays(dates),
         practicedToday: practicedTodayIds.has(profileRow.id),
         milestone: state.milestone.title,
         lastPractice: dates.sort().slice(-1)[0] || "",
@@ -84,4 +84,5 @@ loadAdminDashboard().catch((error) => {
   console.error(error);
   adminPracticePulseEl.innerHTML = '<div class="admin-empty-state">Could not load dashboard data.</div>';
 });
+
 

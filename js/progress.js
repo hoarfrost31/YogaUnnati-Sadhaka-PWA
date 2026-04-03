@@ -200,7 +200,7 @@ function loadCalendar() {
 }
 
 function loadStats() {
-  const totalDays = practiceDates.length;
+  const totalDays = getAdjustedPracticeTotalDays(practiceDates);
   document.getElementById("totalDays").textContent = totalDays;
 
   const dates = [...practiceDates].sort().reverse();
@@ -689,6 +689,7 @@ async function initApp() {
 }
 
 initApp();
+
 
 
 

@@ -111,7 +111,7 @@ async function loadAdminMembers() {
       return {
         id: profileRow.id,
         displayName: getProfileFromRow(profileRow).displayName || DEFAULT_PROFILE_NAME,
-        totalDays: uniqueDates.length,
+        totalDays: getAdjustedPracticeTotalDays(uniqueDates),
         streak: calculateAdminStreak(uniqueDates),
         level: milestoneState.milestone.level,
         lastPractice: uniqueDates.slice(-1)[0] || "",
@@ -133,4 +133,5 @@ loadAdminMembers().catch((error) => {
   console.error(error);
   adminMembersListEl.innerHTML = '<div class="admin-empty-state">Could not load members.</div>';
 });
+
 

@@ -257,7 +257,7 @@ function formatLongDate(dateString) {
 
 function buildMemberSnapshot(memberId, profileRow, practiceDates) {
   const uniquePracticeDates = [...new Set(practiceDates)].sort();
-  const totalDays = uniquePracticeDates.length;
+  const totalDays = getAdjustedPracticeTotalDays(uniquePracticeDates);
   const streak = calculateStreak(uniquePracticeDates);
   const milestoneState = getCurrentMilestoneState(memberId, getMilestoneProgressCount(uniquePracticeDates));
   const profile = getProfileFromRow(profileRow || {}, null);
@@ -445,6 +445,7 @@ if (memberLogoutBtn) {
     await logout();
   });
 }
+
 
 
 

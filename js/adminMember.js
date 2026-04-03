@@ -584,7 +584,7 @@ async function loadAdminMember() {
 
   const practiceDates = (practiceLogsResult.data || []).map((row) => row.date).sort();
   adminMemberPracticeDates = [...new Set(practiceDates)];
-  const totalDays = adminMemberPracticeDates.length;
+  const totalDays = getAdjustedPracticeTotalDays(adminMemberPracticeDates);
   const streak = calculateAdminStreak(adminMemberPracticeDates);
   const lastPractice = adminMemberPracticeDates.slice(-1)[0] || "";
   const milestoneState = getCurrentMilestoneState(memberId, getMilestoneProgressCount(adminMemberPracticeDates));
@@ -680,6 +680,7 @@ loadAdminMember().catch((error) => {
   setAdminMemberPasswordMessage('Password tools could not be loaded.');
   setAdminMemberDeleteMessage('Delete tools could not be loaded.');
 });
+
 
 
 
