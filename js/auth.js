@@ -18,6 +18,11 @@ function setButtonsDisabled(disabled) {
   }
 }
 
+const pendingAuthNotice = window.appAuth?.consumeNotice?.();
+if (pendingAuthNotice) {
+  setMessage(pendingAuthNotice);
+}
+
 if (signupBtn) {
   signupBtn.onclick = async () => {
     const displayName = displayNameInput?.value.trim() || "";
@@ -76,13 +81,24 @@ loginBtn.onclick = async () => {
   setMessage("Signing in...");
 
   try {
-    const { error } = await supabaseClient.auth.signInWithPassword({
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
       setMessage(error.message);
+      return;
+    }
+
+    const signedInUser = data?.user || data?.session?.user || null;
+    const allowed = await window.appAuth?.ensureLoginAllowed?.({
+      user: signedInUser,
+      redirectTo: null,
+    });
+
+    if (!allowed) {
+      setMessage("This account has been disabled. Contact admin.");
       return;
     }
 
