@@ -5068,3 +5068,27 @@ input {
   }
 }
 
+
+.pricing-page .pricing-badge {
+  margin-bottom: 6px;
+}
+
+.pricing-page .pricing-plan-copy {
+  margin-top: 2px;
+}
+
+.pricing-page .membership-plan-status {
+  margin-top: 6px;
+}
+
+.pricing-page .membership-plan-support {
+  margin-top: 2px;
+}
+
+.pricing-page .membership-plan-toggle {
+  margin-top: 6px;
+}
+
+.pricing-page .membership-plan-status-icon {
+  display: none;
+}

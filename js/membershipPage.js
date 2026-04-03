@@ -90,20 +90,20 @@ function membershipPaymentStatus(membership) {
 
   if (diffDays === 1) {
     return {
-      label: "Next payment due tomorrow",
+      label: "Due tomorrow",
       tone: "orange",
     };
   }
 
   if (diffDays === 2) {
     return {
-      label: "Next payment due in 2 days",
+      label: "Due in 2 days",
       tone: "amber",
     };
   }
 
   return {
-    label: `Next payment due in ${diffDays} days`,
+    label: `Due in ${diffDays} days`,
     tone: diffDays >= 3 ? "green" : "amber",
   };
 }
@@ -391,6 +391,7 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
 
