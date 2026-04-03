@@ -4451,46 +4451,87 @@ input {
 }
 
 .membership-status-card-compact {
-  padding: 14px 16px;
-  border-radius: 22px;
+  padding: 12px 14px;
+  border-radius: 20px;
   background:
-    radial-gradient(circle at top right, rgba(127, 151, 128, 0.08), transparent 34%),
-    rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(255, 255, 255, 0.64);
-  box-shadow: 0 10px 24px rgba(32, 22, 14, 0.05);
+    radial-gradient(circle at top right, rgba(127, 151, 128, 0.05), transparent 32%),
+    rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  box-shadow: 0 8px 18px rgba(32, 22, 14, 0.04);
 }
 
 .membership-status-head-compact {
   align-items: center;
+  gap: 10px;
 }
 
 .membership-status-head-compact h2 {
   margin: 0;
-  font-size: 1.04rem;
+  font-size: 0.98rem;
+  line-height: 1.2;
 }
 
 .membership-status-card-compact .membership-status-pill {
-  min-height: 28px;
-  padding: 6px 10px;
-  font-size: 0.7rem;
+  min-height: 26px;
+  padding: 5px 9px;
+  font-size: 0.68rem;
 }
 
 .membership-status-card-compact .membership-status-days {
-  margin-top: 10px;
-  font-size: 0.92rem;
+  margin-top: 8px;
+  font-size: 0.88rem;
   font-weight: 600;
+  line-height: 1.4;
 }
 
 .membership-status-card-compact .pricing-cta-btn {
-  margin-top: 14px;
-  min-height: 44px;
-  background: rgba(216, 135, 74, 0.12);
+  margin-top: 12px;
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 0.92rem;
+  background: rgba(216, 135, 74, 0.11);
   color: var(--accent-deep);
   box-shadow: none;
 }
 
 .membership-status-card-compact .pricing-cta-btn:hover {
-  background: rgba(216, 135, 74, 0.18);
+  background: rgba(216, 135, 74, 0.16);
+}
+
+@media (max-width: 640px) {
+  .membership-status-card-compact {
+    margin-top: 14px;
+    padding: 11px 12px;
+    border-radius: 18px;
+  }
+
+  .membership-status-card-compact .membership-status-head {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .membership-status-card-compact .membership-status-head h2 {
+    font-size: 0.94rem;
+  }
+
+  .membership-status-card-compact .membership-status-pill {
+    min-height: 24px;
+    padding: 4px 8px;
+    font-size: 0.64rem;
+  }
+
+  .membership-status-card-compact .membership-status-days {
+    margin-top: 7px;
+    font-size: 0.84rem;
+  }
+
+  .membership-status-card-compact .pricing-cta-btn {
+    margin-top: 10px;
+    min-height: 38px;
+    font-size: 0.88rem;
+  }
 }
 
 .membership-status-grid-compact {
@@ -5133,6 +5174,7 @@ input {
 .pricing-page .membership-plan-status-icon {
   display: none;
 }
+
 
 
 
