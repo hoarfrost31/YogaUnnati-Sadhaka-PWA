@@ -69,7 +69,7 @@ function hydrateCachedMembers(members) {
   const currentUserDates = readPracticeCache(userId);
   const currentUserProfile = readProfileCache(userId);
   const currentUserStreak = calculateStreak(currentUserDates);
-  const currentUserTotalDays = [...new Set(currentUserDates)].length;
+  const currentUserTotalDays = getAdjustedPracticeTotalDays(currentUserDates);
   const currentUserMilestoneState = getCurrentMilestoneState(
     userId,
     getMilestoneProgressCount(currentUserDates)
@@ -302,6 +302,7 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 initApp();
+
 
 
 
