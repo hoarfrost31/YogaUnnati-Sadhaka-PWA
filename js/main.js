@@ -25,6 +25,7 @@ const homeMilestoneBarFillEl = document.getElementById("homeMilestoneBarFill");
 const brandTaglineEl = document.getElementById("brandTagline");
 const homeMembershipReminderCardEl = document.getElementById("homeMembershipReminderCard");
 const homeMembershipReminderTextEl = document.getElementById("homeMembershipReminderText");
+const homeMembershipReminderDebugTextEl = document.getElementById("homeMembershipReminderDebugText");
 const todayPracticeActionsEl = document.getElementById("todayPracticeActions");
 const HOME_MILESTONE_BAR_ANIMATED_KEY = "home_milestone_bar_animated_v1";
 const TOMORROW_RSVP_KEY = "yogaunnati_tomorrow_rsvp";
@@ -663,22 +664,42 @@ async function maybeSendMembershipReminderNotification(reminder) {
   }
 }
 
+function renderMembershipReminderDebug(label, membership, reminder, errorText = "") {
+  if (!homeMembershipReminderDebugTextEl) {
+    return;
+  }
+
+  const payload = {
+    label,
+    userId,
+    membership,
+    reminder,
+    error: errorText || null,
+  };
+
+  homeMembershipReminderDebugTextEl.textContent = JSON.stringify(payload, null, 2);
+}
+
 async function loadHomeMembershipReminder() {
   if (!userId || !window.membershipData) {
+    renderMembershipReminderDebug("missing-prerequisites", null, null, "userId or membershipData missing");
     return;
   }
 
   const cachedMembership = window.membershipData.readMembershipCache(userId);
   let reminder = getMembershipReminderState(cachedMembership);
   renderHomeMembershipReminder(reminder);
+  renderMembershipReminderDebug("cached", cachedMembership, reminder);
 
   try {
     const membership = await window.membershipData.refreshCurrentUserMembership(userId);
     reminder = getMembershipReminderState(membership);
     renderHomeMembershipReminder(reminder);
+    renderMembershipReminderDebug("remote", membership, reminder);
     await maybeSendMembershipReminderNotification(reminder);
   } catch (error) {
     console.error("Membership reminder load error:", error);
+    renderMembershipReminderDebug("error", null, null, error?.message || String(error));
   }
 }
 
@@ -711,6 +732,14 @@ function getTodayIsoDate() {
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatIsoDate(date) {
+  const value = new Date(date);
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
@@ -1205,6 +1234,14 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
+
+
+
+
+
+
+
 
 
 
