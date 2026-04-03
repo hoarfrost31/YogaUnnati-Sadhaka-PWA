@@ -4451,7 +4451,13 @@ input {
 }
 
 .membership-status-card-compact {
-  padding: 16px 18px;
+  padding: 14px 16px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top right, rgba(127, 151, 128, 0.08), transparent 34%),
+    rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.64);
+  box-shadow: 0 10px 24px rgba(32, 22, 14, 0.05);
 }
 
 .membership-status-head-compact {
@@ -4460,6 +4466,31 @@ input {
 
 .membership-status-head-compact h2 {
   margin: 0;
+  font-size: 1.04rem;
+}
+
+.membership-status-card-compact .membership-status-pill {
+  min-height: 28px;
+  padding: 6px 10px;
+  font-size: 0.7rem;
+}
+
+.membership-status-card-compact .membership-status-days {
+  margin-top: 10px;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.membership-status-card-compact .pricing-cta-btn {
+  margin-top: 14px;
+  min-height: 44px;
+  background: rgba(216, 135, 74, 0.12);
+  color: var(--accent-deep);
+  box-shadow: none;
+}
+
+.membership-status-card-compact .pricing-cta-btn:hover {
+  background: rgba(216, 135, 74, 0.18);
 }
 
 .membership-status-grid-compact {
@@ -5054,6 +5085,12 @@ input {
   color: #2f7a3c;
 }
 
+.pricing-page .pricing-badge.is-plan-tag {
+  background: rgba(249, 239, 227, 0.84);
+  border: 1px solid rgba(209, 134, 74, 0.14);
+  color: #9a6b43;
+}
+
 @media (max-width: 720px) {
   .pricing-page .pricing-plan-grid .pricing-plan-card {
     padding: 20px 18px;
@@ -5096,5 +5133,6 @@ input {
 .pricing-page .membership-plan-status-icon {
   display: none;
 }
+
 
 

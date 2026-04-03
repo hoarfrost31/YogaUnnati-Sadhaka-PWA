@@ -252,12 +252,19 @@ function updateMembershipPlanCards(membership) {
     }
 
     if (topBadge) {
-      const showBadge = membership.status === "active" && isCurrent;
+      const defaultBadge = topBadge.getAttribute("data-default-badge") || "";
+      const isInactiveCard = !isCurrent && !isPending;
+      const showBadge = (membership.status === "active" && isCurrent) || (isInactiveCard && Boolean(defaultBadge));
       topBadge.classList.toggle("hidden", !showBadge);
       topBadge.hidden = !showBadge;
       if (showBadge) {
-        topBadge.textContent = "Active";
-        topBadge.className = "pricing-badge is-active";
+        if (membership.status === "active" && isCurrent) {
+          topBadge.textContent = "Active";
+          topBadge.className = "pricing-badge is-active";
+        } else {
+          topBadge.textContent = defaultBadge;
+          topBadge.className = "pricing-badge is-plan-tag";
+        }
       }
     }
 
@@ -391,6 +398,7 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
 
