@@ -198,20 +198,13 @@ function updateMembershipPlanCards(membership) {
     card.classList.toggle("is-pending-plan", isPending);
 
     const statusWrap = card.querySelector("[data-membership-plan-status]");
-    const statusPill = card.querySelector("[data-membership-plan-pill]");
     const statusCopy = card.querySelector("[data-membership-plan-status-copy]");
     const topBadge = card.querySelector("[data-membership-plan-badge]");
     const shouldShowStatus = isCurrent || isPending;
-    const statusKey = isPending ? "pending" : membership.status;
 
     statusWrap?.classList.toggle("hidden", !shouldShowStatus);
     if (statusWrap) {
       statusWrap.hidden = !shouldShowStatus;
-    }
-
-    if (statusPill) {
-      statusPill.textContent = membershipStatusLabel(statusKey);
-      statusPill.className = `membership-status-pill is-${statusKey}`;
     }
 
     if (statusCopy) {
@@ -219,12 +212,12 @@ function updateMembershipPlanCards(membership) {
     }
 
     if (topBadge) {
-      const showBadge = shouldShowStatus;
+      const showBadge = membership.status === "active" && isCurrent;
       topBadge.classList.toggle("hidden", !showBadge);
       topBadge.hidden = !showBadge;
       if (showBadge) {
-        topBadge.textContent = membershipStatusLabel(statusKey);
-        topBadge.className = `pricing-badge is-${statusKey}`;
+        topBadge.textContent = "Active";
+        topBadge.className = "pricing-badge is-active";
       }
     }
 
@@ -358,6 +351,7 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
 
