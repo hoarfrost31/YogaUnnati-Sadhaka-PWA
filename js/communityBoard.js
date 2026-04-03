@@ -217,9 +217,6 @@ async function buildCommunityMembers() {
     const practiceDates = practiceMap.get(memberId) || [];
     const totalDays = getAdjustedPracticeTotalDays(practiceDates);
 
-    if (memberId !== userId && totalDays === 0) {
-      return;
-    }
 
     const profile = profileMap.get(memberId) || readProfileCache(memberId);
     const displayName = profile.displayName || (memberId === userId ? DEFAULT_PROFILE_NAME : "Yoga Member");
@@ -302,6 +299,7 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 initApp();
+
 
 
 
