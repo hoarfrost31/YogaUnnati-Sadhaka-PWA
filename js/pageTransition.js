@@ -2,6 +2,7 @@ const TAB_HISTORY_KEY = "yogaunnati_tab_history";
 const TAB_PAGES = new Set(["index.html", "progress.html", "milestones.html", "community.html", "memberprofile.html"]);
 const EXIT_PROMPT_KEY = "yogaunnati_exit_prompt_at";
 const EXIT_PROMPT_WINDOW_MS = 1800;
+const prefetchedPageUrls = new Set();
 let lastTouchNavAt = 0;
 
 function getAppPlugin() {
@@ -31,6 +32,57 @@ function exitAppIfPossible() {
 function navigateToPage(url) {
   clearExitPrompt();
   window.location.replace(url);
+}
+
+function markPageReady() {
+  if (document.body.classList.contains("page-ready")) {
+    return;
+  }
+
+  window.requestAnimationFrame(() => {
+    document.body.classList.add("page-ready");
+  });
+}
+
+function prefetchInternalPage(url) {
+  if (!url) {
+    return;
+  }
+
+  const normalizedUrl = new URL(url, window.location.href).toString();
+  if (prefetchedPageUrls.has(normalizedUrl) || normalizedUrl === window.location.href) {
+    return;
+  }
+
+  prefetchedPageUrls.add(normalizedUrl);
+
+  try {
+    fetch(normalizedUrl, {
+      credentials: "same-origin",
+    }).catch(() => {
+      prefetchedPageUrls.delete(normalizedUrl);
+    });
+  } catch (_error) {
+    prefetchedPageUrls.delete(normalizedUrl);
+  }
+}
+
+function warmTabPages() {
+  const navLinks = Array.from(document.querySelectorAll(".nav-item[href]"));
+  const currentPage = getCurrentPageName();
+
+  navLinks.forEach((anchor) => {
+    if (!isInternalPageLink(anchor)) {
+      return;
+    }
+
+    const targetPage = new URL(anchor.href, window.location.href).pathname.split("/").pop() || "index.html";
+    if (targetPage === currentPage) {
+      return;
+    }
+
+    prefetchInternalPage(anchor.href);
+  });
 }
 
 function isInternalPageLink(anchor) {
@@ -229,12 +281,23 @@ function enableNativeBackNavigation() {
   });
 }
 
+window.addEventListener("DOMContentLoaded", () => {
+  markPageReady();
+
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(() => {
+      warmTabPages();
+    }, { timeout: 1200 });
+    return;
+  }
+
+  window.setTimeout(() => {
+    warmTabPages();
+  }, 350);
+});
+
 window.addEventListener("pageshow", () => {
-  window.requestAnimationFrame(() => {
-    window.requestAnimationFrame(() => {
-      document.body.classList.add("page-ready");
-    });
-  });
+  markPageReady();
 });
 
 enableTabHistoryNavigation();
@@ -271,6 +334,7 @@ document.addEventListener("touchstart", (event) => {
     return;
   }
 
+  prefetchInternalPage(anchor.href);
   event.preventDefault();
 }, { passive: false });
 
