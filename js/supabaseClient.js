@@ -7,6 +7,24 @@ const DISABLED_ACCOUNT_MESSAGE = "Your account has been disabled. Contact admin.
 
 window.supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+async function syncCurrentUserLastSeen(options = {}) {
+  if (typeof window.touchCurrentUserLastSeen !== "function") {
+    return false;
+  }
+
+  try {
+    const user = await window.appAuth.getCurrentUser({ forceRefresh: Boolean(options.forceRefresh) });
+    if (!user?.id) {
+      return false;
+    }
+
+    return await window.touchCurrentUserLastSeen(user.id, { force: Boolean(options.force) });
+  } catch (error) {
+    console.error("Last seen sync error:", error);
+    return false;
+  }
+}
+
 function readCachedAuthUser() {
   try {
     const raw = sessionStorage.getItem(AUTH_CACHE_KEY);
@@ -175,6 +193,14 @@ window.appAuth = {
 
 window.supabaseClient.auth.onAuthStateChange((_event, session) => {
   writeCachedAuthUser(session?.user || null);
+
+  if (session?.user?.id) {
+    syncCurrentUserLastSeen({ force: true });
+  }
+});
+
+window.addEventListener("pageshow", () => {
+  syncCurrentUserLastSeen();
 });
 
 document.addEventListener("visibilitychange", async () => {
@@ -190,6 +216,7 @@ document.addEventListener("visibilitychange", async () => {
         user: sessionUser,
         redirectTo: "auth.html",
       });
+      await syncCurrentUserLastSeen();
     }
   } catch (error) {
     console.error("Visibility auth access check error:", error);

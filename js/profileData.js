@@ -5,9 +5,15 @@ const LEGACY_DEFAULT_AVATAR_PATHS = new Set([
   "images/profile.jpg",
   "/images/profile.jpg",
 ]);
+const LAST_SEEN_SYNC_KEY_PREFIX = "profile_last_seen_sync_v1:";
+const LAST_SEEN_MIN_UPDATE_MS = 5 * 60 * 1000;
 
 function getProfileCacheKey(userId) {
   return `${PROFILE_CACHE_PREFIX}${userId}`;
+}
+
+function getLastSeenSyncKey(userId) {
+  return `${LAST_SEEN_SYNC_KEY_PREFIX}${userId}`;
 }
 
 function normalizeFallbackName(name = "") {
@@ -127,10 +133,14 @@ function isProfilesTableMissing(error) {
   return error?.code === "42P01";
 }
 
+function isLastSeenColumnMissing(error) {
+  return ["42703", "PGRST204"].includes(String(error?.code || ""));
+}
+
 async function fetchProfileRow(userId) {
   const { data, error } = await window.supabaseClient
     .from("profiles")
-    .select("id, display_name, avatar_url, phone")
+    .select("id, display_name, avatar_url, phone, last_seen_at")
     .eq("id", userId)
     .maybeSingle();
 
@@ -308,7 +318,7 @@ async function fetchProfilesByIds(userIds = []) {
 
   const { data, error } = await window.supabaseClient
     .from("profiles")
-    .select("id, display_name, avatar_url, phone")
+    .select("id, display_name, avatar_url, phone, last_seen_at")
     .in("id", uniqueIds);
 
   if (error) {
@@ -326,7 +336,7 @@ async function fetchProfilesByIds(userIds = []) {
 async function fetchAllProfiles() {
   const { data, error } = await window.supabaseClient
     .from("profiles")
-    .select("id, display_name, avatar_url, phone");
+    .select("id, display_name, avatar_url, phone, last_seen_at");
 
   if (error) {
     if (isProfilesTableMissing(error)) {
@@ -338,6 +348,87 @@ async function fetchAllProfiles() {
 
   markRemoteRefresh("profiles_public", "");
   return data || [];
+}
+
+function readLastSeenSyncAt(userId) {
+  if (!userId) {
+    return 0;
+  }
+
+  try {
+    const raw = localStorage.getItem(getLastSeenSyncKey(userId));
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : 0;
+  } catch (error) {
+    console.error("Last seen sync read error:", error);
+    return 0;
+  }
+}
+
+function writeLastSeenSyncAt(userId, timestampMs) {
+  if (!userId) {
+    return;
+  }
+
+  try {
+    localStorage.setItem(getLastSeenSyncKey(userId), String(timestampMs));
+  } catch (error) {
+    console.error("Last seen sync write error:", error);
+  }
+}
+
+async function touchCurrentUserLastSeen(userId, options = {}) {
+  if (!userId) {
+    return false;
+  }
+
+  const force = Boolean(options.force);
+  const nowMs = Date.now();
+  if (!force && nowMs - readLastSeenSyncAt(userId) < LAST_SEEN_MIN_UPDATE_MS) {
+    return false;
+  }
+
+  const { data, error } = await window.supabaseClient.auth.getUser();
+  if (error) {
+    throw error;
+  }
+
+  const fallbackUser = data.user;
+  const fallbackProfile = getProfileFromUser(fallbackUser);
+
+  try {
+    const { error: upsertError } = await window.supabaseClient
+      .from("profiles")
+      .upsert(
+        {
+          id: userId,
+          display_name: fallbackProfile.displayName || DEFAULT_PROFILE_NAME,
+          avatar_url: fallbackProfile.avatarUrl || null,
+          phone: fallbackProfile.phone || null,
+          last_seen_at: new Date(nowMs).toISOString(),
+        },
+        { onConflict: "id" }
+      );
+
+    if (upsertError) {
+      if (isProfilesTableMissing(upsertError) || isLastSeenColumnMissing(upsertError)) {
+        return false;
+      }
+
+      throw upsertError;
+    }
+
+    writeLastSeenSyncAt(userId, nowMs);
+    markRemoteRefresh("profile", userId);
+    markRemoteRefresh("profiles_public", "");
+    return true;
+  } catch (profilesError) {
+    if (isProfilesTableMissing(profilesError) || isLastSeenColumnMissing(profilesError)) {
+      return false;
+    }
+
+    throw profilesError;
+  }
 }
 
 
