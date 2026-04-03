@@ -598,8 +598,8 @@ function getMembershipReminderState(membership) {
   if (membership.status === "past_due" || diffDays < 0) {
     return {
       tone: "warning",
-      message: `Payment overdue for ${membershipReminderPlanLabel(membership.planCode)}. Open Membership to renew now.`,
-      notification: `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} payment is overdue. Tap to continue.`,
+      message: `${membershipReminderPlanLabel(membership.planCode)} membership is overdue. Open Membership to renew now.`,
+      notification: `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} membership is overdue. Tap to continue.`,
       key: `overdue:${formatIsoDate(dueDate)}`,
     };
   }
@@ -609,11 +609,11 @@ function getMembershipReminderState(membership) {
     return {
       tone: diffDays === 0 ? "warning" : "encouragement",
       message: diffDays === 0
-        ? `${membershipReminderPlanLabel(membership.planCode)} payment is due today.`
-        : `${membershipReminderPlanLabel(membership.planCode)} payment due in ${diffDays} ${dayLabel} on ${formattedDate}.`,
+        ? `${membershipReminderPlanLabel(membership.planCode)} membership is due today.`
+        : `${membershipReminderPlanLabel(membership.planCode)} membership due in ${diffDays} ${dayLabel} on ${formattedDate}.`,
       notification: diffDays === 0
-        ? `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} payment is due today. Tap to continue.`
-        : `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} payment is due in ${diffDays} ${dayLabel}. Tap to continue.`,
+        ? `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} membership is due today. Tap to continue.`
+        : `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} membership is due in ${diffDays} ${dayLabel}. Tap to continue.`,
       key: `due:${formatIsoDate(dueDate)}:${diffDays}`,
     };
   }
@@ -1234,6 +1234,7 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
 
 
 
