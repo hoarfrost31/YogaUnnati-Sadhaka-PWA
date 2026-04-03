@@ -599,7 +599,7 @@ function getMembershipReminderState(membership) {
     return {
       tone: "warning",
       message: `Payment overdue for ${membershipReminderPlanLabel(membership.planCode)}. Open Membership to renew now.`,
-      notification: `${membershipReminderPlanLabel(membership.planCode)} payment is overdue. Please renew now.`,
+      notification: `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} payment is overdue. Tap to continue.`,
       key: `overdue:${formatIsoDate(dueDate)}`,
     };
   }
@@ -612,8 +612,8 @@ function getMembershipReminderState(membership) {
         ? `${membershipReminderPlanLabel(membership.planCode)} payment is due today.`
         : `${membershipReminderPlanLabel(membership.planCode)} payment due in ${diffDays} ${dayLabel} on ${formattedDate}.`,
       notification: diffDays === 0
-        ? `${membershipReminderPlanLabel(membership.planCode)} payment is due today.`
-        : `${membershipReminderPlanLabel(membership.planCode)} payment is due in ${diffDays} ${dayLabel}.`,
+        ? `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} payment is due today. Tap to continue.`
+        : `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} payment is due in ${diffDays} ${dayLabel}. Tap to continue.`,
       key: `due:${formatIsoDate(dueDate)}:${diffDays}`,
     };
   }
@@ -1234,6 +1234,8 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
+
 
 
 
