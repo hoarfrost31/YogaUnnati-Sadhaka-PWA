@@ -580,10 +580,6 @@ function applyHomeProfile(profile) {
   }
 }
 
-function formatReminderDueDate(value) {
-  return value.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
-}
-
 function getMembershipReminderState(membership) {
   if (!membership || membership.planCode === "none" || !membership.currentPeriodEnd) {
     return null;
@@ -597,31 +593,27 @@ function getMembershipReminderState(membership) {
   const now = new Date();
   const msPerDay = 24 * 60 * 60 * 1000;
   const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / msPerDay);
-  const formattedDate = formatReminderDueDate(dueDate);
-  const planLabel = membershipReminderPlanLabel(membership.planCode);
+  const formattedDate = dueDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 
   if (membership.status === "past_due" || diffDays < 0) {
     return {
       tone: "warning",
-      message: `Namaskaram \uD83D\uDE4F ${planLabel} membership overdue. Tap to continue.`,
-      notification: `${planLabel} membership payment is overdue.`,
+      message: `Namaskaram \uD83D\uDE4F Payment overdue for ${membershipReminderPlanLabel(membership.planCode)}. [Click here]`,
+      notification: `${membershipReminderPlanLabel(membership.planCode)} payment is overdue. Please renew now.`,
       key: `overdue:${formatIsoDate(dueDate)}`,
     };
   }
 
   if (diffDays <= 3) {
+    const dayLabel = diffDays === 1 ? "day" : "days";
     return {
       tone: diffDays === 0 ? "warning" : "encouragement",
       message: diffDays === 0
-        ? `Namaskaram \uD83D\uDE4F ${planLabel} membership due today (${formattedDate}). Tap to continue.`
-        : diffDays === 1
-          ? `Namaskaram \uD83D\uDE4F ${planLabel} membership due tomorrow (${formattedDate}). Tap to continue.`
-          : `Namaskaram \uD83D\uDE4F ${planLabel} membership due in ${diffDays} days (${formattedDate}). Tap to continue.`,
+        ? `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} payment is due today. [Click here]`
+        : `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} payment due in ${diffDays} ${dayLabel} on ${formattedDate}. [Click here]`,
       notification: diffDays === 0
-        ? `${planLabel} membership payment is due today.`
-        : diffDays === 1
-          ? `${planLabel} membership payment is due tomorrow.`
-          : `${planLabel} membership payment is due in ${diffDays} days.`,
+        ? `Namaskaram \uD83D\uDE4F ${membershipReminderPlanLabel(membership.planCode)} payment is due today. [Click here]`
+        : `${membershipReminderPlanLabel(membership.planCode)} payment is due in ${diffDays} ${dayLabel}.`,
       key: `due:${formatIsoDate(dueDate)}:${diffDays}`,
     };
   }
@@ -1222,10 +1214,6 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
-
-
-
-
 
 
 
