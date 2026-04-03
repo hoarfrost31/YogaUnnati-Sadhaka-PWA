@@ -96,6 +96,16 @@ async function initUser() {
   userEmail = currentUser.email || "";
 }
 
+function hydrateProfileSettingsFromCache() {
+  if (!userId) {
+    return;
+  }
+
+  initProfileBackLink();
+  renderProfile(readProfileCache(userId));
+  renderReminderSettings();
+}
+
 function initProfileBackLink() {
   if (!profileBackLink) {
     return;
@@ -358,11 +368,16 @@ saveProfileBtn.addEventListener("click", async () => {
 });
 
 async function initApp() {
+  const cachedUser = window.appAuth?.getCachedUser?.();
+  if (cachedUser?.id) {
+    userId = cachedUser.id;
+    userEmail = cachedUser.email || "";
+    hydrateProfileSettingsFromCache();
+  }
+
   await initUser();
   window.appAnalytics?.identify(userId);
-  initProfileBackLink();
-  renderProfile(readProfileCache(userId));
-  renderReminderSettings();
+  hydrateProfileSettingsFromCache();
 
   try {
     const profile = await ensureCurrentUserProfile(userId);

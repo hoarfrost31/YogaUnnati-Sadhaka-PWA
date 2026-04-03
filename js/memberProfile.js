@@ -456,6 +456,25 @@ async function initMemberProfile() {
     return;
   }
 
+  const cachedUser = window.appAuth?.getCachedUser?.();
+  if (cachedUser?.id) {
+    currentUserId = cachedUser.id;
+    setOwnProfileActionsVisible(memberId === currentUserId);
+
+    if (memberId === currentUserId) {
+      const selfSnapshot = buildCachedSelfSnapshot(memberId);
+      writeMemberProfileCache(memberId, selfSnapshot);
+      renderMemberProfile(selfSnapshot);
+      const cachedMembership = window.membershipData?.readMembershipCache?.(memberId) || window.membershipData?.DEFAULT_MEMBERSHIP;
+      renderProfileMembershipCard(cachedMembership, true);
+    }
+  }
+
+  const cachedSnapshot = readMemberProfileCache(memberId);
+  if (cachedSnapshot) {
+    renderMemberProfile(cachedSnapshot);
+  }
+
   const currentUser = await window.appAuth.getCurrentUser();
   if (!currentUser?.id) {
     window.location.href = "auth.html";
@@ -470,19 +489,6 @@ async function initMemberProfile() {
     member_id: memberId,
     is_own_profile: memberId === currentUserId,
   });
-
-  if (memberId === currentUserId) {
-    const selfSnapshot = buildCachedSelfSnapshot(memberId);
-    writeMemberProfileCache(memberId, selfSnapshot);
-    renderMemberProfile(selfSnapshot);
-    const cachedMembership = window.membershipData?.readMembershipCache?.(memberId) || window.membershipData?.DEFAULT_MEMBERSHIP;
-    renderProfileMembershipCard(cachedMembership, true);
-  }
-
-  const cachedSnapshot = readMemberProfileCache(memberId);
-  if (cachedSnapshot) {
-    renderMemberProfile(cachedSnapshot);
-  }
 
   if (cachedSnapshot && !shouldRefreshMemberProfile(cachedSnapshot)) {
     return;
