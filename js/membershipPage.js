@@ -262,8 +262,8 @@ function updateMembershipPlanCards(membership) {
       ? "Loading..."
       : (canChangePlanDuringRenewal ? "Change Plan" : (button.getAttribute("data-default-label") || "Continue to Payment"));
     button.disabled = membershipPageBusy || !membershipPageUserId;
-    button.classList.toggle("primary-btn", defaultVariant === "primary");
-    button.classList.toggle("secondary-btn", defaultVariant !== "primary");
+    button.classList.toggle("primary-btn", !canChangePlanDuringRenewal && defaultVariant === "primary");
+    button.classList.toggle("secondary-btn", canChangePlanDuringRenewal || defaultVariant !== "primary");
   });
 }
 
@@ -345,6 +345,7 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
 
