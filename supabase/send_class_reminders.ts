@@ -14,9 +14,21 @@ const APP_MILESTONES = [
   { days: 90, title: "Paramananda" },
 ];
 
-type NotificationType = "night" | "morning" | "missed";
+const MEMBERSHIP_PLAN_LABELS: Record<string, string> = {
+  app: "YogaUnnati App",
+  online: "YogaUnnati Online",
+  studio: "YogaUnnati Studio",
+};
+
+type NotificationType = "night" | "morning" | "missed" | "membership_overdue";
 type RequestPayload = {
   force_type?: NotificationType;
+};
+
+type MembershipReminderInput = {
+  planCode: string;
+  status: string;
+  currentPeriodEnd: string | null;
 };
 
 webpush.setVapidDetails(
@@ -45,7 +57,7 @@ function getRelativeIsoDate(baseIsoDate: string, offsetDays: number) {
   return `${year}-${month}-${day}`;
 }
 
-function getZonedNow(timeZone: string) {
+function getZonedParts(value: Date, timeZone: string) {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone,
     year: "numeric",
@@ -57,8 +69,12 @@ function getZonedNow(timeZone: string) {
     weekday: "short",
   });
 
-  const parts = formatter.formatToParts(new Date());
-  const map = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const parts = formatter.formatToParts(value);
+  return Object.fromEntries(parts.map((part) => [part.type, part.value]));
+}
+
+function getZonedNow(timeZone: string) {
+  const map = getZonedParts(new Date(), timeZone);
 
   return {
     timeZone,
@@ -67,6 +83,20 @@ function getZonedNow(timeZone: string) {
     hour: Number(map.hour || 0),
     minute: Number(map.minute || 0),
   };
+}
+
+function getZonedIsoDate(value: string | Date, timeZone: string) {
+  const parsed = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return "";
+  }
+
+  const map = getZonedParts(parsed, timeZone);
+  return `${map.year}-${map.month}-${map.day}`;
+}
+
+function getMembershipPlanLabel(planCode: string) {
+  return MEMBERSHIP_PLAN_LABELS[planCode] || "YogaUnnati membership";
 }
 
 function getMilestoneProgressCount(practiceDates: string[], referenceDate: Date) {
@@ -168,13 +198,39 @@ function getScheduledNotificationType(hour: number, minute: number): Notificatio
   return null;
 }
 
+function isMembershipOverdue(
+  membership: MembershipReminderInput | null | undefined,
+  zoneIsoDate: string,
+  timeZone: string,
+) {
+  if (!membership || !membership.planCode || membership.planCode === "none") {
+    return false;
+  }
+
+  if (membership.status === "past_due") {
+    return true;
+  }
+
+  if (!membership.currentPeriodEnd) {
+    return false;
+  }
+
+  const dueIsoDate = getZonedIsoDate(membership.currentPeriodEnd, timeZone);
+  return Boolean(dueIsoDate) && dueIsoDate < zoneIsoDate;
+}
+
 function buildScheduledMessage(
   type: NotificationType,
   nextDayNumber: number,
   practicedToday: boolean,
   remainingDays: number,
   streak: number,
+  membershipPlanLabel = "",
 ) {
+  if (type === "membership_overdue") {
+    return `Namaskaram \uD83D\uDE4F ${membershipPlanLabel} membership is overdue. Tap to continue.`;
+  }
+
   if (type === "morning") {
     return `Day ${nextDayNumber} starts soon!`;
   }
@@ -261,15 +317,29 @@ Deno.serve(async (req) => {
   const subscriptions = subs ?? [];
   const userIds = [...new Set(subscriptions.map((sub) => sub.user_id).filter(Boolean))];
   const practiceLogMap = new Map<string, string[]>();
+  const membershipMap = new Map<string, MembershipReminderInput>();
 
   if (userIds.length) {
-    const { data: logs, error: logsError } = await supabase
-      .from("practice_logs")
-      .select("user_id, date")
-      .in("user_id", userIds);
+    const [{ data: logs, error: logsError }, { data: memberships, error: membershipsError }] = await Promise.all([
+      supabase
+        .from("practice_logs")
+        .select("user_id, date")
+        .in("user_id", userIds),
+      supabase
+        .from("memberships")
+        .select("user_id, plan_code, status, current_period_end")
+        .in("user_id", userIds),
+    ]);
 
     if (logsError) {
       return new Response(JSON.stringify({ error: logsError.message }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (membershipsError) {
+      return new Response(JSON.stringify({ error: membershipsError.message }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
       });
@@ -281,6 +351,14 @@ Deno.serve(async (req) => {
       }
       practiceLogMap.get(log.user_id)!.push(log.date);
     }
+
+    for (const membership of memberships ?? []) {
+      membershipMap.set(membership.user_id, {
+        planCode: String(membership.plan_code || "none"),
+        status: String(membership.status || "inactive"),
+        currentPeriodEnd: membership.current_period_end || null,
+      });
+    }
   }
 
   let sent = 0;
@@ -291,7 +369,12 @@ Deno.serve(async (req) => {
   for (const sub of subscriptions) {
     try {
       const zone = getZonedNow(sub.timezone || "UTC");
-      const notificationType = payload.force_type || getScheduledNotificationType(zone.hour, zone.minute);
+      const scheduledType = payload.force_type || getScheduledNotificationType(zone.hour, zone.minute);
+      const membership = membershipMap.get(sub.user_id);
+      const notificationType = payload.force_type
+        || (scheduledType === "night" && isMembershipOverdue(membership, zone.isoDate, zone.timeZone)
+          ? "membership_overdue"
+          : scheduledType);
 
       if (!notificationType) {
         skipped += 1;
@@ -319,6 +402,7 @@ Deno.serve(async (req) => {
         practicedToday,
         state.remainingDays,
         streak,
+        getMembershipPlanLabel(membership?.planCode || "none"),
       );
 
       await webpush.sendNotification(
@@ -332,7 +416,10 @@ Deno.serve(async (req) => {
         JSON.stringify({
           title: "YogaUnnati",
           body: message,
-          data: { url: "./index.html", type: notificationType },
+          data: {
+            url: notificationType === "membership_overdue" ? "./membership.html?from=home" : "./index.html",
+            type: notificationType,
+          },
         }),
       );
 
