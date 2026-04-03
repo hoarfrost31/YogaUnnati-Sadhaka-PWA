@@ -575,8 +575,9 @@ if (memberLogoutBtn) {
 
 if (memberProfileMembershipButtonEl) {
   memberProfileMembershipButtonEl.addEventListener("click", () => {
-    window.location.href = "membership.html";
+    window.location.href = "membership.html?from=profile";
   });
 }
+
 
 

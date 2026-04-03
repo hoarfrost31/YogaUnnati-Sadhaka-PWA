@@ -188,17 +188,28 @@
   <script src="js/supabaseClient.js"></script>
   <script src="js/membershipData.js"></script>
   <script src="js/membershipPage.js"></script>
-  <script>
+    <script>
     (function () {
       const backLink = document.getElementById("membershipBackLink");
       if (!backLink) {
         return;
       }
 
-      function setBackTarget(userId) {
-        const targetUrl = userId
+      const params = new URLSearchParams(window.location.search);
+      const source = params.get("from") || "profile";
+
+      function buildBackTarget(userId) {
+        if (source === "home") {
+          return "index.html";
+        }
+
+        return userId
           ? `memberprofile.html?uid=${encodeURIComponent(userId)}`
           : "index.html";
+      }
+
+      function setBackTarget(userId) {
+        const targetUrl = buildBackTarget(userId);
         backLink.href = targetUrl;
         backLink.onclick = function (event) {
           event.preventDefault();
@@ -208,9 +219,7 @@
 
       try {
         const cached = JSON.parse(sessionStorage.getItem("yogaunnati_auth_user_v1") || "null");
-        if (cached?.id) {
-          setBackTarget(cached.id);
-        }
+        setBackTarget(cached?.id || "");
       } catch (_error) {
         setBackTarget("");
       }
@@ -225,6 +234,8 @@
   <script src="js/pageTransition.js"></script>
 </body>
 </html>
+
+
 
 
 

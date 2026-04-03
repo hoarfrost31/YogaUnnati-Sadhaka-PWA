@@ -1181,12 +1181,12 @@ async function initApp() {
   }
   if (homeMembershipReminderCardEl) {
     homeMembershipReminderCardEl.addEventListener("click", () => {
-      window.location.href = "membership.html";
+      window.location.href = "membership.html?from=home";
     });
     homeMembershipReminderCardEl.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        window.location.href = "membership.html";
+        window.location.href = "membership.html?from=home";
       }
     });
   }
@@ -1214,6 +1214,7 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
 
 
 
