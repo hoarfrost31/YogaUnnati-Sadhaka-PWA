@@ -203,14 +203,14 @@ async function buildCommunityMembers() {
     practiceMap.get(row.user_id).push(row.date);
   });
 
-  const memberIds = [...new Set([...practiceMap.keys(), userId].filter(Boolean))];
-  const profiles = await fetchProfilesByIds(memberIds);
+  const profiles = await fetchAllProfiles();
   const profileMap = new Map(
     profiles.map((profileRow) => [
       profileRow.id,
       getProfileFromRow(profileRow),
     ])
   );
+  const memberIds = [...new Set([...profileMap.keys(), ...practiceMap.keys(), userId].filter(Boolean))];
   const members = [];
 
   memberIds.forEach((memberId) => {
@@ -299,6 +299,7 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 initApp();
+
 
 
 
