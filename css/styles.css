@@ -4850,3 +4850,20 @@ input {
   margin: 0;
   text-align: right;
 }
+
+.membership-plan-status {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+}
+
+.membership-plan-status-copy {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.96rem;
+  font-weight: 600;
+}
+

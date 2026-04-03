@@ -26,15 +26,6 @@
       <section class="pricing-hero-card membership-hero-card">
         <h1 class="page-title pricing-title">Choose your membership</h1>
       </section>
-
-      <section class="membership-status-card membership-status-card-compact">
-        <div class="membership-status-head membership-status-head-compact">
-          <h2 id="membershipCurrentPlan">No active plan</h2>
-          <span class="membership-status-pill is-inactive" id="membershipStatusPill">Inactive</span>
-        </div>
-
-        <p class="membership-status-days" id="membershipStatusDays">No active membership yet.</p>
-      </section>
       <section class="pricing-card-grid pricing-plan-grid">
         <article class="pricing-plan-card pricing-plan-card-primary" data-membership-plan="studio">
           <div class="pricing-badge pricing-plan-highlight">Most Complete</div>
@@ -51,6 +42,11 @@
 
           <div class="pricing-plan-copy">
             <p>The full membership with studio access and app support together.</p>
+          </div>
+
+          <div class="membership-plan-status hidden" data-membership-plan-status hidden>
+            <span class="membership-status-pill is-inactive" data-membership-plan-pill>Inactive</span>
+            <p class="membership-plan-status-copy" data-membership-plan-status-copy>No active membership yet.</p>
           </div>
 
           <button type="button" class="membership-plan-toggle" data-membership-plan-toggle aria-expanded="false">View key features</button>
@@ -96,6 +92,11 @@
 
           <div class="pricing-plan-copy">
             <p>For members who want only the digital journey.</p>
+          </div>
+
+          <div class="membership-plan-status hidden" data-membership-plan-status hidden>
+            <span class="membership-status-pill is-inactive" data-membership-plan-pill>Inactive</span>
+            <p class="membership-plan-status-copy" data-membership-plan-status-copy>No active membership yet.</p>
           </div>
 
           <button type="button" class="membership-plan-toggle" data-membership-plan-toggle aria-expanded="false">View key features</button>
@@ -144,6 +145,11 @@
 
           <div class="pricing-plan-copy">
             <p>For members who want guided practice remotely along with the full app journey.</p>
+          </div>
+
+          <div class="membership-plan-status hidden" data-membership-plan-status hidden>
+            <span class="membership-status-pill is-inactive" data-membership-plan-pill>Inactive</span>
+            <p class="membership-plan-status-copy" data-membership-plan-status-copy>No active membership yet.</p>
           </div>
 
           <button type="button" class="membership-plan-toggle" data-membership-plan-toggle aria-expanded="false">View key features</button>
@@ -220,6 +226,7 @@
   <script src="js/pageTransition.js"></script>
 </body>
 </html>
+
 
 
 

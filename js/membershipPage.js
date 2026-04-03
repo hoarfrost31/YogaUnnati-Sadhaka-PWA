@@ -167,6 +167,26 @@ function updateMembershipPlanCards(membership) {
     card.classList.toggle("is-current-plan", isCurrent);
     card.classList.toggle("is-pending-plan", isPending);
 
+    const statusWrap = card.querySelector("[data-membership-plan-status]");
+    const statusPill = card.querySelector("[data-membership-plan-pill]");
+    const statusCopy = card.querySelector("[data-membership-plan-status-copy]");
+    const shouldShowStatus = isCurrent || isPending;
+
+    statusWrap?.classList.toggle("hidden", !shouldShowStatus);
+    if (statusWrap) {
+      statusWrap.hidden = !shouldShowStatus;
+    }
+
+    if (statusPill) {
+      const statusKey = isPending ? "pending" : membership.status;
+      statusPill.textContent = membershipStatusLabel(statusKey);
+      statusPill.className = `membership-status-pill is-${statusKey}`;
+    }
+
+    if (statusCopy) {
+      statusCopy.textContent = membershipDaysLeftLabel(membership);
+    }
+
     if (!button) {
       return;
     }
@@ -218,25 +238,6 @@ function updateMembershipPlanCards(membership) {
 }
 
 function renderMembershipSummary(membership) {
-  const currentPlanHeading = document.getElementById("membershipCurrentPlan");
-  const statusPill = document.getElementById("membershipStatusPill");
-  const daysLabel = document.getElementById("membershipStatusDays");
-
-  if (currentPlanHeading) {
-    currentPlanHeading.textContent = membership.planCode === "none"
-      ? "No active plan"
-      : membershipPlanLabel(membership.planCode);
-  }
-
-  if (statusPill) {
-    statusPill.textContent = membershipStatusLabel(membership.status);
-    statusPill.className = `membership-status-pill is-${membership.status}`;
-  }
-
-  if (daysLabel) {
-    daysLabel.textContent = membershipDaysLeftLabel(membership);
-  }
-
   updateMembershipPlanCards(membership);
 }
 function bindMembershipPlanButtons() {
@@ -314,6 +315,7 @@ async function initMembershipPage() {
 initMembershipPage().catch((error) => {
   console.error("Membership page init error:", error);
 });
+
 
 
 
