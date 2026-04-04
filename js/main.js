@@ -1218,9 +1218,6 @@ async function initApp() {
   await initUser();   // 🔥 must complete first
   window.appAnalytics?.identify(userId);
   hydrateHomeFromCache();
-  if (shouldRefreshRemote("profile", userId, PROFILE_REFRESH_TTL_MS)) {
-    loadHomeProfile();
-  }
   if (homeMembershipReminderCardEl) {
     homeMembershipReminderCardEl.addEventListener("click", () => {
       window.location.href = "membership.html?from=home";
@@ -1232,15 +1229,10 @@ async function initApp() {
       }
     });
   }
-  if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
-    refreshPracticeDates();
-  }
-  if (
-    shouldRefreshRemote("community_today", userId, COMMUNITY_HOME_REFRESH_TTL_MS) ||
-    shouldRefreshRemote("profiles_public", "", COMMUNITY_HOME_REFRESH_TTL_MS)
-  ) {
-    refreshHomeCommunitySnapshot();
-  }
+  loadHomeProfile();
+  refreshPracticeDates();
+  refreshHomeCommunitySnapshot();
+  loadHomeMembershipReminder();
 
   window.setTimeout(() => {
     showHomeNotificationsPrompt();
@@ -1252,6 +1244,9 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
+
+
 
 
 
