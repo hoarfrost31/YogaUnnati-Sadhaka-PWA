@@ -719,7 +719,7 @@ async function loadHomeProfile() {
 }
 
 async function initUser() {
-  const currentUser = await window.appAuth.getCurrentUser();
+  const currentUser = await window.appAuth.getCurrentUser({ forceRefresh: true });
   if (!currentUser?.id) {
     window.location.href = "auth.html";
     return;
@@ -1244,6 +1244,7 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
 
 
 
