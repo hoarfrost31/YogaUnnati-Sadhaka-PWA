@@ -231,7 +231,9 @@ function enableTabHistoryNavigation() {
       if (shouldExitOnThisBackPress()) {
         if (!exitAppIfPossible()) {
           writeTabHistory(["index.html"]);
-          window.history.pushState({ tabBackGuard: true, page: currentPage }, "", window.location.href);
+          window.setTimeout(() => {
+            window.history.back();
+          }, 0);
         }
         return;
       }
@@ -355,5 +357,6 @@ document.addEventListener("touchend", (event) => {
   lastTouchNavAt = Date.now();
   navigateToPage(anchor.href);
 }, { passive: false });
+
 
 
