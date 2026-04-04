@@ -4,8 +4,16 @@ const supabaseKey = "sb_publishable_r5m-2kccX-q36GbBQc1jXQ_T-H7E1UY";
 const AUTH_CACHE_KEY = "yogaunnati_auth_user_v1";
 const AUTH_NOTICE_KEY = "yogaunnati_auth_notice_v1";
 const DISABLED_ACCOUNT_MESSAGE = "Your account has been disabled. Contact admin.";
+const SUPABASE_AUTH_STORAGE_KEY = "sb-wiqazuogcyxvtcoyekvc-auth-token";
 
-window.supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+window.supabaseClient = supabase.createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    storage: window.localStorage,
+    storageKey: SUPABASE_AUTH_STORAGE_KEY,
+  },
+});
 
 async function syncCurrentUserLastSeen(options = {}) {
   if (typeof window.touchCurrentUserLastSeen !== "function") {
@@ -40,6 +48,30 @@ function readCachedAuthUser() {
   }
 }
 
+function readPersistedSessionUser() {
+  try {
+    const raw = localStorage.getItem(SUPABASE_AUTH_STORAGE_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+    const session = Array.isArray(parsed) ? parsed[0] : parsed;
+    const user = session?.user || session?.currentSession?.user || null;
+
+    if (!user?.id) {
+      return null;
+    }
+
+    return {
+      id: user.id,
+      email: user.email || "",
+    };
+  } catch (error) {
+    console.error("Persisted auth read error:", error);
+    return null;
+  }
+}
 function writeCachedAuthUser(user) {
   try {
     if (!user) {
@@ -231,3 +263,5 @@ document.addEventListener("visibilitychange", async () => {
     console.error("Visibility auth access check error:", error);
   }
 });
+
+
