@@ -213,6 +213,10 @@
         backLink.href = targetUrl;
         backLink.onclick = function (event) {
           event.preventDefault();
+          if (targetUrl === "index.html") {
+            window.location.replace(targetUrl);
+            return;
+          }
           window.location.href = targetUrl;
         };
       }
@@ -234,6 +238,8 @@
   <script src="js/pageTransition.js"></script>
 </body>
 </html>
+
+
 
 
 

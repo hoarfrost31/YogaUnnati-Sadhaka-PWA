@@ -108,10 +108,11 @@ loginBtn.onclick = async () => {
     });
 
     setMessage("Login successful!");
-    window.location.href = "index.html";
+    window.location.replace("index.html");
   } finally {
     window.setTimeout(() => {
       setButtonsDisabled(false);
     }, 220);
   }
 };
+

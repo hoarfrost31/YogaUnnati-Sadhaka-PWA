@@ -563,7 +563,7 @@ if (memberBackLinkEl) {
       return;
     }
 
-    window.location.href = "index.html";
+    window.location.replace("index.html");
   });
 }
 
@@ -587,6 +587,7 @@ if (memberProfileMembershipButtonEl) {
     window.location.href = "membership.html?from=profile";
   });
 }
+
 
 
 

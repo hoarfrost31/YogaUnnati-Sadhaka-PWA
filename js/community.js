@@ -119,7 +119,7 @@ function initProfileBackLink() {
       return;
     }
 
-    window.location.href = "index.html";
+    window.location.replace("index.html");
   });
 }
 
@@ -405,6 +405,7 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 initApp();
+
 
 
 

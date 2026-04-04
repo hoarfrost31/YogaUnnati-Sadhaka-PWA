@@ -31,6 +31,12 @@ function exitAppIfPossible() {
 
 function navigateToPage(url) {
   clearExitPrompt();
+  const nextPage = new URL(url, window.location.href).pathname.split("/").pop() || "index.html";
+
+  if (nextPage === "index.html") {
+    writeTabHistory(["index.html"]);
+  }
+
   window.location.replace(url);
 }
 
@@ -349,4 +355,5 @@ document.addEventListener("touchend", (event) => {
   lastTouchNavAt = Date.now();
   navigateToPage(anchor.href);
 }, { passive: false });
+
 
