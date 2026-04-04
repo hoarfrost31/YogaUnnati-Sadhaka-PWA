@@ -1130,35 +1130,38 @@ async function refreshPracticeDates() {
   }
 }
 
-async function refreshHomeOnForeground() {
+async function refreshHomeOnForeground(options = {}) {
   if (!userId) {
     return;
   }
 
+  const force = Boolean(options.force);
+
   try {
     const refreshTasks = [];
 
-    if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
+    if (force || shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
       refreshTasks.push(refreshPracticeDates());
     }
 
-    if (shouldRefreshRemote("profile", userId, PROFILE_REFRESH_TTL_MS)) {
+    if (force || shouldRefreshRemote("profile", userId, PROFILE_REFRESH_TTL_MS)) {
       refreshTasks.push(loadHomeProfile());
     }
 
     if (
+      force ||
       shouldRefreshRemote("community_today", userId, COMMUNITY_HOME_REFRESH_TTL_MS) ||
       shouldRefreshRemote("profiles_public", "", COMMUNITY_HOME_REFRESH_TTL_MS)
     ) {
       refreshTasks.push(refreshHomeCommunitySnapshot());
     }
 
-    if (shouldRefreshRemote("membership", userId, MEMBERSHIP_REFRESH_TTL_MS)) {
+    if (force || shouldRefreshRemote("membership", userId, MEMBERSHIP_REFRESH_TTL_MS)) {
       refreshTasks.push(loadHomeMembershipReminder());
     }
 
     if (refreshTasks.length) {
-      await Promise.all(refreshTasks);
+      await Promise.allSettled(refreshTasks);
     }
   } catch (error) {
     console.error("Home refresh error:", error);
@@ -1245,10 +1248,7 @@ async function initApp() {
       }
     });
   }
-  loadHomeProfile();
-  refreshPracticeDates();
-  refreshHomeCommunitySnapshot();
-  loadHomeMembershipReminder();
+  await refreshHomeOnForeground({ force: true });
 
   window.setTimeout(() => {
     showHomeNotificationsPrompt();
@@ -1260,6 +1260,8 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
+
 
 
 
