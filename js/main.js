@@ -1138,25 +1138,32 @@ async function refreshHomeOnForeground(options = {}) {
   const force = Boolean(options.force);
 
   try {
+    if (force) {
+      await loadHomeProfile();
+      await refreshPracticeDates();
+      await refreshHomeCommunitySnapshot();
+      await loadHomeMembershipReminder();
+      return;
+    }
+
     const refreshTasks = [];
 
-    if (force || shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
+    if (shouldRefreshRemote("practice_dates", userId, PRACTICE_REFRESH_TTL_MS)) {
       refreshTasks.push(refreshPracticeDates());
     }
 
-    if (force || shouldRefreshRemote("profile", userId, PROFILE_REFRESH_TTL_MS)) {
+    if (shouldRefreshRemote("profile", userId, PROFILE_REFRESH_TTL_MS)) {
       refreshTasks.push(loadHomeProfile());
     }
 
     if (
-      force ||
       shouldRefreshRemote("community_today", userId, COMMUNITY_HOME_REFRESH_TTL_MS) ||
       shouldRefreshRemote("profiles_public", "", COMMUNITY_HOME_REFRESH_TTL_MS)
     ) {
       refreshTasks.push(refreshHomeCommunitySnapshot());
     }
 
-    if (force || shouldRefreshRemote("membership", userId, MEMBERSHIP_REFRESH_TTL_MS)) {
+    if (shouldRefreshRemote("membership", userId, MEMBERSHIP_REFRESH_TTL_MS)) {
       refreshTasks.push(loadHomeMembershipReminder());
     }
 
@@ -1260,6 +1267,7 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
 
 
 
