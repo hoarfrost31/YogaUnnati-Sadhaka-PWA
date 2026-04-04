@@ -211,6 +211,12 @@ function enableTabHistoryNavigation() {
   const history = readTabHistory();
   const lastPage = history[history.length - 1];
 
+  if (currentPage === "index.html") {
+    writeTabHistory(["index.html"]);
+    clearExitPrompt();
+    return;
+  }
+
   if (lastPage !== currentPage) {
     history.push(currentPage);
     writeTabHistory(history);
@@ -224,23 +230,6 @@ function enableTabHistoryNavigation() {
     if (previousPage && previousPage !== currentPage) {
       writeTabHistory(previousPage === "index.html" ? ["index.html"] : nextHistory);
       navigateToPage(previousPage);
-      return;
-    }
-
-    if (currentPage === "index.html") {
-      if (shouldExitOnThisBackPress()) {
-        if (!exitAppIfPossible()) {
-          writeTabHistory(["index.html"]);
-          window.setTimeout(() => {
-            window.history.back();
-          }, 0);
-        }
-        return;
-      }
-
-      writeTabHistory(["index.html"]);
-      showExitPrompt();
-      window.history.pushState({ tabBackGuard: true, page: currentPage }, "", window.location.href);
       return;
     }
 
@@ -262,6 +251,13 @@ function enableNativeBackNavigation() {
     return;
   }
 
+  if (currentPage === "index.html") {
+    appPlugin.addListener("backButton", () => {
+      exitAppIfPossible();
+    });
+    return;
+  }
+
   appPlugin.addListener("backButton", () => {
     const { previousPage, nextHistory } = getPreviousTrackedPage(currentPage);
 
@@ -271,21 +267,9 @@ function enableNativeBackNavigation() {
       return;
     }
 
-    if (currentPage !== "index.html") {
-      clearExitPrompt();
-      writeTabHistory(["index.html"]);
-      navigateToPage("index.html");
-      return;
-    }
-
+    clearExitPrompt();
     writeTabHistory(["index.html"]);
-
-    if (!shouldExitOnThisBackPress()) {
-      showExitPrompt();
-      return;
-    }
-
-    exitAppIfPossible();
+    navigateToPage("index.html");
   });
 }
 
@@ -357,6 +341,7 @@ document.addEventListener("touchend", (event) => {
   lastTouchNavAt = Date.now();
   navigateToPage(anchor.href);
 }, { passive: false });
+
 
 
 
