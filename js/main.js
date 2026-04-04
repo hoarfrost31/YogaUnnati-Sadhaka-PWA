@@ -1130,8 +1130,8 @@ async function refreshPracticeDates() {
   }
 }
 
-document.addEventListener("visibilitychange", async () => {
-  if (document.visibilityState !== "visible" || !userId) {
+async function refreshHomeOnForeground() {
+  if (!userId) {
     return;
   }
 
@@ -1163,6 +1163,22 @@ document.addEventListener("visibilitychange", async () => {
   } catch (error) {
     console.error("Home refresh error:", error);
   }
+}
+
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState !== "visible") {
+    return;
+  }
+
+  await refreshHomeOnForeground();
+});
+
+window.addEventListener("pageshow", () => {
+  refreshHomeOnForeground();
+});
+
+window.addEventListener("focus", () => {
+  refreshHomeOnForeground();
 });
 
 // 🔁 Button toggle
@@ -1244,6 +1260,8 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
+
 
 
 
