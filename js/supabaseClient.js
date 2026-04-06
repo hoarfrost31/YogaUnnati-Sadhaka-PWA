@@ -232,6 +232,91 @@ window.appAuth = {
   },
 };
 
+const APP_RESUME_SYNC_MIN_INTERVAL_MS = 1400;
+
+window.registerAppResumeSync = function registerAppResumeSync(handler, options = {}) {
+  if (typeof handler !== "function") {
+    return {
+      refresh: async () => {},
+      detach() {},
+    };
+  }
+
+  const minIntervalMs = Math.max(0, Number(options.minIntervalMs) || APP_RESUME_SYNC_MIN_INTERVAL_MS);
+  let lastRunAt = 0;
+  let inFlight = null;
+  let detached = false;
+
+  async function run(reason, runOptions = {}) {
+    if (detached) {
+      return null;
+    }
+
+    const force = Boolean(runOptions.force);
+    const now = Date.now();
+
+    if (!force) {
+      if (inFlight) {
+        return inFlight;
+      }
+
+      if (now - lastRunAt < minIntervalMs) {
+        return null;
+      }
+    }
+
+    lastRunAt = now;
+    inFlight = Promise.resolve(
+      handler({
+        reason,
+        force,
+        isOnline: navigator.onLine !== false,
+      })
+    )
+      .catch((error) => {
+        console.error("App resume sync error:", error);
+      })
+      .finally(() => {
+        inFlight = null;
+      });
+
+    return inFlight;
+  }
+
+  const onVisibilityChange = () => {
+    if (document.visibilityState === "visible") {
+      run("visibilitychange");
+    }
+  };
+  const onPageShow = () => {
+    run("pageshow");
+  };
+  const onFocus = () => {
+    run("focus");
+  };
+  const onOnline = () => {
+    run("online", { force: true });
+  };
+
+  document.addEventListener("visibilitychange", onVisibilityChange);
+  window.addEventListener("pageshow", onPageShow);
+  window.addEventListener("focus", onFocus);
+  window.addEventListener("online", onOnline);
+
+  return {
+    refresh(runOptions = {}) {
+      return run(runOptions.reason || "manual", { force: Boolean(runOptions.force) });
+    },
+    detach() {
+      detached = true;
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("online", onOnline);
+    },
+  };
+};
+
 window.supabaseClient.auth.onAuthStateChange((_event, session) => {
   writeCachedAuthUser(session?.user || null);
 
@@ -263,5 +348,6 @@ document.addEventListener("visibilitychange", async () => {
     console.error("Visibility auth access check error:", error);
   }
 });
+
 
 

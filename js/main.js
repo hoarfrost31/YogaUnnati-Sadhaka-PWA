@@ -1175,21 +1175,7 @@ async function refreshHomeOnForeground(options = {}) {
   }
 }
 
-document.addEventListener("visibilitychange", async () => {
-  if (document.visibilityState !== "visible") {
-    return;
-  }
 
-  await refreshHomeOnForeground();
-});
-
-window.addEventListener("pageshow", () => {
-  refreshHomeOnForeground();
-});
-
-window.addEventListener("focus", () => {
-  refreshHomeOnForeground();
-});
 
 // 🔁 Button toggle
 button.addEventListener("click", async () => {
@@ -1256,6 +1242,10 @@ async function initApp() {
     });
   }
   await refreshHomeOnForeground({ force: true });
+  window.homeResumeSync?.detach?.();
+  window.homeResumeSync = window.registerAppResumeSync?.((context) =>
+    refreshHomeOnForeground({ force: Boolean(context?.force) })
+  );
 
   window.setTimeout(() => {
     showHomeNotificationsPrompt();
@@ -1267,6 +1257,7 @@ initBrandTaglineRotation();
 initTomorrowRsvp();
 initTodayPracticeCardLink();
 initApp();
+
 
 
 
